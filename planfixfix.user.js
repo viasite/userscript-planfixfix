@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name           PlanfixFix
 // @author         popstas
-// @version        0.3.3
+// @version        0.3.4
 // @namespace      viasite.ru
 // @description    Some planfix.ru improvements
 // @unwrap
@@ -282,6 +282,7 @@
 					if(opts.scrollTo) PlanfixFix.scrollTo(div);
 
                     setTimeout(function(){
+                        // выбор группы аналитик
                         var select = div.find('select');
                         if(PlanfixFix.debug) console.log('select', select);
 
@@ -297,50 +298,54 @@
 
                         // выработка
                         if(opts.name){
-                            analitic.addClass('silentChosen');
-                            analitic.find('.chzn-search:first input').val(opts.name)/*.focus()*/.keyup();
-                            select_handbook.bind("liszt:updated", function(e){
-                                var results = analitic.find('.chzn-results .active-result');
-                                if(PlanfixFix.debug) console.log('results', results);
-                                if(results.length==1 || opts.select){
-                                    results.first().mouseup();
-                                    analitic.find(PlanfixFix.fields.count).focus();
-                                }
-                                // задержка из-за лага chosen
-                                setTimeout(function(){
-                                    analitic.removeClass('silentChosen');
+                            // выбор конкретной аналитики
+                            // задержка из-за того, что иногда выбирается выработка "заказ такси"
+                            setTimeout(function(){
+                                analitic.addClass('silentChosen');
+                                analitic.find('.chzn-search:first input').val(opts.name)/*.focus()*/.keyup();
+                                select_handbook.bind("liszt:updated", function(e){
+                                    var results = analitic.find('.chzn-results .active-result');
+                                    if(PlanfixFix.debug) console.log('results', results);
+                                    if(results.length==1 || opts.select){
+                                        results.first().mouseup();
+                                        analitic.find(PlanfixFix.fields.count).focus();
+                                    }
+                                    // задержка из-за лага chosen
+                                    setTimeout(function(){
+                                        analitic.removeClass('silentChosen');
 
-                                    if(opts.count){
-                                        analitic.find(PlanfixFix.fields.count).val(opts.count);
-                                        analitic.find(PlanfixFix.fields.comment).focus();
-                                    } else {
-                                        analitic.find(PlanfixFix.fields.count)
-                                            .focus()
-                                            .on('keypress', function(e){
-                                            if(e.which == 13){
-                                                if(e.ctrlKey){
-                                                    $('[data-action="saveParent"]').click();
-                                                } else {
-                                                    $('[data-action="save"]').click();
+                                        if(opts.count){
+                                            analitic.find(PlanfixFix.fields.count).val(opts.count);
+                                            analitic.find(PlanfixFix.fields.comment).focus();
+                                        } else {
+                                            analitic.find(PlanfixFix.fields.count)
+                                                .focus()
+                                                .on('keypress', function(e){
+                                                if(e.which == 13){
+                                                    if(e.ctrlKey){
+                                                        $('[data-action="saveParent"]').click();
+                                                    } else {
+                                                        $('[data-action="save"]').click();
+                                                    }
                                                 }
-                                            }
-                                        });
-                                    }
+                                            });
+                                        }
 
-                                    // планируемое время
-                                    if(opts.date){
-                                        analitic.find('input.date').val(opts.date);
-                                    }
-                                    if(opts.begin){
-                                        analitic.find('select.timeperiodbegin').val(opts.begin);
-                                    }
-                                    if(opts.end){
-                                        analitic.find('select.timeperiodend').val(opts.end);
-                                    }
-                                }, 1000);
+                                        // планируемое время
+                                        if(opts.date){
+                                            analitic.find('input.date').val(opts.date);
+                                        }
+                                        if(opts.begin){
+                                            analitic.find('select.timeperiodbegin').val(opts.begin);
+                                        }
+                                        if(opts.end){
+                                            analitic.find('select.timeperiodend').val(opts.end);
+                                        }
+                                    }, 1000);
 
-                                deferred.resolve();
-                            });
+                                    deferred.resolve();
+                                });
+                            }, 500);
                         }
 
                         if(!opts.name){
