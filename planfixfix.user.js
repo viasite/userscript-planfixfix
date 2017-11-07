@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name           PlanfixFix
 // @author         popstas
-// @version        0.3.4
+// @version        0.3.5
 // @namespace      viasite.ru
 // @description    Some planfix.ru improvements
 // @unwrap
@@ -35,7 +35,7 @@
 			name: '[data-fid="741"] select',
 			count: '[data-fid="747"] input',
 			comment: '[data-fid="749"] textarea',
-			hours_per_count: '[hfid="915"]'
+			hours_per_count: '[hfid="741:h915"]'
 		},
 		
         default_handbook: 'Инструкции и стандарты',
@@ -138,9 +138,10 @@
 			win.ActionJS.create_orig = win.ActionJS.create;
 			win.ActionJS.edit_orig = win.ActionJS.edit;
 			win.ActionJS.restoreAnaliticsForEdit_orig = win.ActionJS.restoreAnaliticsForEdit;
-			win.ActionJS.create = function(task, projectid, insertBefore){
-				win.ActionJS.create_orig(task, projectid, insertBefore);
-				PlanfixFix.addCustomAnalitics();
+			win.ActionJS.create = function(task, insertBefore) {
+			  return win.ActionJS.create_orig(task, insertBefore).then(function() {
+			    PlanfixFix.addCustomAnalitics();
+			  });
 			};
 			/*win.ActionJS.edit = function(id, task){
 				win.ActionJS.edit_orig(id, task);
