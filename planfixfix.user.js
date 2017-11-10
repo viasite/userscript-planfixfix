@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name           PlanfixFix
 // @author         popstas
-// @version        0.3.6
+// @version        0.3.7
 // @namespace      viasite.ru
 // @description    Some planfix.ru improvements
 // @unwrap
@@ -35,7 +35,7 @@
 			name: '[data-fid="741"] select',
 			count: '[data-fid="747"] input',
 			comment: '[data-fid="749"] textarea',
-			hours_per_count: '[hfid="741:h915"]'
+			hours_per_count: '.analitic-data[data-fid="741:h915"]'
 		},
 		
         default_handbook: 'Инструкции и стандарты',
@@ -191,7 +191,21 @@
 			PlanfixFix.addTaskBlock('|');
 			PlanfixFix.addTaskBlock('Выработка', {});
 			PlanfixFix.addTaskBlock('|');
-			PlanfixFix.addTaskBlock('Программирование', { name: 'Поминутная работа программиста' });
+
+            var userPost = Current.loginedPost;
+            switch(userPost){
+                case "Программист":
+                    PlanfixFix.addTaskBlock('Программирование', { name: 'Поминутная работа программиста' });
+                    break;
+                case "Менеджер по сопровождению заказов":
+                    PlanfixFix.addTaskBlock('тел. лёгкий', { name: 'Лёгкий разговор по телефону' });
+                    PlanfixFix.addTaskBlock('тел. обычный', { name: 'Обычный разговор по телефону' });
+                    PlanfixFix.addTaskBlock('тел. сложный', { name: 'Сложный разговор по телефону' });
+                    PlanfixFix.addTaskBlock('письмо лёгкое', { name: 'Лёгкое письмо' });
+                    PlanfixFix.addTaskBlock('письмо обычное', { name: 'Письмо средней сложности / обычное письмо' });
+                    PlanfixFix.addTaskBlock('письмо сложное', { name: 'Сложное письмо' });
+                    break;
+            }
 
 			// парсим массив подготовленных аналитик
 			PlanfixFix.getAnalitics().then(function(tasks){
@@ -208,7 +222,6 @@
                     setTimeout(function(){
                         $('[data-action="remove-all-analitics"]').click();
                     }, 200);
-					
 				});
 			}
 		},
@@ -304,6 +317,7 @@
                             setTimeout(function(){
                                 analitic.addClass('silentChosen');
                                 analitic.find('.chzn-search:first input').val(opts.name)/*.focus()*/.keyup();
+                                var count_focused = false;
                                 select_handbook.bind("liszt:updated", function(e){
                                     var results = analitic.find('.chzn-results .active-result');
                                     if(PlanfixFix.debug) console.log('results', results);
@@ -313,6 +327,8 @@
                                     }
                                     // задержка из-за лага chosen
                                     setTimeout(function(){
+                                        if(count_focused) return;
+                                        count_focused = true;
                                         analitic.removeClass('silentChosen');
 
                                         if(opts.count){
@@ -556,7 +572,7 @@
 				counts.each(function(i, count_field){
 					var analitic = $(count_field).parents('.add-analitic-block');
 					var count = $(count_field).val();
-					var hours_per_count = analitic.find(PlanfixFix.fields.hours_per_count).val().replace(',', '.');
+					var hours_per_count = analitic.find(PlanfixFix.fields.hours_per_count).text().replace(',', '.');
 					var hours = count * hours_per_count;
 					if(count==='' || hours_per_count==='') highlight(true);
 					totals += hours;
