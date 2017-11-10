@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name           PlanfixFix
 // @author         popstas
-// @version        0.3.5
+// @version        0.3.6
 // @namespace      viasite.ru
 // @description    Some planfix.ru improvements
 // @unwrap
@@ -138,8 +138,8 @@
 			win.ActionJS.create_orig = win.ActionJS.create;
 			win.ActionJS.edit_orig = win.ActionJS.edit;
 			win.ActionJS.restoreAnaliticsForEdit_orig = win.ActionJS.restoreAnaliticsForEdit;
-			win.ActionJS.create = function(task, insertBefore) {
-			  return win.ActionJS.create_orig(task, insertBefore).then(function() {
+			win.ActionJS.create = function(task, insertBefore, actionDescription) {
+			  return win.ActionJS.create_orig(task, insertBefore, actionDescription).then(function() {
 			    PlanfixFix.addCustomAnalitics();
 			  });
 			};
