@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name           PlanfixFix
 // @author         popstas
-// @version        0.3.7
+// @version        0.3.8
 // @namespace      viasite.ru
 // @description    Some planfix.ru improvements
 // @unwrap
@@ -29,7 +29,7 @@
     return;
   }
 
-  PlanfixFix = {
+  const PlanfixFix = {
     debug: false,
     deferred: false,
     fields: {
@@ -87,11 +87,13 @@
 
       //PlanfixFix.addMenu();
 
-      if (PlanfixFix.debug)
+      // тестовое открытие нового действия
+      if (PlanfixFix.debug) {
         setTimeout(function() {
           $('.actions-quick-add-block-text').click();
           PlanfixFix.addAnalitics({ name: 'Поминутная работа программиста' });
         }, 1000);
+      }
     },
 
     /**
@@ -146,45 +148,48 @@
     },
 
     actionAlter: function() {
-      win.ActionJS.create_orig = win.ActionJS.prototype.createNewAction;
+      if (PlanfixFix.debug) console.log('actionAlter');
+      win.ActionListJS.prototype.createAction_orig = win.ActionListJS.prototype.createAction;
       //win.ActionJS.edit_orig = win.ActionJS.edit;
       //win.ActionJS.restoreAnaliticsForEdit_orig = win.ActionJS.restoreAnaliticsForEdit;
-      win.ActionJS.prototype.createNewAction = function() {
-        return win.ActionJS.create_orig().then(function() {
+      win.ActionListJS.prototype.createAction = function() {
+        return this.createAction_orig().then(function() {
+          if (PlanfixFix.debug) console.log('after createAction');
           PlanfixFix.addCustomAnalitics();
         });
       };
       /*win.ActionJS.prototype.createNewAction = function(task, insertBefore, actionDescription) {
-			  return win.ActionJS.create_orig(task, insertBefore, actionDescription).then(function() {
-			    PlanfixFix.addCustomAnalitics();
-			  });
-			};*/
+				return win.ActionJS.create_orig(task, insertBefore, actionDescription).then(function() {
+				  PlanfixFix.addCustomAnalitics();
+				});
+			  };*/
 
       /*win.ActionJS.edit = function(id, task){
-				win.ActionJS.edit_orig(id, task);
-				setTimeout(function(){
-					PlanfixFix.addCustomAnalitics();
-				}, 1000);
-			};
-			win.ActionJS.restoreAnaliticsForEdit = function(data){
-				win.ActionJS.restoreAnaliticsForEdit_orig(data);
-				setTimeout(function(){
-					PlanfixFix.countTotalAnalitics();
-				}, 2000);
-			};*/
+				  win.ActionJS.edit_orig(id, task);
+				  setTimeout(function(){
+					  PlanfixFix.addCustomAnalitics();
+				  }, 1000);
+			  };
+			  win.ActionJS.restoreAnaliticsForEdit = function(data){
+				  win.ActionJS.restoreAnaliticsForEdit_orig(data);
+				  setTimeout(function(){
+					  PlanfixFix.countTotalAnalitics();
+				  }, 2000);
+			  };*/
 
       /*$('body').delegate(PlanfixFix.fields.count, 'change keypress', PlanfixFix.countTotalAnalitics);
-
-			$('body').delegate(PlanfixFix.fields.name, 'change', function(){
-				var hours_field = $(this).parents('.add-analitic-block').find(PlanfixFix.fields.hours_per_count);
-				hours_field.attr('title', (hours_field.val().replace(',', '.')*60).toFixed(1));
-			});*/
+  
+			  $('body').delegate(PlanfixFix.fields.name, 'change', function(){
+				  var hours_field = $(this).parents('.add-analitic-block').find(PlanfixFix.fields.hours_per_count);
+				  hours_field.attr('title', (hours_field.val().replace(',', '.')*60).toFixed(1));
+			  });*/
 
       /*$('body').delegate('.attach-new-analitic td.td-item-add-ex:first span.fakelink-dashed', 'click', function(e){
-				PlanfixFix.addAnalitics([{}]);
-			});*/
+				  PlanfixFix.addAnalitics([{}]);
+			  });*/
     },
 
+    // добавляет быстрые аналитики в блок действия
     addCustomAnalitics: function() {
       // показывается в задаче, где одно и то же планируется на каждый день
       if (PlanfixFix.debug) console.log('addCustomAnalitics');
@@ -233,6 +238,7 @@
         });
       });
 
+      // тестовый вызов добавления аналитики
       if (PlanfixFix.debug) {
         PlanfixFix.addTaskBlock('|');
         PlanfixFix.addTaskBlock('Удалить все', function() {
@@ -449,10 +455,10 @@
         PlanfixFix._analitics = $.parseJSON(localStorage.planfixfix_analitics) || [];
 
         /*if(PlanfixFix._analitics.length===0){
-					deferred = PlanfixFix.parseRemoteAnalitics(
-						PlanfixFix.getRemoteAnaliticsUrl()
-					);
-				}*/
+					  deferred = PlanfixFix.parseRemoteAnalitics(
+						  PlanfixFix.getRemoteAnaliticsUrl()
+					  );
+				  }*/
       }
       if (PlanfixFix._analitics.length > 0) {
         deferred.resolve(PlanfixFix._analitics);
@@ -636,7 +642,7 @@
       var dates = [];
 
       // next or current monday
-      d = new Date();
+      const d = new Date();
       var day = d.getDay();
       if (day === 0) day = 7;
       if (day != dayofweek) {
