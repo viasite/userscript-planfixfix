@@ -41,7 +41,7 @@
         default_handbook: 'Инструкции и стандарты',
         
 		analitics_remote_default: {
-			url: 'https://dl.dropboxusercontent.com/u/13557357/planfix_analitics.txt',
+			url: 'https://dev.viasite.ru/planfix_analitics.txt',
 			format: 'text',
 		},
 		analitics_remote_cache_lifetime: 3600,
@@ -135,15 +135,21 @@
 		},
 
 		actionAlter: function(){
-			win.ActionJS.create_orig = win.ActionJS.create;
-			win.ActionJS.edit_orig = win.ActionJS.edit;
-			win.ActionJS.restoreAnaliticsForEdit_orig = win.ActionJS.restoreAnaliticsForEdit;
-			win.ActionJS.create = function(task, insertBefore, actionDescription) {
-			  return win.ActionJS.create_orig(task, insertBefore, actionDescription).then(function() {
+			win.ActionJS.create_orig = win.ActionJS.prototype.createNewAction;
+			//win.ActionJS.edit_orig = win.ActionJS.edit;
+			//win.ActionJS.restoreAnaliticsForEdit_orig = win.ActionJS.restoreAnaliticsForEdit;
+			win.ActionJS.prototype.createNewAction = function() {
+			  return win.ActionJS.create_orig().then(function() {
 			    PlanfixFix.addCustomAnalitics();
 			  });
 			};
-			/*win.ActionJS.edit = function(id, task){
+			/*win.ActionJS.prototype.createNewAction = function(task, insertBefore, actionDescription) {
+			  return win.ActionJS.create_orig(task, insertBefore, actionDescription).then(function() {
+			    PlanfixFix.addCustomAnalitics();
+			  });
+			};*/
+
+            /*win.ActionJS.edit = function(id, task){
 				win.ActionJS.edit_orig(id, task);
 				setTimeout(function(){
 					PlanfixFix.addCustomAnalitics();
