@@ -42,7 +42,7 @@
         newlines.push(`<b>Итого: ${lastPrice} рублей</b><br /><br /><br /><br />`);
       };
 
-      html = html.replace('<p>', '').replace('</p>', '');
+      html = html.replace(/<p>/g, '<br />').replace(/<\/p>/g, '');
       const lines = html.split(/<br ?\/?>/);
 
       //console.log(lines);
@@ -51,6 +51,12 @@
 
       for (let line of lines) {
         //console.log(line);
+
+        // empty line
+        if(line.replace(/(;nbsp| )/g, '') == '') continue;
+
+        // ignore summary for double conversion
+        if(line.match(/^Итого.*?:/)) continue;
 
         // trim trailing spaces
         line = line.replace(/(&nbsp;| )+$/, '');
@@ -77,7 +83,7 @@
           // save int price
           headerPrices.push(parseInt(price.replace(/ /g, '')));
 
-          newlines.push(`<b>${name}:&nbsp;${price} руб.</b>`);
+          newlines.push(`<b>${name}:&nbsp;${price} рублей</b>`);
 
           newlines.push('<ul>');
         } else {
@@ -112,6 +118,7 @@
         }
       }
 
+      // last section end
       newlines.push('</ul><br />');
       outSectionSummary();
 
@@ -137,7 +144,6 @@
     // main function
     run() {
       const editor = win.CKEDITOR.instances.ActionDescription;
-      const s = editor.getSelection();
       const html = smetaStyle.getSelectionHtml(editor);
       const styledHtml = smetaStyle.processHtml(html);
 
