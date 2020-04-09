@@ -60,7 +60,7 @@
         if (h && line.indexOf(':')==-1) {
           const name = h[1];
           const price = h[3];
-          if (newlines.length > 0) newlines.push('</ul>');
+          if (newlines.length > 0) newlines.push('</ul><br />');
 
           newlines.push(`<b>${name}:&nbsp;${price} руб.</b>`);
 
@@ -70,12 +70,12 @@
 
           // non-standard line
           if (!item) {
-            newlines.push(`<li>${line}</li>`);
+            newlines.push(`<li style="margin-bottom:1em">${line}</li>`);
             continue;
           }
 
           const name = item[1];
-          let price = `<b>${item[2]}</b>`;
+          let price = `${item[2]}`;
 
           let desc = '';
           if (item[5]) {
@@ -93,7 +93,7 @@
             price = `<s>${oldprice}</s> ${price}`;
           }
 
-          newlines.push(`<li>${name}: ${price}${desc}</li>`);
+          newlines.push(`<li style="margin-bottom:1em">${name}: ${price}${desc}</li>`);
         }
       }
       return `<p>${newlines.join('\n')}</p>`;
