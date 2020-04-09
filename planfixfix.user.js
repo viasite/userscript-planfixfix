@@ -34,6 +34,13 @@
     // style html
     processHtml(html) {
       const newlines = [];
+      const headerPrices = [];
+
+      const outSectionSummary = function() {
+        let lastPrice = headerPrices[headerPrices.length-1];
+        lastPrice = new Intl.NumberFormat().format(lastPrice);
+        newlines.push(`<b>Итого: ${lastPrice} рублей</b><br /><br /><br /><br />`);
+      };
 
       html = html.replace('<p>', '').replace('</p>', '');
       const lines = html.split(/<br ?\/?>/);
@@ -53,14 +60,22 @@
           line = line.replace(/:/g, '').replace(' рублей', '.00');
         }
 
-      // is header?
         const h = line.match(/(.*?)(&nbsp;| )+([0-9 ]+)\..*/);
         //console.log(h);
 
+        // is header?
         if (h && line.indexOf(':')==-1) {
           const name = h[1];
           const price = h[3];
-          if (newlines.length > 0) newlines.push('</ul><br />');
+
+          // section end
+          if (newlines.length > 0){
+              newlines.push('</ul><br />');
+              outSectionSummary();
+          }
+
+          // save int price
+          headerPrices.push(parseInt(price.replace(/ /g, '')));
 
           newlines.push(`<b>${name}:&nbsp;${price} руб.</b>`);
 
@@ -96,6 +111,15 @@
           newlines.push(`<li style="margin-bottom:1em">${name}: ${price}${desc}</li>`);
         }
       }
+
+      newlines.push('</ul><br />');
+      outSectionSummary();
+
+      // summary:
+      let sumPrice = headerPrices.reduce((a, c) => a + c);
+      sumPrice = new Intl.NumberFormat().format(sumPrice);
+      newlines.push(`<b>Итого за все этапы: ${sumPrice} рублей</b>`);
+
       return `<p>${newlines.join('\n')}</p>`;
     },
 
