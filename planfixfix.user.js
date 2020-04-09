@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name           PlanfixFix
 // @author         popstas
-// @version        0.4.0
+// @version        0.4.1
 // @namespace      viasite.ru
 // @description    Some planfix.ru improvements
 // @unwrap
@@ -48,7 +48,12 @@
         // trim trailing spaces
         line = line.replace(/(&nbsp;| )+$/, '');
 
-        // is header?
+        // for double conversion
+        if(line.match(/рублей$/)){
+          line = line.replace(/:/g, '').replace(' рублей', '.00');
+        }
+
+      // is header?
         const h = line.match(/(.*?)(&nbsp;| )+([0-9 ]+)\..*/);
         //console.log(h);
 
