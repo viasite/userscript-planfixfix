@@ -170,8 +170,6 @@
         return;
       };
 
-      if (PlanfixFix.debug) console.log('init');
-
       // очередь аналитик
       PlanfixFix.resetDeferred();
 
@@ -183,10 +181,14 @@
 
       // тестовое открытие нового действия
       if (PlanfixFix.debug) {
-        setTimeout(function() {
-          $('.actions-quick-add-block-text').click();
-          PlanfixFix.addAnalitics({ name: 'Поминутная работа программиста' });
-        }, 1000);
+        console.log('debug: init');
+        setTimeout(() => {
+          //console.log('debug: new action');
+          //$('.actions-quick-add-block-text').click(); // create
+          //console.log('debug: edit-draft-action');
+          //$('.edit-draft-action').click(); // edit
+          //PlanfixFix.addAnalitics({ name: 'Поминутная работа программиста' });
+        }, 2000);
       }
     },
 
@@ -243,43 +245,49 @@
 
     actionAlter: function() {
       if (PlanfixFix.debug) console.log('actionAlter');
+
+      // save original functions
       win.ActionListJS.prototype.createAction_orig = win.ActionListJS.prototype.createAction;
-      //win.ActionJS.edit_orig = win.ActionJS.edit;
+      //win.ActionJS.prototype.createNewAction_orig = win.ActionJS.prototype.createNewAction;
+      win.ActionJS.prototype.editDraft_orig = win.ActionJS.prototype.editDraft;
+      win.ActionJS.prototype.edit_orig = win.ActionJS.prototype.edit;
       //win.ActionJS.restoreAnaliticsForEdit_orig = win.ActionJS.restoreAnaliticsForEdit;
+
+      // decorate original functions
       win.ActionListJS.prototype.createAction = function() {
         return this.createAction_orig().then(function() {
           if (PlanfixFix.debug) console.log('after createAction');
           PlanfixFix.addCustomAnalitics();
         });
       };
-      /*win.ActionJS.prototype.createNewAction = function(task, insertBefore, actionDescription) {
-				return win.ActionJS.create_orig(task, insertBefore, actionDescription).then(function() {
-				  PlanfixFix.addCustomAnalitics();
-				});
-			  };*/
-
-      /*win.ActionJS.edit = function(id, task){
-				  win.ActionJS.edit_orig(id, task);
-				  setTimeout(function(){
-					  PlanfixFix.addCustomAnalitics();
-				  }, 1000);
-			  };
-			  win.ActionJS.restoreAnaliticsForEdit = function(data){
-				  win.ActionJS.restoreAnaliticsForEdit_orig(data);
-				  setTimeout(function(){
-					  PlanfixFix.countTotalAnalitics();
-				  }, 2000);
-			  };*/
+      /*win.ActionJS.prototype.createNewAction = function() {
+        this.createNewAction_orig();
+        if (PlanfixFix.debug) console.log('after createNewAction');
+        setTimeout(PlanfixFix.addCustomAnalitics, 2000);
+      };*/
+      win.ActionJS.prototype.editDraft = function(draftid, task, insertBefore, actionList) {
+        this.editDraft_orig(draftid, task, insertBefore, actionList);
+        if (PlanfixFix.debug) console.log('after editDraft');
+        setTimeout(PlanfixFix.addCustomAnalitics, 1000);
+      };
+      win.ActionJS.prototype.edit = function(id, task, data, actionNode) {
+        this.edit_orig(id, task, data, actionNode);
+        setTimeout(PlanfixFix.addCustomAnalitics, 1000);
+      };
+      /*win.ActionJS.restoreAnaliticsForEdit = function(data){
+        win.ActionJS.restoreAnaliticsForEdit_orig(data);
+        setTimeout(PlanfixFix.countTotalAnalitics, 2000);
+      };*/
 
       /*$('body').delegate(PlanfixFix.fields.count, 'change keypress', PlanfixFix.countTotalAnalitics);
-			  $('body').delegate(PlanfixFix.fields.name, 'change', function(){
-				  var hours_field = $(this).parents('.add-analitic-block').find(PlanfixFix.fields.hours_per_count);
-				  hours_field.attr('title', (hours_field.val().replace(',', '.')*60).toFixed(1));
-			  });*/
+      $('body').delegate(PlanfixFix.fields.name, 'change', function(){
+      var hours_field = $(this).parents('.add-analitic-block').find(PlanfixFix.fields.hours_per_count);
+      hours_field.attr('title', (hours_field.val().replace(',', '.')*60).toFixed(1));
+      });*/
 
       /*$('body').delegate('.attach-new-analitic td.td-item-add-ex:first span.fakelink-dashed', 'click', function(e){
-				  PlanfixFix.addAnalitics([{}]);
-			  });*/
+        PlanfixFix.addAnalitics([{}]);
+      });*/
     },
 
     // добавляет быстрые аналитики в блок действия
