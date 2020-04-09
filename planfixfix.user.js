@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name           PlanfixFix
 // @author         popstas
-// @version        0.3.8
+// @version        0.4.0
 // @namespace      viasite.ru
 // @description    Some planfix.ru improvements
 // @unwrap
@@ -28,6 +28,95 @@
   if (location.hostname !== 'tagilcity.planfix.ru') {
     return;
   }
+
+  // оформление сметы в 1 клик, https://tagilcity.planfix.ru/task/604890
+  const smetaStyle = {
+    // style html
+    processHtml(html) {
+      const newlines = [];
+
+      html = html.replace('<p>', '').replace('</p>', '');
+      const lines = html.split(/<br ?\/?>/);
+
+      //console.log(lines);
+
+      if (lines.length === 0) return;
+
+      for (let line of lines) {
+        //console.log(line);
+
+        // trim trailing spaces
+        line = line.replace(/(&nbsp;| )+$/, '');
+
+        // is header?
+        const h = line.match(/(.*?)(&nbsp;| )+([0-9 ]+)\..*/);
+        //console.log(h);
+
+        if (h && line.indexOf(':')==-1) {
+          const name = h[1];
+          const price = h[3];
+          if (newlines.length > 0) newlines.push('</ul>');
+
+          newlines.push(`<b>${name}:&nbsp;${price} руб.</b>`);
+
+          newlines.push('<ul>');
+        } else {
+          const item = line.match(/(.*?): ([0-9 ]+ руб\.)(, старая цена: ([0-9 \.]+))? ?(.*)?/);
+
+          // non-standard line
+          if (!item) {
+            newlines.push(`<li>${line}</li>`);
+            continue;
+          }
+
+          const name = item[1];
+          let price = `<b>${item[2]}</b>`;
+
+          let desc = '';
+          if (item[5]) {
+            // remove .)
+            desc = item[5].replace('.)', ')');
+
+            // style desc
+            desc = ` <span style="color:#7f8c8d"><em>${desc}</em></span>`;
+          }
+
+          // old price
+          if (item[3]) {
+            const oldprice = item[4].replace('.00', ' руб.').trim();
+            //console.log(item[4]);
+            price = `<s>${oldprice}</s> ${price}`;
+          }
+
+          newlines.push(`<li>${name}: ${price}${desc}</li>`);
+        }
+      }
+      return `<p>${newlines.join('\n')}</p>`;
+    },
+
+    // get selection html from ckeditor
+    getSelectionHtml(editor) {
+      const sel = editor.getSelection();
+      const ranges = sel.getRanges();
+      const el = new win.CKEDITOR.dom.element('div');
+      for (let i = 0, len = ranges.length; i < len; ++i) {
+        el.append(ranges[i].cloneContents());
+      }
+      return el.getHtml();
+    },
+
+    // main function
+    run() {
+      const editor = win.CKEDITOR.instances.ActionDescription;
+      const s = editor.getSelection();
+      const html = smetaStyle.getSelectionHtml(editor);
+      const styledHtml = smetaStyle.processHtml(html);
+
+      editor.insertHtml(styledHtml);
+      //document.getElementsByClassName('b-task-description')[0].innerHTML = styledHtml;
+      //console.log('html: '+html);
+    },
+  };
 
   const PlanfixFix = {
     debug: false,
@@ -178,7 +267,6 @@
 			  };*/
 
       /*$('body').delegate(PlanfixFix.fields.count, 'change keypress', PlanfixFix.countTotalAnalitics);
-  
 			  $('body').delegate(PlanfixFix.fields.name, 'change', function(){
 				  var hours_field = $(this).parents('.add-analitic-block').find(PlanfixFix.fields.hours_per_count);
 				  hours_field.attr('title', (hours_field.val().replace(',', '.')*60).toFixed(1));
@@ -228,6 +316,11 @@
           });
           PlanfixFix.addTaskBlock('письмо сложное', { name: 'Сложное письмо' });
           break;
+      }
+
+      if(Current.logined == 9230 || userPost == 'Менеджер по сопровождению заказов' || userPost == 'Руководитель отдела продаж'){
+          PlanfixFix.addTaskBlock('|');
+          PlanfixFix.addTaskBlock('Оформить смету', smetaStyle.run);
       }
 
       // парсим массив подготовленных аналитик
