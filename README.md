@@ -6,15 +6,15 @@
 - быстрое добавление аналитики, минуя выбор словаря и типа работ
 - аналитика сохраняется по нажатию Enter в поле кол-ва минут
 - [быстрое оформление смет](https://tagilcity.planfix.ru/task/604890)
+- сортировка аналитик в смете
 
 ## Установка
 1. Поставьте Tampermonkey для 
    [Chrome](https://chrome.google.com/webstore/detail/tampermonkey/dhdgffkkebhmkfjojejmpbldmpobfkfo?hl=ru)
    или
    [Firefox](https://addons.mozilla.org/en-US/firefox/addon/tampermonkey/)
-2. Перейдите в настройки Tampermonkey - Панель - Утилиты
-3. Вставьте в нижний textfield: `https://raw.githubusercontent.com/viasite/userscript-planfixfix/master/planfixfix.user.js`, нажмите Импорт
-4. В появившемся окне нажмите Установить
+2. Перейдите на [страницу расширения](https://raw.githubusercontent.com/viasite/userscript-planfixfix/master/planfixfix.user.js)
+3. На открывшейся странице нажмите Установить
 
 ## Обновление
 Скрипт обновляется автоматически.
@@ -22,10 +22,7 @@
 если потом ничего не произойдет, значит скрипт обновится.
 
 ## Ограничения
-- работает только с одной аналитикой
-- работает только для tagilcity.planfix.ru
-- работает только для программистов и менеджеров по сопровождению заказов
-
+- работает только для tagilcity.planfix.ru, можете исправить код для своей компании
 
 ## Убирание сворачивания комментов в планфиксе
 Юзерстиль для отмены скрытия комментов.
