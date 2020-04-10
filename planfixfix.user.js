@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name           PlanfixFix
 // @author         popstas
-// @version        0.5.1
+// @version        0.5.2
 // @namespace      viasite.ru
 // @description    Some planfix.ru improvements
 // @unwrap
@@ -732,11 +732,29 @@
     processHtml(html) {
       const newlines = [];
       const headerPrices = [];
+      let discontSection = 0;
+      let discontTotal = 0;
+
+      const getPlural = (number, one, two, five) => {
+        let n = Math.abs(number);
+        n %= 100;
+        if (n >= 5 && n <= 20) return five;
+        n %= 10;
+        if (n === 1) return one;
+        if (n >= 2 && n <= 4) return two;
+        return five;
+      };
 
       const outSectionSummary = function () {
         let lastPrice = headerPrices[headerPrices.length - 1];
         lastPrice = new Intl.NumberFormat().format(lastPrice);
-        newlines.push(`<b>Итого: ${lastPrice} рублей</b><br /><br /><br /><br />`);
+        discontTotal += discontSection;
+
+        const discontSectionFormat = new Intl.NumberFormat().format(discontSection);
+        const plural = getPlural(discontSection, 'рубль', 'рубля', 'рублей');
+        let discontText = discontSection ? `, экономия ${discontSectionFormat} ${plural}` : '';
+        newlines.push(`<b>Итого: ${lastPrice} рублей${discontText}</b><br /><br /><br /><br />`);
+        discontSection = 0;
       };
 
       html = html.replace(/<p>/g, '<br />').replace(/<\/p>/g, '');
@@ -825,13 +843,21 @@
               oldprice = item[4];
             }
 
-            price = price.replace(/\s/g, '&nbsp;');
             oldprice = oldprice
               .replace(' руб.', '')
               .replace(/&nbsp;/g, '')
               .replace('.00', ' руб.')
               .trim();
+            price = price
+              .replace(/&nbsp;/g, '')
+              .replace('руб.', '')
+              .replace(/\s/g, '');
+
+            let discont = parseInt(oldprice) - parseInt(price);
+            discontSection += discont;
+
             oldprice = new Intl.NumberFormat().format(parseInt(oldprice));
+            price = price.replace(/\s/g, '&nbsp;') + '&nbsp;руб.';
             //console.log(item[4]);
             price = `<s>${oldprice}&nbsp;руб.</s> ${price}`;
           } else {
@@ -849,8 +875,13 @@
 
       // summary:
       let sumPrice = headerPrices.reduce((a, c) => a + c);
+      let oldsumPrice = new Intl.NumberFormat().format(sumPrice + discontTotal);
       sumPrice = new Intl.NumberFormat().format(sumPrice);
-      newlines.push(`<b>Итого за все этапы: ${sumPrice} рублей</b>`);
+      const discontTotalFormat = new Intl.NumberFormat().format(discontTotal);
+      const plural = getPlural(discontTotal, 'рубль', 'рубля', 'рублей');
+      let discontText = discontTotal ? `, экономия ${discontTotalFormat} ${plural}` : '';
+      let oldsumText = discontTotal ? `<s>${oldsumPrice} рублей</s> ` : '';
+      newlines.push(`<b>Итого за все этапы: ${oldsumText}${sumPrice} рублей${discontText}</b>`);
 
       return `<p>${newlines.join('\n')}</p>`;
     },

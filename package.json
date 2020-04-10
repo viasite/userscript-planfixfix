@@ -1,0 +1,14 @@
+{
+    "name": "planfixfix",
+    "version": "0.5.1",
+    "description": "Userscript for Chrome and Firefox for fast analytics insert. Only for tagilcity.planfix.ru",
+    "scripts": {
+      "version": "npm run changelog && git add CHANGELOG.md",
+      "postversion": "git push && npm run release",
+      "changelog": "conventional-changelog -p angular -i CHANGELOG.md -s -r 0",
+      "release": "conventional-github-releaser -p angular"
+    },
+    "author": "Stanislav Popov",
+    "license": "ISC"
+  }
+  
