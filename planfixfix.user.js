@@ -190,12 +190,44 @@
       win.AnaliticsWinJS.prototype.show = function (options) {
         this.show_orig(options);
         setTimeout(() => {
-          // кнопка "Сортировать смету"
-          if (Current.logined == 9230 && $('[data-aid="314"]').length > 0) {
-            const link = $(
-              '<span style="margin-left:1em" class="fakelink-dashed">Сортировать смету</span>'
-            ).click(smetaOrder);
-            $('.af-row-btn-add').append(link);
+          const smetaTable = $('[data-aid="314"] .tbl-list');
+          // смета на разработку
+          if (smetaTable.length > 0) {
+            // кнопка "Сортировать смету"
+            if (Current.logined == 9230) {
+              const link = $(
+                '<span style="margin-left:1em" class="fakelink-dashed">Сортировать смету</span>'
+              ).click(smetaOrder);
+              $('.af-row-btn-add').append(link);
+            }
+
+            // удаление аналитик по блокам (этапам)
+            const sections = {};
+            smetaTable.find('div[data-fid="950"]').each(function () {
+              const val = $(this).find('input:hidden').val();
+              if (!sections[val]) {
+                sections[val] = {
+                  name: $(this).text(),
+                  count: 0,
+                  rows: [],
+                };
+              }
+              sections[val].count++;
+              sections[val].rows.push($(this).parents('tr'));
+            });
+            for (let fid in sections) {
+              let sec = sections[fid];
+              let link = $(
+                `<span style="margin-left:1em" class="fakelink-dashed">Удалить ${sec.name} (${sec.count})</span>`
+              ).click(() => {
+                for (let row of sec.rows) {
+                  row.find('[data-acr="delete"]').click();
+                  //row.remove();
+                }
+                link.remove();
+              });
+              $('.af-row-btn-add').append(link);
+            }
           }
         }, 3000);
       };
