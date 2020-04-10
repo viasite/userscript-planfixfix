@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name           PlanfixFix
 // @author         popstas
-// @version        0.4.1
+// @version        0.5.0
 // @namespace      viasite.ru
 // @description    Some planfix.ru improvements
 // @unwrap
@@ -12,12 +12,12 @@
 // @match          https://tagilcity.planfix.ru/*
 // ==/UserScript==
 
-(function() {
+(function () {
   var u = 'undefined',
     win = typeof unsafeWindow != u ? unsafeWindow : window;
   var $ = win.$;
 
-  win.onerror = function(error, file, line) {
+  win.onerror = function (error, file, line) {
     console.log(error + ' (line ' + line + ')');
   };
 
@@ -36,14 +36,14 @@
       name: '[data-fid="741"] select',
       count: '[data-fid="747"] input',
       comment: '[data-fid="749"] textarea',
-      hours_per_count: '.analitic-data[data-fid="741:h915"]'
+      hours_per_count: '.analitic-data[data-fid="741:h915"]',
     },
 
     default_handbook: 'Инструкции и стандарты',
 
     analitics_remote_default: {
       url: 'https://dev.viasite.ru/planfix_analitics.txt',
-      format: 'text'
+      format: 'text',
     },
     analitics_remote_cache_lifetime: 3600,
 
@@ -57,22 +57,22 @@
           'Обработка простая на вводе или выводе',
           'Тестирование',
           'Замена / вставка любого контента',
-          { name: 'Создание пояснительной записки по внесенным изменениям', count: 1 }
-        ]
+          { name: 'Создание пояснительной записки по внесенным изменениям', count: 1 },
+        ],
       ],
       ['Задание', 'Задание'],
       ['Консультация', 'с коллегой'],
-      ['Записка', 'Создание пояснительной записки']
+      ['Записка', 'Создание пояснительной записки'],
     ],
     _analitics: [],
 
-    init: function() {
+    init: function () {
       // init once
       if ($('body').hasClass('fixes')) return false;
       $('body').addClass('fixes');
 
       // не пугаем планфикс своими ошибками
-      win.onerror = function() {
+      win.onerror = function () {
         return;
       };
 
@@ -101,7 +101,7 @@
     /**
      * Переопределяет стили
      */
-    addStyles: function() {
+    addStyles: function () {
       $('body').append(
         '<style>' +
           '.chzn-container .chzn-results{ max-height:400px !important; }' +
@@ -117,12 +117,12 @@
      * Настройки скрипта:
      * - url для удаленной загрузки аналитик
      */
-    addMenu: function() {
+    addMenu: function () {
       var li = $(
         '<li class="b-ddl-menu-li-action b-ddl-menu-li-item b-ddl-menu-li-group-0"><span></span><a href="#">PlanfixFix</a></li>'
       )
         .appendTo('.b-main-menu-more ul')
-        .click(function() {
+        .click(function () {
           var remote = PlanfixFix.getRemoteAnaliticsUrl();
           var html =
             '<div class="planfixfix-settings">' +
@@ -136,10 +136,10 @@
             '<input type="button" value="Сохранить"/>' +
             '</div>';
           win.drawDialog(300, 'auto', 300, html);
-          $('.planfixfix-settings [type="button"]').click(function() {
+          $('.planfixfix-settings [type="button"]').click(function () {
             var isSave = PlanfixFix.setRemoteAnaliticsUrl({
               url: $('[name="planfixfix_remote_url"]').val(),
-              format: 'text'
+              format: 'text',
             });
             if (isSave) {
               $('.dialogWin .destroy-button').click();
@@ -149,7 +149,7 @@
         });
     },
 
-    actionAlter: function() {
+    actionAlter: function () {
       if (PlanfixFix.debug) console.log('actionAlter');
 
       // save original functions
@@ -160,10 +160,9 @@
       //win.ActionJS.restoreAnaliticsForEdit_orig = win.ActionJS.restoreAnaliticsForEdit;
       win.AnaliticsWinJS.prototype.show_orig = win.AnaliticsWinJS.prototype.show;
 
-
       // decorate original functions
-      win.ActionListJS.prototype.createAction = function() {
-        return this.createAction_orig().then(function() {
+      win.ActionListJS.prototype.createAction = function () {
+        return this.createAction_orig().then(function () {
           if (PlanfixFix.debug) console.log('after createAction');
           PlanfixFix.addCustomAnalitics();
         });
@@ -173,12 +172,12 @@
         if (PlanfixFix.debug) console.log('after createNewAction');
         setTimeout(PlanfixFix.addCustomAnalitics, 2000);
       };*/
-      win.ActionJS.prototype.editDraft = function(draftid, task, insertBefore, actionList) {
+      win.ActionJS.prototype.editDraft = function (draftid, task, insertBefore, actionList) {
         this.editDraft_orig(draftid, task, insertBefore, actionList);
         if (PlanfixFix.debug) console.log('after editDraft');
         setTimeout(PlanfixFix.addCustomAnalitics, 1000);
       };
-      win.ActionJS.prototype.edit = function(id, task, data, actionNode) {
+      win.ActionJS.prototype.edit = function (id, task, data, actionNode) {
         this.edit_orig(id, task, data, actionNode);
         setTimeout(PlanfixFix.addCustomAnalitics, 1000);
       };
@@ -188,16 +187,18 @@
       };*/
 
       // редактор аналитик
-      win.AnaliticsWinJS.prototype.show = function(options){
+      win.AnaliticsWinJS.prototype.show = function (options) {
         this.show_orig(options);
         setTimeout(() => {
           // кнопка "Сортировать смету"
-          if(Current.logined == 9230 && $('[data-aid="314"]').length > 0){
-            const link = $('<span style="margin-left:1em" class="fakelink-dashed">Сортировать смету</span>').click(smetaOrder);
+          if (Current.logined == 9230 && $('[data-aid="314"]').length > 0) {
+            const link = $(
+              '<span style="margin-left:1em" class="fakelink-dashed">Сортировать смету</span>'
+            ).click(smetaOrder);
             $('.af-row-btn-add').append(link);
           }
         }, 3000);
-      }
+      };
 
       /*$('body').delegate(PlanfixFix.fields.count, 'change keypress', PlanfixFix.countTotalAnalitics);
       $('body').delegate(PlanfixFix.fields.name, 'change', function(){
@@ -211,17 +212,17 @@
     },
 
     // добавляет быстрые действия в блок действия
-    addCustomAnalitics: function() {
+    addCustomAnalitics: function () {
       // показывается в задаче, где одно и то же планируется на каждый день
       if (PlanfixFix.debug) console.log('addCustomAnalitics');
       if (win.PlanfixPage.task == 116702) {
         var dates = PlanfixFix.getDates(1, 5);
-        var analitics_arr = $.map(dates, function(date) {
+        var analitics_arr = $.map(dates, function (date) {
           return {
             group: 'Планируемое время работы',
             date: date,
             begin: '09:00',
-            end: '09:30'
+            end: '09:30',
           };
         });
         PlanfixFix.addTaskBlock('План на неделю', analitics_arr);
@@ -245,21 +246,25 @@
           PlanfixFix.addTaskBlock('тел. сложный', { name: 'Сложный разговор по телефону' });
           PlanfixFix.addTaskBlock('письмо лёгкое', { name: 'Лёгкое письмо' });
           PlanfixFix.addTaskBlock('письмо обычное', {
-            name: 'Письмо средней сложности / обычное письмо'
+            name: 'Письмо средней сложности / обычное письмо',
           });
           PlanfixFix.addTaskBlock('письмо сложное', { name: 'Сложное письмо' });
           break;
       }
 
-      if(Current.logined == 9230 || userPost == 'Менеджер по сопровождению заказов' || userPost == 'Руководитель отдела продаж'){
-          PlanfixFix.addTaskBlock('|');
-          PlanfixFix.addTaskBlock('Оформить смету', smetaStyle.run);
+      if (
+        Current.logined == 9230 ||
+        userPost == 'Менеджер по сопровождению заказов' ||
+        userPost == 'Руководитель отдела продаж'
+      ) {
+        PlanfixFix.addTaskBlock('|');
+        PlanfixFix.addTaskBlock('Оформить смету', smetaStyle.run);
       }
 
       // парсим массив подготовленных аналитик
-      PlanfixFix.getAnalitics().then(function(tasks) {
+      PlanfixFix.getAnalitics().then(function (tasks) {
         PlanfixFix.addTaskBlock('|');
-        $.each(tasks, function(i, task) {
+        $.each(tasks, function (i, task) {
           PlanfixFix.addTaskBlock(task.name, task.analitics);
         });
       });
@@ -267,9 +272,9 @@
       // тестовый вызов добавления аналитики
       if (PlanfixFix.debug) {
         PlanfixFix.addTaskBlock('|');
-        PlanfixFix.addTaskBlock('Удалить все', function() {
+        PlanfixFix.addTaskBlock('Удалить все', function () {
           $('.task-add-analitic').click();
-          setTimeout(function() {
+          setTimeout(function () {
             $('[data-action="remove-all-analitics"]').click();
           }, 200);
         });
@@ -279,9 +284,9 @@
     /**
      * Тупая функция, добавляет все аналитики из массива
      */
-    addAnalitics: function(analitics_arr) {
+    addAnalitics: function (analitics_arr) {
       analitics_arr = PlanfixFix.normalizeAnalitics(analitics_arr);
-      $.each(analitics_arr, function(i, opts) {
+      $.each(analitics_arr, function (i, opts) {
         PlanfixFix._addAnalitic(opts);
       });
       PlanfixFix.deferred.then(PlanfixFix.countTotalAnalitics);
@@ -293,10 +298,10 @@
      * [Группа аналитик] Название аналитики - кол-во
      * Группа по умолчанию - Выработка
      */
-    normalizeAnalitics: function(analitics_arr) {
+    normalizeAnalitics: function (analitics_arr) {
       var analitics = [];
       if (!$.isArray(analitics_arr)) analitics_arr = [analitics_arr];
-      $.each(analitics_arr, function(i, opts) {
+      $.each(analitics_arr, function (i, opts) {
         var isFirst = i === 0;
         var isLast = i === analitics_arr.length - 1;
         if (typeof opts == 'string') {
@@ -308,7 +313,7 @@
             name: '',
             group: 'Выработка',
             scrollTo: isFirst,
-            select: !isLast
+            select: !isLast,
           },
           opts
         );
@@ -336,24 +341,24 @@
      * В deferred создержится последняя добавляемая аналитика
      * @param {object} opts { name, group, count, scrollTo, select }
      */
-    _addAnalitic: function(opts) {
+    _addAnalitic: function (opts) {
       var deferred = $.Deferred();
 
-      PlanfixFix.deferred.then(function() {
+      PlanfixFix.deferred.then(function () {
         $('.task-add-analitic').click();
 
         var timeout = $('.analitics-form').size() === 0 ? 500 : 10;
         //var timeout = 2000;
-        setTimeout(function() {
+        setTimeout(function () {
           var div = $('.analitics-form').last();
           if (opts.scrollTo) PlanfixFix.scrollTo(div);
 
-          setTimeout(function() {
+          setTimeout(function () {
             // выбор группы аналитик
             var select = div.find('select');
             if (PlanfixFix.debug) console.log('select', select);
 
-            var option = select.find('option').filter(function() {
+            var option = select.find('option').filter(function () {
               return $(this).text() == opts.group;
             });
             select.val(option.val()).change();
@@ -369,14 +374,14 @@
             if (opts.name) {
               // выбор конкретной аналитики
               // задержка из-за того, что иногда выбирается выработка "заказ такси"
-              setTimeout(function() {
+              setTimeout(function () {
                 analitic.addClass('silentChosen');
                 analitic
                   .find('.chzn-search:first input')
                   .val(opts.name) /*.focus()*/
                   .keyup();
                 var count_focused = false;
-                select_handbook.bind('liszt:updated', function(e) {
+                select_handbook.bind('liszt:updated', function (e) {
                   var results = analitic.find('.chzn-results .active-result');
                   if (PlanfixFix.debug) console.log('results', results);
                   if (results.length == 1 || opts.select) {
@@ -384,7 +389,7 @@
                     analitic.find(PlanfixFix.fields.count).focus();
                   }
                   // задержка из-за лага chosen
-                  setTimeout(function() {
+                  setTimeout(function () {
                     if (count_focused) return;
                     count_focused = true;
                     analitic.removeClass('silentChosen');
@@ -396,7 +401,7 @@
                       analitic
                         .find(PlanfixFix.fields.count)
                         .focus()
-                        .on('keypress', function(e) {
+                        .on('keypress', function (e) {
                           if (e.which == 13) {
                             if (e.ctrlKey) {
                               $('[data-action="saveParent"]').click();
@@ -440,10 +445,10 @@
      * В ссылку вписывается список аналитик
      * Можно передавать вместо аналитик произвольную функцию
      */
-    addTaskBlock: function(name, action) {
+    addTaskBlock: function (name, action) {
       var block = $('<div class="task-add-block"></div>')
         .html(name)
-        .click(function() {
+        .click(function () {
           PlanfixFix.resetDeferred();
           if ($.isArray(action) || typeof action == 'object' || typeof action == 'string') {
             PlanfixFix.addAnalitics(action);
@@ -453,14 +458,12 @@
         });
       if (PlanfixFix.debug) console.log(block);
       if ($.isArray(action) || typeof action == 'object' || typeof action == 'string') {
-        var analitics = $.map(PlanfixFix.normalizeAnalitics(action), function(analitic) {
+        var analitics = $.map(PlanfixFix.normalizeAnalitics(action), function (analitic) {
           return analitic.name;
         });
         block.attr('title', analitics.join('\n'));
       }
-      $('.task-add-block')
-        .last()
-        .after(block);
+      $('.task-add-block').last().after(block);
       return block;
     },
 
@@ -470,7 +473,7 @@
      * Или грузит по урлу и отдает, здесь же проверяется свежесть кеша
      * Удаленные возвращают умолчальные аналитики в случае неудачи
      */
-    getAnalitics: function() {
+    getAnalitics: function () {
       var deferred = $.Deferred();
       if (PlanfixFix._analitics.length === 0) {
         var mtime = localStorage.planfixfix_analitics_mtime || new Date().getTime();
@@ -495,12 +498,12 @@
     /**
      * Умолчальные аналитики (задачи) из массива
      */
-    getDefaultAnalitics: function() {
+    getDefaultAnalitics: function () {
       var tasks = [];
-      $.each(PlanfixFix.analitics_default, function(i, item) {
+      $.each(PlanfixFix.analitics_default, function (i, item) {
         tasks.push({
           name: item[0],
-          analitics: item[1]
+          analitics: item[1],
         });
       });
       return tasks;
@@ -509,7 +512,7 @@
     /**
      * Возвращает сохраненный или дефолтный урл
      */
-    getRemoteAnaliticsUrl: function() {
+    getRemoteAnaliticsUrl: function () {
       var store = $.parseJSON(localStorage.planfixfix_remote_analitics_url);
       return store || PlanfixFix.analitics_remote_default;
     },
@@ -518,7 +521,7 @@
      * Сохраняет урл удаленных аналитик,
      * Если пусто или изменено, чистим кеш
      */
-    setRemoteAnaliticsUrl: function(remote) {
+    setRemoteAnaliticsUrl: function (remote) {
       if (remote.url == PlanfixFix.analitics_remote_default.url) {
         return true;
       }
@@ -540,9 +543,9 @@
       return true;
     },
 
-    parseRemoteAnalitics: function(opts) {
+    parseRemoteAnalitics: function (opts) {
       var deferred = $.Deferred();
-      $.get(opts.url, function(data) {
+      $.get(opts.url, function (data) {
         var tasks = [];
         if (opts.format == 'text') {
           tasks = PlanfixFix.text2tasks(data);
@@ -566,12 +569,12 @@
      * если в конце аналитики через дефис написана цифра - 1, она превратится в количество
      * @return массив, пригодный для addAnalitics()
      */
-    text2tasks: function(text) {
+    text2tasks: function (text) {
       var lines = text.split('\n');
       var lastLevel = -1;
       var tasks = [];
       var task;
-      $.each(lines, function(i, line) {
+      $.each(lines, function (i, line) {
         if (line === '') return;
 
         var level = line.match(/^\t*/)[0].length;
@@ -593,7 +596,7 @@
     /**
      * Чистит сохраненные аналитики, которые загружались удаленно
      */
-    clearCache: function() {
+    clearCache: function () {
       delete localStorage.planfixfix_analitics;
     },
 
@@ -601,12 +604,12 @@
      * Считает, сколько всего минут во всех аналитиках действия,
      * Предупреждает, если есть незаполненные или ошибочные
      */
-    countTotalAnalitics: function() {
-      setTimeout(function() {
+    countTotalAnalitics: function () {
+      setTimeout(function () {
         var count_div = $('.analitics-total-wrap');
         var btn = $('.tr-action-commit .btn:first, .action-edit-save');
 
-        var highlight = function(state) {
+        var highlight = function (state) {
           if (state) {
             count_div.css('color', 'red');
             btn.css('border-color', 'red');
@@ -626,7 +629,7 @@
 
         var counts = $(PlanfixFix.fields.count);
         var totals = 0;
-        counts.each(function(i, count_field) {
+        counts.each(function (i, count_field) {
           var analitic = $(count_field).parents('.add-analitic-block');
           var count = $(count_field).val();
           var hours_per_count = analitic
@@ -647,7 +650,7 @@
     /**
      * Прокручивает до селектора, используется функция планфикса
      */
-    scrollTo: function(elem) {
+    scrollTo: function (elem) {
       win.TaskCardPoolJS.getInstance(win.PlanfixPage.task).scroller.scrollToBlock(elem);
     },
 
@@ -655,7 +658,7 @@
      * Записывает в последнего в очереди чистый deferred,
      * следующий _addAnalitic() исполнится мгновенно
      */
-    resetDeferred: function() {
+    resetDeferred: function () {
       PlanfixFix.deferred = $.Deferred().resolve();
     },
 
@@ -664,7 +667,7 @@
      * Если текущая дата совпадает с dayofweek, берется сегодня,
      * иначе этот ближайший день недели
      */
-    getDates: function(dayofweek, count) {
+    getDates: function (dayofweek, count) {
       var dates = [];
 
       // next or current monday
@@ -676,7 +679,7 @@
         d.setTime(d.getTime() + diff);
       }
 
-      var pad = function(num) {
+      var pad = function (num) {
         var A = num.toString();
         if (A.length > 1) return A;
         else return ('00' + A).slice(-2);
@@ -688,7 +691,7 @@
       }
 
       return dates;
-    }
+    },
   };
 
   // оформление сметы в 1 клик, https://tagilcity.planfix.ru/task/604890
@@ -698,8 +701,8 @@
       const newlines = [];
       const headerPrices = [];
 
-      const outSectionSummary = function() {
-        let lastPrice = headerPrices[headerPrices.length-1];
+      const outSectionSummary = function () {
+        let lastPrice = headerPrices[headerPrices.length - 1];
         lastPrice = new Intl.NumberFormat().format(lastPrice);
         newlines.push(`<b>Итого: ${lastPrice} рублей</b><br /><br /><br /><br />`);
       };
@@ -715,16 +718,16 @@
         //console.log(line);
 
         // empty line
-        if(line.replace(/(;nbsp| )/g, '') == '') continue;
+        if (line.replace(/(;nbsp| )/g, '') == '') continue;
 
         // ignore summary for double conversion
-        if(line.match(/^Итого.*?:/)) continue;
+        if (line.match(/^Итого.*?:/)) continue;
 
         // trim trailing spaces
         line = line.replace(/(&nbsp;| )+$/, '');
 
         // for double conversion
-        if(line.match(/рублей$/)){
+        if (line.match(/рублей$/)) {
           line = line.replace(/:/g, '').replace(' рублей', '.00');
         }
 
@@ -732,14 +735,14 @@
         //console.log(h);
 
         // is header?
-        if (h && line.indexOf(':')==-1) {
+        if (h && line.indexOf(':') == -1) {
           const name = h[1];
           const price = h[3];
 
           // section end
-          if (newlines.length > 0){
-              newlines.push('</ul><br />');
-              outSectionSummary();
+          if (newlines.length > 0) {
+            newlines.push('</ul><br />');
+            outSectionSummary();
           }
 
           // save int price
@@ -816,35 +819,35 @@
   };
 
   // сортировать смету, https://tagilcity.planfix.ru/task/608083
-  const smetaOrder = function(opts){
+  const smetaOrder = function (opts) {
     opts = {
       ...{
         analiticAid: 314, // смета на разработку
-        orderByFids: [950, 1093] // тип работ, №
+        orderByFids: [950, 1093], // тип работ, №
       },
-      ...opts
-    }
+      ...opts,
+    };
 
-    const t = $('[data-aid="'+opts.analiticAid+'"] .tbl-list');
+    const t = $('[data-aid="' + opts.analiticAid + '"] .tbl-list');
     const rows = t.find('tr');
     const rowsData = [];
 
     // собираем массив с данными таблицы (ключ-значение по fid)
     // сохраняем также ссылку на DOM-элемент ряда
-    rows.each(function(){
+    rows.each(function () {
       const r = $(this);
-      if(r.find('.td-head').length > 0) return;
+      if (r.find('.td-head').length > 0) return;
 
       const rowData = {
-        'elem': this
+        elem: this,
       };
 
-      r.find('td').each(function(){
+      r.find('td').each(function () {
         const td = $(this);
 
         const fid = td.find('[data-fid]').data('fid');
         // ignore subfids
-        if(!fid || fid.toString().indexOf(':')!==-1) return;
+        if (!fid || fid.toString().indexOf(':') !== -1) return;
 
         const val = td.find('input:hidden').val();
 
@@ -856,8 +859,8 @@
 
     // сортируем массив данных по нужным колонкам, предполагаем, что там int/float
     const rowsDataSorted = rowsData.concat().sort((a, b) => {
-      for(let sfid of opts.orderByFids) {
-        if(a[sfid] == b[sfid]) continue;
+      for (let sfid of opts.orderByFids) {
+        if (a[sfid] == b[sfid]) continue;
 
         // remove "
         a[sfid] = a[sfid].replace(/"/g, '').replace(/,/g, '.');
@@ -873,11 +876,11 @@
     //console.log(rowsDataSorted);
 
     // прогоняем оригинальный массив, но вписываем туда значения из сортированного массива
-    rowsData.map(function(row, ind) {
+    rowsData.map(function (row, ind) {
       const elem = $(row.elem);
       const newData = rowsDataSorted[ind];
-      for(let fid in newData){
-        elem.find('[data-fid="'+fid+'"] input:hidden').val(newData[fid]);
+      for (let fid in newData) {
+        elem.find('[data-fid="' + fid + '"] input:hidden').val(newData[fid]);
       }
     });
 
@@ -891,9 +894,9 @@
 5. Нажать "Сохранить аналитику"
 6. Открыть оригинальную задачу и скопированную отсортированную, проверить, что сортировка прошла правильно
 7. Удалить копию, прогнать шаги 2-5 на оригинале`);
-  }
+  };
 
-  $(function() {
+  $(function () {
     PlanfixFix.init();
   });
 })();
