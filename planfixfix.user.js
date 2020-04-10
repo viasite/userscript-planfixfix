@@ -29,208 +29,6 @@
     return;
   }
 
-  // оформление сметы в 1 клик, https://tagilcity.planfix.ru/task/604890
-  const smetaStyle = {
-    // style html
-    processHtml(html) {
-      const newlines = [];
-      const headerPrices = [];
-
-      const outSectionSummary = function() {
-        let lastPrice = headerPrices[headerPrices.length-1];
-        lastPrice = new Intl.NumberFormat().format(lastPrice);
-        newlines.push(`<b>Итого: ${lastPrice} рублей</b><br /><br /><br /><br />`);
-      };
-
-      html = html.replace(/<p>/g, '<br />').replace(/<\/p>/g, '');
-      const lines = html.split(/<br ?\/?>/);
-
-      //console.log(lines);
-
-      if (lines.length === 0) return;
-
-      for (let line of lines) {
-        //console.log(line);
-
-        // empty line
-        if(line.replace(/(;nbsp| )/g, '') == '') continue;
-
-        // ignore summary for double conversion
-        if(line.match(/^Итого.*?:/)) continue;
-
-        // trim trailing spaces
-        line = line.replace(/(&nbsp;| )+$/, '');
-
-        // for double conversion
-        if(line.match(/рублей$/)){
-          line = line.replace(/:/g, '').replace(' рублей', '.00');
-        }
-
-        const h = line.match(/(.*?)(&nbsp;| )+([0-9 ]+)\..*/);
-        //console.log(h);
-
-        // is header?
-        if (h && line.indexOf(':')==-1) {
-          const name = h[1];
-          const price = h[3];
-
-          // section end
-          if (newlines.length > 0){
-              newlines.push('</ul><br />');
-              outSectionSummary();
-          }
-
-          // save int price
-          headerPrices.push(parseInt(price.replace(/ /g, '')));
-
-          newlines.push(`<b>${name}:&nbsp;${price} рублей</b>`);
-
-          newlines.push('<ul>');
-        } else {
-          const item = line.match(/(.*?): ([0-9 ]+ руб\.)(, старая цена: ([0-9 \.]+))? ?(.*)?/);
-
-          // non-standard line
-          if (!item) {
-            newlines.push(`<li style="margin-bottom:1em">${line}</li>`);
-            continue;
-          }
-
-          const name = item[1];
-          let price = `${item[2]}`;
-
-          let desc = '';
-          if (item[5]) {
-            // remove .)
-            desc = item[5].replace('.)', ')');
-
-            // style desc
-            desc = ` <span style="color:#7f8c8d"><em>${desc}</em></span>`;
-          }
-
-          // old price
-          if (item[3]) {
-            const oldprice = item[4].replace('.00', ' руб.').trim();
-            //console.log(item[4]);
-            price = `<s>${oldprice}</s> ${price}`;
-          }
-
-          newlines.push(`<li style="margin-bottom:1em">${name}: ${price}${desc}</li>`);
-        }
-      }
-
-      // last section end
-      newlines.push('</ul><br />');
-      outSectionSummary();
-
-      // summary:
-      let sumPrice = headerPrices.reduce((a, c) => a + c);
-      sumPrice = new Intl.NumberFormat().format(sumPrice);
-      newlines.push(`<b>Итого за все этапы: ${sumPrice} рублей</b>`);
-
-      return `<p>${newlines.join('\n')}</p>`;
-    },
-
-    // get selection html from ckeditor
-    getSelectionHtml(editor) {
-      const sel = editor.getSelection();
-      const ranges = sel.getRanges();
-      const el = new win.CKEDITOR.dom.element('div');
-      for (let i = 0, len = ranges.length; i < len; ++i) {
-        el.append(ranges[i].cloneContents());
-      }
-      return el.getHtml();
-    },
-
-    // main function
-    run() {
-      const editor = win.CKEDITOR.instances.ActionDescription;
-      const html = smetaStyle.getSelectionHtml(editor);
-      const styledHtml = smetaStyle.processHtml(html);
-
-      editor.insertHtml(styledHtml);
-      //document.getElementsByClassName('b-task-description')[0].innerHTML = styledHtml;
-      //console.log('html: '+html);
-    },
-  };
-
-  // https://tagilcity.planfix.ru/task/608083
-  const smetaOrder = function(opts){
-    opts = {
-      ...{
-        analiticAid: 314, // смета на разработку
-        orderByFids: [950, 1093] // тип работ, №
-      },
-      ...opts
-    }
-
-    const t = $('[data-aid="'+opts.analiticAid+'"] .tbl-list');
-    const rows = t.find('tr');
-    const rowsData = [];
-
-    // собираем массив с данными таблицы (ключ-значение по fid)
-    // сохраняем также ссылку на DOM-элемент ряда
-    rows.each(function(){
-      const r = $(this);
-      if(r.find('.td-head').length > 0) return;
-
-      const rowData = {
-        'elem': this
-      };
-
-      r.find('td').each(function(){
-        const td = $(this);
-
-        const fid = td.find('[data-fid]').data('fid');
-        // ignore subfids
-        if(!fid || fid.toString().indexOf(':')!==-1) return;
-
-        const val = td.find('input:hidden').val();
-
-        rowData[fid] = val;
-      });
-
-      rowsData.push(rowData);
-    });
-
-    // сортируем массив данных по нужным колонкам, предполагаем, что там int/float
-    const rowsDataSorted = rowsData.concat().sort((a, b) => {
-      for(let sfid of opts.orderByFids) {
-        if(a[sfid] == b[sfid]) continue;
-
-        // remove "
-        a[sfid] = a[sfid].replace(/"/g, '').replace(/,/g, '.');
-        //console.log(a[sfid]);
-        b[sfid] = b[sfid].replace(/"/g, '').replace(/,/g, '.');
-        //console.log(`a[${sfid}]:${a[sfid]}, b[${sfid}]:${b[sfid]}, a>b: ${parseFloat(a[sfid]) > parseFloat(b[sfid])}`);
-        return parseFloat(a[sfid]) > parseFloat(b[sfid]) ? 1 : -1;
-      }
-      return 0;
-    });
-    const newrows = [];
-    //console.log(rowsData);
-    //console.log(rowsDataSorted);
-
-    // прогоняем оригинальный массив, но вписываем туда значения из сортированного массива
-    rowsData.map(function(row, ind) {
-      const elem = $(row.elem);
-      const newData = rowsDataSorted[ind];
-      for(let fid in newData){
-        elem.find('[data-fid="'+fid+'"] input:hidden').val(newData[fid]);
-      }
-    });
-
-    // обозначаем окончание цветом (визуально данные не поменяются)
-    t.css('background', '#e5ffe5');
-    alert(`Использование:
-1. Сделать копию задачи
-2. Открыть в копии редактор аналитик. Не должно быть отредактированных полей, то есть открыли и сразу переходим к следующему шагу.
-3. Запустить сниппет
-4. Таблица окрасится в зелёный цвет, это значит, что сортировка прошла
-5. Нажать "Сохранить аналитику"
-6. Открыть оригинальную задачу и скопированную отсортированную, проверить, что сортировка прошла правильно
-7. Удалить копию, прогнать шаги 2-5 на оригинале`);
-  }
-
   const PlanfixFix = {
     debug: false,
     deferred: false,
@@ -398,7 +196,7 @@
             const link = $('<span style="margin-left:1em" class="fakelink-dashed">Сортировать смету</span>').click(smetaOrder);
             $('.af-row-btn-add').append(link);
           }
-        }, 2000);
+        }, 3000);
       }
 
       /*$('body').delegate(PlanfixFix.fields.count, 'change keypress', PlanfixFix.countTotalAnalitics);
@@ -892,6 +690,208 @@
       return dates;
     }
   };
+
+  // оформление сметы в 1 клик, https://tagilcity.planfix.ru/task/604890
+  const smetaStyle = {
+    // style html
+    processHtml(html) {
+      const newlines = [];
+      const headerPrices = [];
+
+      const outSectionSummary = function() {
+        let lastPrice = headerPrices[headerPrices.length-1];
+        lastPrice = new Intl.NumberFormat().format(lastPrice);
+        newlines.push(`<b>Итого: ${lastPrice} рублей</b><br /><br /><br /><br />`);
+      };
+
+      html = html.replace(/<p>/g, '<br />').replace(/<\/p>/g, '');
+      const lines = html.split(/<br ?\/?>/);
+
+      //console.log(lines);
+
+      if (lines.length === 0) return;
+
+      for (let line of lines) {
+        //console.log(line);
+
+        // empty line
+        if(line.replace(/(;nbsp| )/g, '') == '') continue;
+
+        // ignore summary for double conversion
+        if(line.match(/^Итого.*?:/)) continue;
+
+        // trim trailing spaces
+        line = line.replace(/(&nbsp;| )+$/, '');
+
+        // for double conversion
+        if(line.match(/рублей$/)){
+          line = line.replace(/:/g, '').replace(' рублей', '.00');
+        }
+
+        const h = line.match(/(.*?)(&nbsp;| )+([0-9 ]+)\..*/);
+        //console.log(h);
+
+        // is header?
+        if (h && line.indexOf(':')==-1) {
+          const name = h[1];
+          const price = h[3];
+
+          // section end
+          if (newlines.length > 0){
+              newlines.push('</ul><br />');
+              outSectionSummary();
+          }
+
+          // save int price
+          headerPrices.push(parseInt(price.replace(/ /g, '')));
+
+          newlines.push(`<b>${name}:&nbsp;${price} рублей</b>`);
+
+          newlines.push('<ul>');
+        } else {
+          const item = line.match(/(.*?): ([0-9 ]+ руб\.)(, старая цена: ([0-9 \.]+))? ?(.*)?/);
+
+          // non-standard line
+          if (!item) {
+            newlines.push(`<li style="margin-bottom:1em">${line}</li>`);
+            continue;
+          }
+
+          const name = item[1];
+          let price = `${item[2]}`;
+
+          let desc = '';
+          if (item[5]) {
+            // remove .)
+            desc = item[5].replace('.)', ')');
+
+            // style desc
+            desc = ` <span style="color:#7f8c8d"><em>${desc}</em></span>`;
+          }
+
+          // old price
+          if (item[3]) {
+            const oldprice = item[4].replace('.00', ' руб.').trim();
+            //console.log(item[4]);
+            price = `<s>${oldprice}</s> ${price}`;
+          }
+
+          newlines.push(`<li style="margin-bottom:1em">${name}: ${price}${desc}</li>`);
+        }
+      }
+
+      // last section end
+      newlines.push('</ul><br />');
+      outSectionSummary();
+
+      // summary:
+      let sumPrice = headerPrices.reduce((a, c) => a + c);
+      sumPrice = new Intl.NumberFormat().format(sumPrice);
+      newlines.push(`<b>Итого за все этапы: ${sumPrice} рублей</b>`);
+
+      return `<p>${newlines.join('\n')}</p>`;
+    },
+
+    // get selection html from ckeditor
+    getSelectionHtml(editor) {
+      const sel = editor.getSelection();
+      const ranges = sel.getRanges();
+      const el = new win.CKEDITOR.dom.element('div');
+      for (let i = 0, len = ranges.length; i < len; ++i) {
+        el.append(ranges[i].cloneContents());
+      }
+      return el.getHtml();
+    },
+
+    // main function
+    run() {
+      const editor = win.CKEDITOR.instances.ActionDescription;
+      const html = smetaStyle.getSelectionHtml(editor);
+      const styledHtml = smetaStyle.processHtml(html);
+
+      editor.insertHtml(styledHtml);
+      //document.getElementsByClassName('b-task-description')[0].innerHTML = styledHtml;
+      //console.log('html: '+html);
+    },
+  };
+
+  // сортировать смету, https://tagilcity.planfix.ru/task/608083
+  const smetaOrder = function(opts){
+    opts = {
+      ...{
+        analiticAid: 314, // смета на разработку
+        orderByFids: [950, 1093] // тип работ, №
+      },
+      ...opts
+    }
+
+    const t = $('[data-aid="'+opts.analiticAid+'"] .tbl-list');
+    const rows = t.find('tr');
+    const rowsData = [];
+
+    // собираем массив с данными таблицы (ключ-значение по fid)
+    // сохраняем также ссылку на DOM-элемент ряда
+    rows.each(function(){
+      const r = $(this);
+      if(r.find('.td-head').length > 0) return;
+
+      const rowData = {
+        'elem': this
+      };
+
+      r.find('td').each(function(){
+        const td = $(this);
+
+        const fid = td.find('[data-fid]').data('fid');
+        // ignore subfids
+        if(!fid || fid.toString().indexOf(':')!==-1) return;
+
+        const val = td.find('input:hidden').val();
+
+        rowData[fid] = val;
+      });
+
+      rowsData.push(rowData);
+    });
+
+    // сортируем массив данных по нужным колонкам, предполагаем, что там int/float
+    const rowsDataSorted = rowsData.concat().sort((a, b) => {
+      for(let sfid of opts.orderByFids) {
+        if(a[sfid] == b[sfid]) continue;
+
+        // remove "
+        a[sfid] = a[sfid].replace(/"/g, '').replace(/,/g, '.');
+        //console.log(a[sfid]);
+        b[sfid] = b[sfid].replace(/"/g, '').replace(/,/g, '.');
+        //console.log(`a[${sfid}]:${a[sfid]}, b[${sfid}]:${b[sfid]}, a>b: ${parseFloat(a[sfid]) > parseFloat(b[sfid])}`);
+        return parseFloat(a[sfid]) > parseFloat(b[sfid]) ? 1 : -1;
+      }
+      return 0;
+    });
+    const newrows = [];
+    //console.log(rowsData);
+    //console.log(rowsDataSorted);
+
+    // прогоняем оригинальный массив, но вписываем туда значения из сортированного массива
+    rowsData.map(function(row, ind) {
+      const elem = $(row.elem);
+      const newData = rowsDataSorted[ind];
+      for(let fid in newData){
+        elem.find('[data-fid="'+fid+'"] input:hidden').val(newData[fid]);
+      }
+    });
+
+    // обозначаем окончание цветом (визуально данные не поменяются)
+    t.css('background', '#e5ffe5');
+    alert(`Использование:
+1. Сделать копию задачи
+2. Открыть в копии редактор аналитик. Не должно быть отредактированных полей, то есть открыли и сразу переходим к следующему шагу.
+3. Запустить сниппет
+4. Таблица окрасится в зелёный цвет, это значит, что сортировка прошла
+5. Нажать "Сохранить аналитику"
+6. Открыть оригинальную задачу и скопированную отсортированную, проверить, что сортировка прошла правильно
+7. Удалить копию, прогнать шаги 2-5 на оригинале`);
+  }
 
   $(function() {
     PlanfixFix.init();
