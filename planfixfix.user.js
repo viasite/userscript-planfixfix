@@ -153,6 +153,84 @@
     },
   };
 
+  // https://tagilcity.planfix.ru/task/608083
+  const smetaOrder = function(opts){
+    opts = {
+      ...{
+        analiticAid: 314, // смета на разработку
+        orderByFids: [950, 1093] // тип работ, №
+      },
+      ...opts
+    }
+
+    const t = $('[data-aid="'+opts.analiticAid+'"] .tbl-list');
+    const rows = t.find('tr');
+    const rowsData = [];
+
+    // собираем массив с данными таблицы (ключ-значение по fid)
+    // сохраняем также ссылку на DOM-элемент ряда
+    rows.each(function(){
+      const r = $(this);
+      if(r.find('.td-head').length > 0) return;
+
+      const rowData = {
+        'elem': this
+      };
+
+      r.find('td').each(function(){
+        const td = $(this);
+
+        const fid = td.find('[data-fid]').data('fid');
+        // ignore subfids
+        if(!fid || fid.toString().indexOf(':')!==-1) return;
+
+        const val = td.find('input:hidden').val();
+
+        rowData[fid] = val;
+      });
+
+      rowsData.push(rowData);
+    });
+
+    // сортируем массив данных по нужным колонкам, предполагаем, что там int/float
+    const rowsDataSorted = rowsData.concat().sort((a, b) => {
+      for(let sfid of opts.orderByFids) {
+        if(a[sfid] == b[sfid]) continue;
+
+        // remove "
+        a[sfid] = a[sfid].replace(/"/g, '').replace(/,/g, '.');
+        //console.log(a[sfid]);
+        b[sfid] = b[sfid].replace(/"/g, '').replace(/,/g, '.');
+        //console.log(`a[${sfid}]:${a[sfid]}, b[${sfid}]:${b[sfid]}, a>b: ${parseFloat(a[sfid]) > parseFloat(b[sfid])}`);
+        return parseFloat(a[sfid]) > parseFloat(b[sfid]) ? 1 : -1;
+      }
+      return 0;
+    });
+    const newrows = [];
+    //console.log(rowsData);
+    //console.log(rowsDataSorted);
+
+    // прогоняем оригинальный массив, но вписываем туда значения из сортированного массива
+    rowsData.map(function(row, ind) {
+      const elem = $(row.elem);
+      const newData = rowsDataSorted[ind];
+      for(let fid in newData){
+        elem.find('[data-fid="'+fid+'"] input:hidden').val(newData[fid]);
+      }
+    });
+
+    // обозначаем окончание цветом (визуально данные не поменяются)
+    t.css('background', '#e5ffe5');
+    alert(`Использование:
+1. Сделать копию задачи
+2. Открыть в копии редактор аналитик. Не должно быть отредактированных полей, то есть открыли и сразу переходим к следующему шагу.
+3. Запустить сниппет
+4. Таблица окрасится в зелёный цвет, это значит, что сортировка прошла
+5. Нажать "Сохранить аналитику"
+6. Открыть оригинальную задачу и скопированную отсортированную, проверить, что сортировка прошла правильно
+7. Удалить копию, прогнать шаги 2-5 на оригинале`);
+  }
+
   const PlanfixFix = {
     debug: false,
     deferred: false,
@@ -282,6 +360,8 @@
       win.ActionJS.prototype.editDraft_orig = win.ActionJS.prototype.editDraft;
       win.ActionJS.prototype.edit_orig = win.ActionJS.prototype.edit;
       //win.ActionJS.restoreAnaliticsForEdit_orig = win.ActionJS.restoreAnaliticsForEdit;
+      win.AnaliticsWinJS.prototype.show_orig = win.AnaliticsWinJS.prototype.show;
+
 
       // decorate original functions
       win.ActionListJS.prototype.createAction = function() {
@@ -309,6 +389,18 @@
         setTimeout(PlanfixFix.countTotalAnalitics, 2000);
       };*/
 
+      // редактор аналитик
+      win.AnaliticsWinJS.prototype.show = function(options){
+        this.show_orig(options);
+        setTimeout(() => {
+          // кнопка "Сортировать смету"
+          if(Current.logined == 9230 && $('[data-aid="314"]').length > 0){
+            const link = $('<span style="margin-left:1em" class="fakelink-dashed">Сортировать смету</span>').click(smetaOrder);
+            $('.af-row-btn-add').append(link);
+          }
+        }, 2000);
+      }
+
       /*$('body').delegate(PlanfixFix.fields.count, 'change keypress', PlanfixFix.countTotalAnalitics);
       $('body').delegate(PlanfixFix.fields.name, 'change', function(){
       var hours_field = $(this).parents('.add-analitic-block').find(PlanfixFix.fields.hours_per_count);
@@ -320,7 +412,7 @@
       });*/
     },
 
-    // добавляет быстрые аналитики в блок действия
+    // добавляет быстрые действия в блок действия
     addCustomAnalitics: function() {
       // показывается в задаче, где одно и то же планируется на каждый день
       if (PlanfixFix.debug) console.log('addCustomAnalitics');
