@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name           PlanfixFix
 // @author         popstas
-// @version        0.5.0
+// @version        0.5.1
 // @namespace      viasite.ru
 // @description    Some planfix.ru improvements
 // @unwrap
@@ -784,7 +784,10 @@
 
           newlines.push('<ul>');
         } else {
-          const item = line.match(/(.*?): ([0-9 ]+ руб\.)(, старая цена: ([0-9 \.]+))? ?(.*)?/);
+          const item = line.match(
+            /(.*?):\s([0-9\s&nbsp;]+[&nbsp;\s]+руб\.)(, старая цена:)?([0-9\s\.&nbsp;]+(руб\.)?)? ?(.*)?/
+          );
+          //console.log(item);
 
           // non-standard line
           if (!item) {
@@ -793,22 +796,47 @@
           }
 
           const name = item[1];
-          let price = `${item[2]}`;
+          let price = item[2];
+
+          // double conversion fix
+          if (item[5]) {
+            price = item[4].trim();
+          }
 
           let desc = '';
-          if (item[5]) {
+          if (item[6]) {
             // remove .)
-            desc = item[5].replace('.)', ')');
+            desc = item[6].replace('.)', ')');
 
             // style desc
             desc = ` <span style="color:#7f8c8d"><em>${desc}</em></span>`;
           }
 
           // old price
-          if (item[3]) {
-            const oldprice = item[4].replace('.00', ' руб.').trim();
+          if (item[4] && item[4].trim()) {
+            //console.log(item);
+            let oldprice;
+
+            // double conversion fix, для строк типа 9 900 руб. 5 500 руб.
+            if (item[5]) {
+              oldprice = item[2];
+              price = item[4].trim();
+            } else {
+              oldprice = item[4];
+            }
+
+            price = price.replace(/\s/g, '&nbsp;');
+            oldprice = oldprice
+              .replace(' руб.', '')
+              .replace(/&nbsp;/g, '')
+              .replace('.00', ' руб.')
+              .trim();
+            oldprice = new Intl.NumberFormat().format(parseInt(oldprice));
             //console.log(item[4]);
-            price = `<s>${oldprice}</s> ${price}`;
+            price = `<s>${oldprice}&nbsp;руб.</s> ${price}`;
+          } else {
+            price = price.replace(/&nbsp;/g, ' ').replace(' руб.', '') + ' руб.';
+            price = price.replace(/\s/g, '&nbsp;');
           }
 
           newlines.push(`<li style="margin-bottom:1em">${name}: ${price}${desc}</li>`);
