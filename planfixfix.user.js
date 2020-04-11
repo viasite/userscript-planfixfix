@@ -32,15 +32,18 @@
   const PlanfixFix = {
     debug: false,
     deferred: false,
+
     fields: {
-      name: '[data-fid="741"] select',
-      count: '[data-fid="747"] input',
-      comment: '[data-fid="749"] textarea',
-      hours_per_count: '.analitic-data[data-fid="741:h915"]',
+      vyrabotka: {
+        name: '[data-fid="741"] select',
+        count: '[data-fid="747"] input',
+        comment: '[data-fid="749"] textarea',
+        hours_per_count: '.analitic-data[data-fid="741:h915"]'
+      },
       realization: {
         count: '[data-fid="990"] input',
         price: '[data-fid="994"] input',
-        date: '[data-fid="996"] input',
+        date: '[data-fid="996"] input'
       },
     },
 
@@ -241,9 +244,9 @@
         }, 3000);
       };
 
-      /*$('body').delegate(PlanfixFix.fields.count, 'change keypress', PlanfixFix.countTotalAnalitics);
-      $('body').delegate(PlanfixFix.fields.name, 'change', function(){
-      var hours_field = $(this).parents('.add-analitic-block').find(PlanfixFix.fields.hours_per_count);
+      /*$('body').delegate(PlanfixFix.fields.vyrabotka.count, 'change keypress', PlanfixFix.countTotalAnalitics);
+      $('body').delegate(PlanfixFix.fields.vyrabotka.name, 'change', function(){
+      var hours_field = $(this).parents('.add-analitic-block').find(PlanfixFix.fields.vyrabotka.hours_per_count);
       hours_field.attr('title', (hours_field.val().replace(',', '.')*60).toFixed(1));
       });*/
 
@@ -427,7 +430,7 @@
                   if (PlanfixFix.debug) console.log('results', results);
                   if (results.length == 1 || opts.select) {
                     results.first().mouseup();
-                    analitic.find(PlanfixFix.fields.count).focus();
+                    analitic.find(PlanfixFix.fields.vyrabotka.count).focus();
                   }
                   // задержка из-за лага chosen
                   setTimeout(function () {
@@ -436,11 +439,11 @@
                     analitic.removeClass('silentChosen');
 
                     if (opts.count) {
-                      analitic.find(PlanfixFix.fields.count).val(opts.count);
-                      analitic.find(PlanfixFix.fields.comment).focus();
+                      analitic.find(PlanfixFix.fields.vyrabotka.count).val(opts.count);
+                      analitic.find(PlanfixFix.fields.vyrabotka.comment).focus();
                     } else {
                       analitic
-                        .find(PlanfixFix.fields.count)
+                        .find(PlanfixFix.fields.vyrabotka.count)
                         .focus()
                         .on('keypress', function (e) {
                           if (e.which == 13) {
@@ -527,7 +530,7 @@
                 if (PlanfixFix.debug) console.log('results', results);
                 if (results.length == 1 || opts.select) {
                   results.first().mouseup();
-                  analitic.find(PlanfixFix.fields.count).focus();
+                  analitic.find(PlanfixFix.fields.vyrabotka.count).focus();
                 }
                 // задержка из-за лага chosen
                 setTimeout(() => {
@@ -744,13 +747,13 @@
         }
         highlight(false);
 
-        var counts = $(PlanfixFix.fields.count);
+        var counts = $(PlanfixFix.fields.vyrabotka.count);
         var totals = 0;
         counts.each(function (i, count_field) {
           var analitic = $(count_field).parents('.add-analitic-block');
           var count = $(count_field).val();
           var hours_per_count = analitic
-            .find(PlanfixFix.fields.hours_per_count)
+            .find(PlanfixFix.fields.vyrabotka.hours_per_count)
             .text()
             .replace(',', '.');
           var hours = count * hours_per_count;
