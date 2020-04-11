@@ -37,6 +37,11 @@
       count: '[data-fid="747"] input',
       comment: '[data-fid="749"] textarea',
       hours_per_count: '.analitic-data[data-fid="741:h915"]',
+      realization: {
+        count: '[data-fid="990"] input',
+        price: '[data-fid="994"] input',
+        date: '[data-fid="996"] input',
+      },
     },
 
     default_handbook: 'Инструкции и стандарты',
@@ -189,16 +194,21 @@
       // редактор аналитик
       win.AnaliticsWinJS.prototype.show = function (options) {
         this.show_orig(options);
+
+        const addAnaliticAction = (name, action) => {
+          const link = $(
+            '<span style="margin-left:1em" class="fakelink-dashed">' + name + '</span>'
+          ).click(action);
+          $('.af-row-btn-add').append(link);
+        };
+
         setTimeout(() => {
           const smetaTable = $('[data-aid="314"] .tbl-list');
           // смета на разработку
           if (smetaTable.length > 0) {
             // кнопка "Сортировать смету"
             if (Current.logined == 9230) {
-              const link = $(
-                '<span style="margin-left:1em" class="fakelink-dashed">Сортировать смету</span>'
-              ).click(smetaOrder);
-              $('.af-row-btn-add').append(link);
+              addAnaliticAction('Сортировать смету', smetaOrder);
             }
 
             // удаление аналитик по блокам (этапам)
@@ -217,18 +227,17 @@
             });
             for (let fid in sections) {
               let sec = sections[fid];
-              let link = $(
-                `<span style="margin-left:1em" class="fakelink-dashed">Удалить ${sec.name} (${sec.count})</span>`
-              ).click(() => {
+              addAnaliticAction(`Удалить ${sec.name} (${sec.count})`, () => {
                 for (let row of sec.rows) {
                   row.find('[data-acr="delete"]').click();
                   //row.remove();
                 }
                 link.remove();
               });
-              $('.af-row-btn-add').append(link);
             }
           }
+
+          addAnaliticAction('Реализовать', smetaToRelization);
         }, 3000);
       };
 
@@ -473,6 +482,82 @@
     },
 
     /**
+     * Добавляет аналитику "Реализация"
+     */
+    _addRealization: function (opts) {
+      opts = {
+        ...{ count: 1 },
+        ...opts,
+      };
+      var deferred = $.Deferred();
+
+      PlanfixFix.deferred.then(function () {
+        // добавить другую аналитику
+        $('[data-action="add-new-analitic"]').click();
+
+        setTimeout(() => {
+          const div = $('.analitics-form').last();
+          if (opts.scrollTo) PlanfixFix.scrollTo(div);
+
+          setTimeout(() => {
+            // выбор группы аналитик
+            var select = div.find('select');
+            if (PlanfixFix.debug) console.log('select', select);
+            const option = select.find('option').filter(function () {
+              return $(this).text() == opts.group;
+            });
+            select.val(option.val()).change();
+
+            const analitic = div.find('[data-aname="' + opts.group + '"] .af-tbl-tr').last();
+            if (PlanfixFix.debug) console.log('analitic', analitic);
+
+            const select_handbook = analitic.find('select[data-handbookid]:first');
+            if (PlanfixFix.debug) console.log('select_handbook', select_handbook);
+            select_handbook.trigger('liszt:focus');
+
+            setTimeout(() => {
+              analitic.addClass('silentChosen');
+              analitic
+                .find('.chzn-search:first input')
+                .val(opts.name) /*.focus()*/
+                .keyup();
+              var count_focused = false;
+              select_handbook.bind('liszt:updated', function (e) {
+                var results = analitic.find('.chzn-results .active-result');
+                if (PlanfixFix.debug) console.log('results', results);
+                if (results.length == 1 || opts.select) {
+                  results.first().mouseup();
+                  analitic.find(PlanfixFix.fields.count).focus();
+                }
+                // задержка из-за лага chosen
+                setTimeout(() => {
+                  if (count_focused) return;
+                  count_focused = true;
+                  analitic.removeClass('silentChosen');
+
+                  if (opts.count) {
+                    analitic.find(PlanfixFix.fields.realization.count).val(opts.count);
+                  }
+                  if (opts.price) {
+                    analitic.find(PlanfixFix.fields.realization.price).val(opts.price);
+                  }
+                  if (opts.date) {
+                    analitic.find(PlanfixFix.fields.realization.date).val(opts.date);
+                  }
+                }, 2000);
+
+                deferred.resolve();
+              });
+            }, 500);
+          });
+        }, 500);
+      });
+
+      PlanfixFix.deferred = deferred;
+      return deferred.promise();
+    },
+
+    /**
      * Добавляет ссылку на добавление аналитики в панель
      * В ссылку вписывается список аналитик
      * Можно передавать вместо аналитик произвольную функцию
@@ -710,12 +795,6 @@
         var diff = (dayofweek + 7 - day) * 86400 * 1000;
         d.setTime(d.getTime() + diff);
       }
-
-      var pad = function (num) {
-        var A = num.toString();
-        if (A.length > 1) return A;
-        else return ('00' + A).slice(-2);
-      };
 
       for (var i = 0; i < count; i++) {
         dates.push(pad(d.getDate()) + '-' + pad(1 + d.getMonth()) + '-' + d.getFullYear());
@@ -985,6 +1064,38 @@
 5. Нажать "Сохранить аналитику"
 6. Открыть оригинальную задачу и скопированную отсортированную, проверить, что сортировка прошла правильно
 7. Удалить копию, прогнать шаги 2-5 на оригинале`);
+  };
+
+  /**
+   * Копирует аналитики "Смета на разработку" в "Реализация"
+   */
+  const smetaToRelization = function () {
+    const smetaTable = $('[data-aid="314"] .tbl-list');
+    smetaTable.find('tr').each(function () {
+      const tr = $(this);
+      if (tr.find('input').length == 0) return;
+
+      const d = new Date();
+
+      const name = tr.find('[data-fid="934"]').text().trim();
+      const itemPrice = tr.find('[data-fid="934:h1016"]').text();
+      const customPrice = tr.find('[data-fid="1089"]').text();
+      const price = customPrice ? customPrice : itemPrice;
+      const date = pad(d.getDate()) + '-' + pad(1 + d.getMonth()) + '-' + d.getFullYear();
+
+      PlanfixFix._addRealization({
+        name: name,
+        group: 'Реализация',
+        price: price,
+        date: date,
+      });
+    });
+  };
+
+  const pad = function (num) {
+    const A = num.toString();
+    if (A.length > 1) return A;
+    else return ('00' + A).slice(-2);
   };
 
   $(function () {
