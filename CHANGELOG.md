@@ -1,3 +1,12 @@
+# [0.6.0](https://github.com/viasite/userscript-planfixfix/compare/v0.5.2...v0.6.0) (2020-04-11)
+
+
+### Features
+
+* копирование сметы в реализацию ([b058bf6](https://github.com/viasite/userscript-planfixfix/commit/b058bf6))
+
+
+
 ## [0.5.2](https://github.com/viasite/userscript-planfixfix/compare/v0.5.1...v0.5.2) (2020-04-10)
 
 

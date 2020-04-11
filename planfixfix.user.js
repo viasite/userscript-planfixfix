@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name           PlanfixFix
 // @author         popstas
-// @version        0.5.2
+// @version        0.6.0
 // @namespace      viasite.ru
 // @description    Some planfix.ru improvements
 // @unwrap

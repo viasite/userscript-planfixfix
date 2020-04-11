@@ -1,6 +1,6 @@
 {
   "name": "planfixfix",
-  "version": "0.5.2",
+  "version": "0.6.0",
   "description": "Userscript for Chrome and Firefox for fast analytics insert. Only for tagilcity.planfix.ru",
   "scripts": {
     "version": "bash scripts/version-update.sh && npm run changelog && git add CHANGELOG.md planfixfix.user.js",
