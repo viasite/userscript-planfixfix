@@ -209,6 +209,9 @@
           const smetaTable = $('[data-aid="314"] .tbl-list');
           // смета на разработку
           if (smetaTable.length > 0) {
+            // кнопка "Реализовать"
+            addAnaliticAction('Реализовать', smetaToRelization);
+
             // кнопка "Сортировать смету"
             addAnaliticAction('Сортировать смету', smetaOrder);
 
