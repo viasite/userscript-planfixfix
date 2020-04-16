@@ -1,3 +1,13 @@
+## [0.6.1](https://github.com/viasite/userscript-planfixfix/compare/v0.6.0...v0.6.1) (2020-04-16)
+
+
+### Bug Fixes
+
+* "Реализовать" оставлена только в редакторе смет ([08f687e](https://github.com/viasite/userscript-planfixfix/commit/08f687e))
+* "Сортировать смету" включена для всех ([a2fa3e1](https://github.com/viasite/userscript-planfixfix/commit/a2fa3e1))
+
+
+
 # [0.6.0](https://github.com/viasite/userscript-planfixfix/compare/v0.5.2...v0.6.0) (2020-04-11)
 
 
