@@ -210,9 +210,7 @@
           // смета на разработку
           if (smetaTable.length > 0) {
             // кнопка "Сортировать смету"
-            if (Current.logined == 9230) {
-              addAnaliticAction('Сортировать смету', smetaOrder);
-            }
+            addAnaliticAction('Сортировать смету', smetaOrder);
 
             // удаление аналитик по блокам (этапам)
             const sections = {};
@@ -233,14 +231,13 @@
               addAnaliticAction(`Удалить ${sec.name} (${sec.count})`, () => {
                 for (let row of sec.rows) {
                   row.find('[data-acr="delete"]').click();
-                  //row.remove();
+                  row.remove();
                 }
                 link.remove();
               });
             }
           }
 
-          addAnaliticAction('Реализовать', smetaToRelization);
         }, 3000);
       };
 
