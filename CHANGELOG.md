@@ -1,3 +1,12 @@
+## [0.6.2](https://github.com/viasite/userscript-planfixfix/compare/v0.6.1...v0.6.2) (2020-04-22)
+
+
+### Bug Fixes
+
+* убрана устаревшая инструкция при нажатии "Сортировать смету" ([4b01b6d](https://github.com/viasite/userscript-planfixfix/commit/4b01b6d))
+
+
+
 ## [0.6.1](https://github.com/viasite/userscript-planfixfix/compare/v0.6.0...v0.6.1) (2020-04-16)
 
 
