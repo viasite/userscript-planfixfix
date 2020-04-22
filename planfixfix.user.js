@@ -91,8 +91,6 @@
 
       PlanfixFix.addStyles();
 
-      //PlanfixFix.addMenu();
-
       // тестовое открытие нового действия
       if (PlanfixFix.debug) {
         console.log('debug: init');
@@ -118,43 +116,6 @@
           '.silentChosen .chzn-drop{ width:1px !important; }' +
           '</style'
       );
-    },
-
-    /**
-     * Добавляет пункт меню в главное меню "Еще"
-     * Настройки скрипта:
-     * - url для удаленной загрузки аналитик
-     */
-    addMenu: function () {
-      var li = $(
-        '<li class="b-ddl-menu-li-action b-ddl-menu-li-item b-ddl-menu-li-group-0"><span></span><a href="#">PlanfixFix</a></li>'
-      )
-        .appendTo('.b-main-menu-more ul')
-        .click(function () {
-          var remote = PlanfixFix.getRemoteAnaliticsUrl();
-          var html =
-            '<div class="planfixfix-settings">' +
-            '<div class="form">' +
-            '<div>URL для обновления аналитик, обязательно https://</div>' +
-            '<input style="width:400px" class="text-box" name="planfixfix_remote_url" value="' +
-            remote.url +
-            '"/>' +
-            //.append('<input type="hidden" name="planfixfix_remote_format" value="text"/>')
-            '</div>' +
-            '<input type="button" value="Сохранить"/>' +
-            '</div>';
-          win.drawDialog(300, 'auto', 300, html);
-          $('.planfixfix-settings [type="button"]').click(function () {
-            var isSave = PlanfixFix.setRemoteAnaliticsUrl({
-              url: $('[name="planfixfix_remote_url"]').val(),
-              format: 'text',
-            });
-            if (isSave) {
-              $('.dialogWin .destroy-button').click();
-            }
-          });
-          return false;
-        });
     },
 
     actionAlter: function () {
@@ -242,6 +203,13 @@
           }
 
         }, 3000);
+      };
+
+      // menuitem
+      win.MainMenuJS.showConfig_orig = win.MainMenuJS.showConfig;
+      win.MainMenuJS.showConfig = function(show) {
+        win.MainMenuJS.showConfig_orig(show);
+        PlanfixFix.addMenu();
       };
 
       /*$('body').delegate(PlanfixFix.fields.vyrabotka.count, 'change keypress', PlanfixFix.countTotalAnalitics);
@@ -782,6 +750,43 @@
      */
     resetDeferred: function () {
       PlanfixFix.deferred = $.Deferred().resolve();
+    },
+
+    /**
+     * Добавляет пункт меню в главное меню "Еще"
+     * Настройки скрипта:
+     * - url для удаленной загрузки аналитик
+     */
+    addMenu: function () {
+      $(
+        '<a href="javascript:" class="without-dragging main-menu-config-item">PlanfixFix</a>'
+      )
+        .appendTo('.main-config-ddl-wrapper')
+        .click(function () {
+          var remote = PlanfixFix.getRemoteAnaliticsUrl();
+          var html =
+            '<div class="planfixfix-settings">' +
+            '<div class="form">' +
+            '<div>URL для обновления аналитик, обязательно https://</div>' +
+            '<input style="width:400px" class="text-box" name="planfixfix_remote_url" value="' +
+            remote.url +
+            '"/>' +
+            //.append('<input type="hidden" name="planfixfix_remote_format" value="text"/>')
+            '</div>' +
+            '<input type="button" value="Сохранить"/>' +
+            '</div>';
+          win.drawDialog(300, 'auto', 300, html);
+          $('.planfixfix-settings [type="button"]').click(function () {
+            var isSave = PlanfixFix.setRemoteAnaliticsUrl({
+              url: $('[name="planfixfix_remote_url"]').val(),
+              format: 'text',
+            });
+            if (isSave) {
+              $('.dialogWin .destroy-button').click();
+            }
+          });
+          return false;
+        });
     },
 
     /**
