@@ -856,6 +856,7 @@
 
         // ignore summary for double conversion
         if (line.match(/^Итого.*?:/)) continue;
+        if (line.match(/^Общий бюджет на запуск сайта.*?:/)) continue;
 
         // trim trailing spaces
         line = line.replace(/(&nbsp;| )+$/, '');
@@ -965,7 +966,7 @@
       const plural = getPlural(discontTotal, 'рубль', 'рубля', 'рублей');
       let discontText = discontTotal ? `, экономия ${discontTotalFormat} ${plural}` : '';
       let oldsumText = discontTotal ? `<s>${oldsumPrice} рублей</s> ` : '';
-      newlines.push(`<b>Итого за все этапы: ${oldsumText}${sumPrice} рублей${discontText}</b>`);
+      newlines.push(`<b>Общий бюджет на запуск сайта: ${oldsumText}${sumPrice} рублей${discontText}</b>`);
 
       return `<p>${newlines.join('\n')}</p>`;
     },
