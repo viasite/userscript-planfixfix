@@ -902,9 +902,9 @@
           let price = item[2];
 
           // double conversion fix
-          if (item[5]) {
+          /*if (item[5]) {
             price = item[4].trim();
-          }
+          }*/
 
           let desc = '';
           if (item[6]) {
@@ -921,16 +921,17 @@
             let oldprice;
 
             // double conversion fix, для строк типа 9 900 руб. 5 500 руб.
-            if (item[5]) {
+            /*if (item[5]) {
               oldprice = item[2];
               price = item[4].trim();
             } else {
               oldprice = item[4];
-            }
+            }*/
+            oldprice = item[4];
 
             oldprice = oldprice
-              .replace(' руб.', '')
               .replace(/&nbsp;/g, '')
+              .replace('руб.', '')
               .replace('.00', ' руб.')
               .trim();
             price = price
@@ -944,7 +945,7 @@
             oldprice = new Intl.NumberFormat().format(parseInt(oldprice));
             price = price.replace(/\s/g, '&nbsp;') + '&nbsp;руб.';
             //console.log(item[4]);
-            price = `<s>${oldprice}&nbsp;руб.</s> ${price}`;
+            price = `${price}, старая цена: <s>${oldprice}&nbsp;руб.</s> `;
           } else {
             price = price.replace(/&nbsp;/g, ' ').replace(' руб.', '') + ' руб.';
             price = price.replace(/\s/g, '&nbsp;');
