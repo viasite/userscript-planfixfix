@@ -302,6 +302,8 @@
         userPost == 'Руководитель отдела продаж'
       ) {
         PlanfixFix.addTaskBlock('|');
+        PlanfixFix.addTaskBlock('Инструкция', { group: 'Особые пометки', name: 'Инструкции' });
+        PlanfixFix.addTaskBlock('|');
         PlanfixFix.addTaskBlock('Оформить смету', smetaStyle.run);
       }
 
