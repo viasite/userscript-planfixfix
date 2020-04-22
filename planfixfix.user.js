@@ -104,6 +104,78 @@
       }
     },
 
+    // добавляет быстрые действия в блок действия
+    addCustomAnalitics: function () {
+      // показывается в задаче, где одно и то же планируется на каждый день
+      if (PlanfixFix.debug) console.log('addCustomAnalitics');
+      if (win.PlanfixPage.task == 116702) {
+        var dates = PlanfixFix.getDates(1, 5);
+        var analitics_arr = $.map(dates, function (date) {
+          return {
+            group: 'Планируемое время работы',
+            date: date,
+            begin: '09:00',
+            end: '09:30',
+          };
+        });
+        PlanfixFix.addTaskBlock('План на неделю', analitics_arr);
+
+        PlanfixFix.addTaskBlock('План на день', { name: 'План на день', count: 1 });
+      }
+
+      PlanfixFix.addTaskBlock('План', '[Планируемое время работы]');
+      PlanfixFix.addTaskBlock('|');
+      PlanfixFix.addTaskBlock('Выработка', {});
+      PlanfixFix.addTaskBlock('|');
+
+      var userPost = Current.loginedPost;
+      switch (userPost) {
+        case 'Программист':
+          PlanfixFix.addTaskBlock('Программирование', { name: 'Поминутная работа программиста' });
+          break;
+        case 'Менеджер по сопровождению заказов':
+          PlanfixFix.addTaskBlock('тел. лёгкий', { name: 'Лёгкий разговор по телефону' });
+          PlanfixFix.addTaskBlock('тел. обычный', { name: 'Обычный разговор по телефону' });
+          PlanfixFix.addTaskBlock('тел. сложный', { name: 'Сложный разговор по телефону' });
+          PlanfixFix.addTaskBlock('письмо лёгкое', { name: 'Лёгкое письмо' });
+          PlanfixFix.addTaskBlock('письмо обычное', {
+            name: 'Письмо средней сложности / обычное письмо',
+          });
+          PlanfixFix.addTaskBlock('письмо сложное', { name: 'Сложное письмо' });
+          break;
+      }
+
+      if (
+        Current.logined == 9230 ||
+        userPost == 'Менеджер по сопровождению заказов' ||
+        userPost == 'Руководитель отдела продаж'
+      ) {
+        PlanfixFix.addTaskBlock('|');
+        PlanfixFix.addTaskBlock('Инструкция', { group: 'Особые пометки', name: 'Инструкции' });
+        PlanfixFix.addTaskBlock('|');
+        PlanfixFix.addTaskBlock('Оформить смету', smetaStyle.run);
+      }
+
+      // парсим массив подготовленных аналитик
+      PlanfixFix.getAnalitics().then(function (tasks) {
+        PlanfixFix.addTaskBlock('|');
+        $.each(tasks, function (i, task) {
+          PlanfixFix.addTaskBlock(task.name, task.analitics);
+        });
+      });
+
+      // тестовый вызов добавления аналитики
+      if (PlanfixFix.debug) {
+        PlanfixFix.addTaskBlock('|');
+        PlanfixFix.addTaskBlock('Удалить все', function () {
+          $('.task-add-analitic').click();
+          setTimeout(function () {
+            $('[data-action="remove-all-analitics"]').click();
+          }, 200);
+        });
+      }
+    },
+
     /**
      * Переопределяет стили
      */
@@ -221,78 +293,6 @@
       /*$('body').delegate('.attach-new-analitic td.td-item-add-ex:first span.fakelink-dashed', 'click', function(e){
         PlanfixFix.addAnalitics([{}]);
       });*/
-    },
-
-    // добавляет быстрые действия в блок действия
-    addCustomAnalitics: function () {
-      // показывается в задаче, где одно и то же планируется на каждый день
-      if (PlanfixFix.debug) console.log('addCustomAnalitics');
-      if (win.PlanfixPage.task == 116702) {
-        var dates = PlanfixFix.getDates(1, 5);
-        var analitics_arr = $.map(dates, function (date) {
-          return {
-            group: 'Планируемое время работы',
-            date: date,
-            begin: '09:00',
-            end: '09:30',
-          };
-        });
-        PlanfixFix.addTaskBlock('План на неделю', analitics_arr);
-
-        PlanfixFix.addTaskBlock('План на день', { name: 'План на день', count: 1 });
-      }
-
-      PlanfixFix.addTaskBlock('План', '[Планируемое время работы]');
-      PlanfixFix.addTaskBlock('|');
-      PlanfixFix.addTaskBlock('Выработка', {});
-      PlanfixFix.addTaskBlock('|');
-
-      var userPost = Current.loginedPost;
-      switch (userPost) {
-        case 'Программист':
-          PlanfixFix.addTaskBlock('Программирование', { name: 'Поминутная работа программиста' });
-          break;
-        case 'Менеджер по сопровождению заказов':
-          PlanfixFix.addTaskBlock('тел. лёгкий', { name: 'Лёгкий разговор по телефону' });
-          PlanfixFix.addTaskBlock('тел. обычный', { name: 'Обычный разговор по телефону' });
-          PlanfixFix.addTaskBlock('тел. сложный', { name: 'Сложный разговор по телефону' });
-          PlanfixFix.addTaskBlock('письмо лёгкое', { name: 'Лёгкое письмо' });
-          PlanfixFix.addTaskBlock('письмо обычное', {
-            name: 'Письмо средней сложности / обычное письмо',
-          });
-          PlanfixFix.addTaskBlock('письмо сложное', { name: 'Сложное письмо' });
-          break;
-      }
-
-      if (
-        Current.logined == 9230 ||
-        userPost == 'Менеджер по сопровождению заказов' ||
-        userPost == 'Руководитель отдела продаж'
-      ) {
-        PlanfixFix.addTaskBlock('|');
-        PlanfixFix.addTaskBlock('Инструкция', { group: 'Особые пометки', name: 'Инструкции' });
-        PlanfixFix.addTaskBlock('|');
-        PlanfixFix.addTaskBlock('Оформить смету', smetaStyle.run);
-      }
-
-      // парсим массив подготовленных аналитик
-      PlanfixFix.getAnalitics().then(function (tasks) {
-        PlanfixFix.addTaskBlock('|');
-        $.each(tasks, function (i, task) {
-          PlanfixFix.addTaskBlock(task.name, task.analitics);
-        });
-      });
-
-      // тестовый вызов добавления аналитики
-      if (PlanfixFix.debug) {
-        PlanfixFix.addTaskBlock('|');
-        PlanfixFix.addTaskBlock('Удалить все', function () {
-          $('.task-add-analitic').click();
-          setTimeout(function () {
-            $('[data-action="remove-all-analitics"]').click();
-          }, 200);
-        });
-      }
     },
 
     /**
