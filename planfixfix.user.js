@@ -38,7 +38,7 @@
   }
 
   const PlanfixFix = {
-    debug: false,
+    debug: true,
     deferred: false,
 
     fields: {
@@ -54,15 +54,19 @@
         date: '[data-fid="996"] input'
       },
     },
-
-    default_handbook: 'Инструкции и стандарты',
+    // Шаблоны
+    tmplsRecord: {
+      handbook: 146, // id справочника
+      name: 960, // id названия
+      text: 962 // id текста
+    },
 
     analitics_remote_default: {
       url: 'https://dev.viasite.ru/planfix_analitics.txt',
       format: 'text',
     },
     templates_remote_default: {
-      url: 'https://dev.viasite.ru/planfix_text_templates.yml',
+      url: '',
       format: 'yml',
     },
     analitics_remote_cache_lifetime: 3600,
@@ -108,8 +112,8 @@
 
     init: function () {
       // init once
-      if ($('body').hasClass('fixes')) return false;
-      $('body').addClass('fixes');
+      if ($('body').hasClass('pff_inited')) return false;
+      $('body').addClass('pff_inited');
 
       // не пугаем планфикс своими ошибками
       win.onerror = function () {
@@ -127,8 +131,9 @@
       if (PlanfixFix.debug) {
         console.log('debug: init');
         setTimeout(() => {
+          win.onbeforeunload = undefined; // отменить предупреждение о закрытии окна
           //console.log('debug: new action');
-          //$('.actions-quick-add-block-text').click(); // create
+          $('.actions-quick-add-block-text').click(); // создание действия
           //console.log('debug: edit-draft-action');
           //$('.edit-draft-action').click(); // edit
           //PlanfixFix.addAnalitics({ name: 'Поминутная работа программиста' });
@@ -201,29 +206,32 @@
       });
 
       // тестовый вызов добавления аналитики
-      if (PlanfixFix.debug) {
+      /* if (PlanfixFix.debug) {
         PlanfixFix.addTaskBlock('|');
-        PlanfixFix.addTaskBlock('Удалить все', function () {
+        PlanfixFix.addTaskBlock('Удалить все', function () { // удалить аналитики из действия
           $('.task-add-analitic').click();
           setTimeout(function () {
             $('[data-action="remove-all-analitics"]').click();
           }, 200);
         });
-      }
+      } */
     },
 
     insertTemplate(textRaw) {
       const editor = win.CKEDITOR.instances.ActionDescription;
       let text = textRaw.replace(/\n/g, '<br>');
-      debug('text:', text);
+
+      text = text.replace(/---.*/, '').replace(/<p>$/, ''); // отсекаем примечания
+
       const tokens = text.match(/(%[a-zа-яё_-]+%)/gi);
       if (tokens) {
-        debug('tokens:', tokens);
         const inputs = tokens.map((token) => {
           const name = token.replace(/%/g, '').replace(/_/g, ' ');
+          let cls = 'text-box'
+          if(name.match(/Дата/)) cls += ' dialog-date';
           return `<span class="task-create-field task-create-field-custom-99 task-create-field-line-first task-create-field-break-after">
                 <span class="task-create-field-label task-create-field-label-first">${name}</span>
-                <span class="task-create-field-input"><input data-token="${token}" type="text" class="text-box" /></span>
+                <span class="task-create-field-input"><input name="${name}" data-token="${token}" type="text" class="${cls}" /></span>
                 </span>`;
         });
 
@@ -293,19 +301,100 @@
         editor.insertHtml(text);
       }
     },
+
+    updateTmplsMRU({id, name, text, cat}) {
+      const mru = localStorage.pff_templates_mru ? JSON.parse(localStorage.pff_templates_mru) : {};
+      if(mru[id]){
+        mru[id].text = text;
+        mru[id].cat = cat;
+        mru[id].count++;
+      }
+      else {
+        mru[id] = { id, name, text, cat, count: 1 };
+      }
+      localStorage.pff_templates_mru = JSON.stringify(mru);
+    },
+
+    // кнопка "вставить шаблон" в редакторе
+    templateSelect: function() {
+      var editor = CKEDITOR.instances.ActionDescription;
+      editor.fire('pffTemplatesOpened');
+
+      var editorSelection = editor.getSelection();
+      var caretPosition = editorSelection.getRanges();
+      
+      var handbookSelectDialog = new HandbookSelectDialogJS(); 
+      
+      setTimeout(() => {
+        $(`[data-handbookid="${PlanfixFix.tmplsRecord.handbook}"]`).click();
+        setTimeout(() => {
+          $(`[data-columnid="${PlanfixFix.tmplsRecord.name}"]`).click()
+        }, 700);
+      }, 1000);
+
+      handbookSelectDialog.onInsertData = function(type, exportData) {
+        editor.focus();
+        
+        setTimeout(function() {
+          editor.getSelection().selectRanges(caretPosition);
+          if ('record' == type) {
+            const opts = {
+              command: 'handbook:getDataStringByKey',
+              handbook: exportData.handbookId,
+              key: exportData.key
+            };
+            AjaxJS.request({
+              data: opts,
+              success: (data) => {
+                let id = exportData.key, name, text;
+                let cat = data.NamedPath[0]?.Name || 'Общие';
+                for (f of data.Items[0].String) {
+                  if(f.Field.ID == PlanfixFix.tmplsRecord.name){
+                    name = f.Value;
+                  }
+                  if(f.Field.ID == PlanfixFix.tmplsRecord.text){
+                    text = f.Value;
+                    PlanfixFix.insertTemplate(text);
+                  }
+                }
+                PlanfixFix.updateTmplsMRU({id, name, text, cat});
+              }
+            });
+
+          } else if('text' == type) {
+            PlanfixFix.insertTemplate(exportData.text);
+          }
+        }, 200);
+      };
+      
+      handbookSelectDialog.onClose = function() {
+        editor.fire('pffTemplatesClosed');
+      };
+      
+      handbookSelectDialog.drawDialog(); // editor.extraHandbookData
+    },
+
+
     // быстрые ответы в редактор
     addTextTemplates: function (tmpls) {
       const tplsBlock = $('<div class="pff-tpls-content"></div>');
 
+      PlanfixFix.addTaskBlock('Шаблон', PlanfixFix.templateSelect);
+
       for (let cat in tmpls) {
         const catDiv = $(`<div class="pff-cat-content"></div>`);
         for (let tpl in tmpls[cat]) {
-          const textRaw = tmpls[cat][tpl].replace(/^\n/, '');
-          const title = textRaw.replace(/"/g, "'");
+          let item = tmpls[cat][tpl];
+          if(typeof tmpls[cat][tpl] == 'string') item = { name: tpl, text: tmpls[cat][tpl] };
+          const textRaw = item.text.replace(/^\n/, '');
+          const title = textRaw.replace(/"/g, "'").replace(/<p>/g, '').replace(/<br ?\/?>/g, '\n');
+          let link = 'javascript:';
+          if(item.id) link = `https://${location.hostname}/?action=handbookdataview&handbook=${PlanfixFix.tmplsRecord.handbook}&key=${item.id}`;
           catDiv.append(
-            $(`<a href="javascript:" title="${title}">${tpl.replace(/ /g, '&nbsp;')}</a>`).click(
+            $(`<a href="${link}" title="${title}">${item.name.replace(/ /g, '&nbsp;')}</a>`).click(
               () => {
                 PlanfixFix.insertTemplate(textRaw);
+                return false;
               }
             )
           );
@@ -341,7 +430,7 @@
 .pff-tpls:hover .pff-tpls-content { display: block; }
 .pff-cat { margin-bottom: 15px; border-bottom: 3px solid transparent; }
 .pff-cat:hover { border-bottom-color: #3ba3d0; }
-.pff-cat-title { float:left; width: 100px; padding-top: 2px; }
+.pff-cat-title { float:left; clear: left; width: 100px; padding-top: 2px; }
 .pff-cat-content { margin-left: 100px; }
 .pff-cat a { display: inline-block; padding: 2px 10px; }
 
@@ -760,9 +849,37 @@
         }
 
         if (!localStorage.planfixfix_templates) {
-          PlanfixFix.parseRemoteTemplates(PlanfixFix.getRemoteTemplatesUrl()).then((tmpls) => {
+          const remoteUrl = PlanfixFix.getRemoteTemplatesUrl();
+          if(remoteUrl.url){
+            PlanfixFix.parseRemoteTemplates().then((tmpls) => {
+              resolve(tmpls);
+            });
+          }
+          else if(localStorage.pff_templates_mru) {
+            // convert mru to text templates
+            const mru = JSON.parse(localStorage.pff_templates_mru);
+            let items = [];
+            for(let id in mru) {
+              items.push(mru[id]);
+            }
+            items.sort((a, b) => {
+              if(a.count > b.count) return -1;
+              if(a.count < b.count) return 1;
+              return 0;
+            });
+
+            let defaultCat = 'Часто используемые'; // TODO: var
+            const tmpls = {[defaultCat]: []};
+            let itemsObj = {}
+            for(let item of items) {
+              itemsObj[item.name] = item.text;
+              if(!item.cat) item.cat = defaultCat;
+              if(!tmpls[item.cat]) tmpls[item.cat] = [];
+              tmpls[item.cat].push(item)
+            }
+
             resolve(tmpls);
-          });
+          }
         } else {
           const tmpls = JSON.parse(localStorage.planfixfix_templates) || {};
           debug('use cached templates:', tmpls);
