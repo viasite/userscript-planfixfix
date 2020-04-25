@@ -1,7 +1,7 @@
 (function() {
   console.log('exec _planfixfix.js');
-  win = typeof unsafeWindow != 'undefined' ? unsafeWindow : window;
-  var $ = win.$;
+  let win = typeof unsafeWindow != 'undefined' ? unsafeWindow : window;
+  let $ = win.$;
 
   function debug() {
     if (PFF.debug) console.log(...arguments);

@@ -1,7 +1,7 @@
 // tmpls.js
 // console.log('include tmpls.js');
 win = typeof unsafeWindow != 'undefined' ? unsafeWindow : window;
-var $ = win.$;
+$ = win.$;
 
 const pffTmpls = {
   addActions() {

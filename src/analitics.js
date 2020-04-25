@@ -1,7 +1,7 @@
 // analitics.js
 // console.log('include analitics.js');
 win = typeof unsafeWindow != 'undefined' ? unsafeWindow : window;
-var $ = win.$;
+$ = win.$;
 
 const pffAnalitics = {
   addActions() {

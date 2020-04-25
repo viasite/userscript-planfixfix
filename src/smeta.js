@@ -1,7 +1,7 @@
 // smeta.js
 // console.log('include smeta.js');
 win = typeof unsafeWindow != 'undefined' ? unsafeWindow : window;
-var $ = win.$;
+$ = win.$;
 
 // оформление сметы в 1 клик, https://tagilcity.planfix.ru/task/604890
 const pffSmeta = {
