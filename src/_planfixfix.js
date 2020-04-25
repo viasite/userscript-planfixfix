@@ -309,7 +309,7 @@
       $.each(analitics_arr, function(i, opts) {
         PFF._addAnalitic(opts);
       });
-      PFF.deferred.then(PFF.analitics.countTotalAnalitics);
+      //PFF.deferred.then(PFF.analitics.countTotalAnalitics);
     },
 
     /**
@@ -487,13 +487,6 @@
       }
       $('.task-add-block').last().after(block);
       return block;
-    },
-
-    /**
-     * Чистит сохраненные аналитики, которые загружались удаленно
-     */
-    clearCache: function() {
-      delete localStorage.pff_analitics;
     },
 
     /**
