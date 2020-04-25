@@ -7,8 +7,8 @@ var $ = win.$;
 const pffSmeta = {
   addActions() {
     if (
-      Current.logined == win.PFF.adminId ||
-      win.PFF.isManager()
+        Current.logined == win.PFF.adminId ||
+        win.PFF.isManager()
     ) {
       win.PFF.addTaskBlock('|');
       win.PFF.addTaskBlock('Оформить смету', pffSmeta.run);
@@ -32,15 +32,19 @@ const pffSmeta = {
       return five;
     };
 
-    const outSectionSummary = function () {
+    const outSectionSummary = function() {
       let lastPrice = headerPrices[headerPrices.length - 1];
       lastPrice = new Intl.NumberFormat().format(lastPrice);
       discontTotal += discontSection;
 
-      const discontSectionFormat = new Intl.NumberFormat().format(discontSection);
+      const discontSectionFormat = new Intl.NumberFormat().format(
+          discontSection);
       const plural = getPlural(discontSection, 'рубль', 'рубля', 'рублей');
-      let discontText = discontSection ? `, экономия ${discontSectionFormat} ${plural}` : '';
-      newlines.push(`<b>Итого: ${lastPrice} рублей${discontText}</b><br /><br /><br /><br />`);
+      let discontText = discontSection
+          ? `, экономия ${discontSectionFormat} ${plural}`
+          : '';
+      newlines.push(
+          `<b>Итого: ${lastPrice} рублей${discontText}</b><br /><br /><br /><br />`);
       discontSection = 0;
     };
 
@@ -91,7 +95,7 @@ const pffSmeta = {
         newlines.push('<ul>');
       } else {
         const item = line.match(
-          /(.*?):\s([0-9\s&nbsp;]+[&nbsp;\s]+руб\.)(, старая цена:)?([0-9\s\.&nbsp;]+(руб\.)?)? ?(.*)?/
+            /(.*?):\s([0-9\s&nbsp;]+[&nbsp;\s]+руб\.)(, старая цена:)?([0-9\s\.&nbsp;]+(руб\.)?)? ?(.*)?/,
         );
         //console.log(item);
 
@@ -132,15 +136,13 @@ const pffSmeta = {
           }*/
           oldprice = item[4];
 
-          oldprice = oldprice
-            .replace(/&nbsp;/g, '')
-            .replace('руб.', '')
-            .replace('.00', ' руб.')
-            .trim();
-          price = price
-            .replace(/&nbsp;/g, '')
-            .replace('руб.', '')
-            .replace(/\s/g, '');
+          oldprice = oldprice.replace(/&nbsp;/g, '').
+              replace('руб.', '').
+              replace('.00', ' руб.').
+              trim();
+          price = price.replace(/&nbsp;/g, '').
+              replace('руб.', '').
+              replace(/\s/g, '');
 
           let discont = parseInt(oldprice) - parseInt(price);
           discontSection += discont;
@@ -154,7 +156,8 @@ const pffSmeta = {
           price = price.replace(/\s/g, '&nbsp;');
         }
 
-        newlines.push(`<li style="margin-bottom:1em">${name}: ${price}${desc}</li>`);
+        newlines.push(
+            `<li style="margin-bottom:1em">${name}: ${price}${desc}</li>`);
       }
     }
 
@@ -168,9 +171,12 @@ const pffSmeta = {
     sumPrice = new Intl.NumberFormat().format(sumPrice);
     const discontTotalFormat = new Intl.NumberFormat().format(discontTotal);
     const plural = getPlural(discontTotal, 'рубль', 'рубля', 'рублей');
-    let discontText = discontTotal ? `, экономия ${discontTotalFormat} ${plural}` : '';
+    let discontText = discontTotal
+        ? `, экономия ${discontTotalFormat} ${plural}`
+        : '';
     let oldsumText = discontTotal ? `<s>${oldsumPrice} рублей</s> ` : '';
-    newlines.push(`<b>Общий бюджет на запуск сайта: ${oldsumText}${sumPrice} рублей${discontText}</b>`);
+    newlines.push(
+        `<b>Общий бюджет на запуск сайта: ${oldsumText}${sumPrice} рублей${discontText}</b>`);
 
     return `<p>${newlines.join('\n')}</p>`;
   },
@@ -213,7 +219,7 @@ const pffSmeta = {
 
     // собираем массив с данными таблицы (ключ-значение по fid)
     // сохраняем также ссылку на DOM-элемент ряда
-    rows.each(function () {
+    rows.each(function() {
       const r = $(this);
       if (r.find('.td-head').length > 0) return;
 
@@ -221,7 +227,7 @@ const pffSmeta = {
         elem: this,
       };
 
-      r.find('td').each(function () {
+      r.find('td').each(function() {
         const td = $(this);
 
         const fid = td.find('[data-fid]').data('fid');
@@ -255,7 +261,7 @@ const pffSmeta = {
     //console.log(rowsDataSorted);
 
     // прогоняем оригинальный массив, но вписываем туда значения из сортированного массива
-    rowsData.map(function (row, ind) {
+    rowsData.map(function(row, ind) {
       const elem = $(row.elem);
       const newData = rowsDataSorted[ind];
       for (let fid in newData) {
@@ -265,7 +271,9 @@ const pffSmeta = {
 
     // обозначаем окончание цветом (визуально данные не поменяются)
     t.css('background', '#e5ffe5');
-    setTimeout(() => { t.parents('.analitics-form').find('.btn-create').click() }, 1000);
+    setTimeout(
+        () => { t.parents('.analitics-form').find('.btn-create').click(); },
+        1000);
     /*alert(`Использование:
     1. Сделать копию задачи
     2. Открыть в копии редактор аналитик. Не должно быть отредактированных полей, то есть открыли и сразу переходим к следующему шагу.
@@ -277,11 +285,11 @@ const pffSmeta = {
   },
 
   /**
-  * Копирует аналитики "Смета на разработку" в "Реализация"
-  */
+   * Копирует аналитики "Смета на разработку" в "Реализация"
+   */
   toRelization() {
     const smetaTable = $('[data-aid="314"] .tbl-list');
-    smetaTable.find('tr').each(function () {
+    smetaTable.find('tr').each(function() {
       const tr = $(this);
       if (tr.find('input').length == 0) return;
 
@@ -291,7 +299,8 @@ const pffSmeta = {
       const itemPrice = tr.find('[data-fid="934:h1016"]').text();
       const customPrice = tr.find('[data-fid="1089"]').text();
       const price = customPrice ? customPrice : itemPrice;
-      const date = pad(d.getDate()) + '-' + pad(1 + d.getMonth()) + '-' + d.getFullYear();
+      const date = pad(d.getDate()) + '-' + pad(1 + d.getMonth()) + '-' +
+          d.getFullYear();
 
       pffSmeta._addRealization({
         name: name,
@@ -305,15 +314,15 @@ const pffSmeta = {
   /**
    * Добавляет аналитику "Реализация"
    */
-  _addRealization: function (opts) {
+  _addRealization: function(opts) {
     const PFF = win.PFF;
     opts = {
-      ...{ count: 1 },
+      ...{count: 1},
       ...opts,
     };
     var deferred = $.Deferred();
 
-    PFF.deferred.then(function () {
+    PFF.deferred.then(function() {
       // добавить другую аналитику
       $('[data-action="add-new-analitic"]').click();
 
@@ -325,26 +334,28 @@ const pffSmeta = {
           // выбор группы аналитик
           var select = div.find('select');
           if (PFF.debug) console.log('select', select);
-          const option = select.find('option').filter(function () {
+          const option = select.find('option').filter(function() {
             return $(this).text() == opts.group;
           });
           select.val(option.val()).change();
 
-          const analitic = div.find('[data-aname="' + opts.group + '"] .af-tbl-tr').last();
+          const analitic = div.find(
+              '[data-aname="' + opts.group + '"] .af-tbl-tr').last();
           if (PFF.debug) console.log('analitic', analitic);
 
-          const select_handbook = analitic.find('select[data-handbookid]:first');
+          const select_handbook = analitic.find(
+              'select[data-handbookid]:first');
           if (PFF.debug) console.log('select_handbook', select_handbook);
           select_handbook.trigger('liszt:focus');
 
           setTimeout(() => {
             analitic.addClass('silentChosen');
-            analitic
-              .find('.chzn-search:first input')
-              .val(opts.name) /*.focus()*/
-              .keyup();
+            analitic.find('.chzn-search:first input').
+                val(opts.name) /*.focus()*/
+                .
+                keyup();
             var count_focused = false;
-            select_handbook.bind('liszt:updated', function (e) {
+            select_handbook.bind('liszt:updated', function(e) {
               var results = analitic.find('.chzn-results .active-result');
               if (PFF.debug) console.log('results', results);
               if (results.length == 1 || opts.select) {

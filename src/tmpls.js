@@ -6,20 +6,20 @@ var $ = win.$;
 const pffTmpls = {
   addActions() {
     // быстрые ответы
-    pffTmpls.getTemplates().then(function (tmpls) {
+    pffTmpls.getTemplates().then(function(tmpls) {
       pffTmpls.addTextTemplates(tmpls);
     });
   },
 
   updateMRU({id, name, text, cat}) {
-    const mru = localStorage.pff_templates_mru ? JSON.parse(localStorage.pff_templates_mru) : {};
-    if(mru[id]){
+    const mru = localStorage.pff_templates_mru ? JSON.parse(
+        localStorage.pff_templates_mru) : {};
+    if (mru[id]) {
       mru[id].text = text;
       mru[id].cat = cat;
       mru[id].count++;
-    }
-    else {
-      mru[id] = { id, name, text, cat, count: 1 };
+    } else {
+      mru[id] = {id, name, text, cat, count: 1};
     }
     localStorage.pff_templates_mru = JSON.stringify(mru);
   },
@@ -35,8 +35,8 @@ const pffTmpls = {
     if (tokens) {
       const inputs = tokens.map((token) => {
         const name = token.replace(/%/g, '').replace(/_/g, ' ');
-        let cls = 'text-box'
-        if(name.match(/Дата/)) cls += ' dialog-date';
+        let cls = 'text-box';
+        if (name.match(/Дата/)) cls += ' dialog-date';
         return `<span class="task-create-field task-create-field-custom-99 task-create-field-line-first task-create-field-break-after">
               <span class="task-create-field-label task-create-field-label-first">${name}</span>
               <span class="task-create-field-input"><input name="${name}" data-token="${token}" type="text" class="${cls}" /></span>
@@ -50,13 +50,13 @@ const pffTmpls = {
 </div>`;
 
       const html =
-        '<div class="pff-tmpl-form">' +
-        '<div class="task-create-panel-fields">' +
-        inputs.join('\n') +
-        '</div>' +
-        `<div class="pff-tmpl-preview">${text}</div>` +
-        btns +
-        '</div>';
+          '<div class="pff-tmpl-form">' +
+          '<div class="task-create-panel-fields">' +
+          inputs.join('\n') +
+          '</div>' +
+          `<div class="pff-tmpl-preview">${text}</div>` +
+          btns +
+          '</div>';
 
       const dialog = new win.CommonDialogScrollableJS();
       dialog.closeByEsc = true;
@@ -64,31 +64,32 @@ const pffTmpls = {
       dialog.draw(html);
       dialog.setHeader('Вставка шаблона');
       dialog.setCloseHandler(
-        () =>
-          new Promise((resolve, reject) => {
-            let isValid = true;
-            $('.pff-tmpl-form input').each(function () {
-              if ($(this).val() == '') {
-                isValid = false;
-              }
-            });
-            if (isValid) {
-              editor.insertHtml($('.pff-tmpl-preview').html());
-              resolve(true);
-            } else {
-              reject('required');
-            }
-          })
+          () =>
+              new Promise((resolve, reject) => {
+                let isValid = true;
+                $('.pff-tmpl-form input').each(function() {
+                  if ($(this).val() == '') {
+                    isValid = false;
+                  }
+                });
+                if (isValid) {
+                  editor.insertHtml($('.pff-tmpl-preview').html());
+                  resolve(true);
+                } else {
+                  reject('required');
+                }
+              }),
       );
       //win.drawDialog(300, 'auto', 300, html);
 
       const redrawPreview = () => {
         let pt = text;
-        $('.pff-tmpl-form input').each(function () {
+        $('.pff-tmpl-form input').each(function() {
           const input = $(this);
           const t = input.data('token');
           const v = input.val();
-          if (v == '') pt = pt.replace(t, `<span style="background:#ffff00">${t}</span>`);
+          if (v == '') pt = pt.replace(t,
+              `<span style="background:#ffff00">${t}</span>`);
           else pt = pt.replace(t, v);
         });
         $('.pff-tmpl-preview').html(pt);
@@ -96,7 +97,9 @@ const pffTmpls = {
 
       setTimeout(() => {
         redrawPreview();
-        $('.pff-tmpl-form input').on('keypress blur change', () => { setTimeout(redrawPreview, 50); });
+        $('.pff-tmpl-form input').
+            on('keypress blur change',
+                () => { setTimeout(redrawPreview, 50); });
         $('.pff-tmpl-form input').first().focus();
         $('.pff-tmpl-form .btn-cancel').click(() => { dialog.close(); });
         $('.js-action-pff-insert-template').click(() => {
@@ -123,7 +126,7 @@ const pffTmpls = {
     setTimeout(() => {
       $(`[data-handbookid="${win.PFF.tmplsRecord.handbook}"]`).click();
       setTimeout(() => {
-        $(`[data-columnid="${win.PFF.tmplsRecord.name}"]`).click()
+        $(`[data-columnid="${win.PFF.tmplsRecord.name}"]`).click();
       }, 700);
     }, 1000);
 
@@ -136,7 +139,7 @@ const pffTmpls = {
           const opts = {
             command: 'handbook:getDataStringByKey',
             handbook: exportData.handbookId,
-            key: exportData.key
+            key: exportData.key,
           };
           AjaxJS.request({
             data: opts,
@@ -144,19 +147,19 @@ const pffTmpls = {
               let id = exportData.key, name, text;
               let cat = data.NamedPath[0]?.Name || 'Общие';
               for (f of data.Items[0].String) {
-                if(f.Field.ID == win.PFF.tmplsRecord.name){
+                if (f.Field.ID == win.PFF.tmplsRecord.name) {
                   name = f.Value;
                 }
-                if(f.Field.ID == win.PFF.tmplsRecord.text){
+                if (f.Field.ID == win.PFF.tmplsRecord.text) {
                   text = f.Value;
                   pffTmpls.insertTemplate(text);
                 }
               }
               pffTmpls.updateMRU({id, name, text, cat});
-            }
+            },
           });
 
-        } else if('text' == type) {
+        } else if ('text' == type) {
           pffTmpls.insertTemplate(exportData.text);
         }
       }, 200);
@@ -170,7 +173,7 @@ const pffTmpls = {
   },
 
   // быстрые ответы в редактор
-  addTextTemplates: function (tmpls) {
+  addTextTemplates: function(tmpls) {
     const tplsBlock = $('<div class="pff-tpls-content"></div>');
 
     win.PFF.addTaskBlock('Шаблон', pffTmpls.templateSelect);
@@ -179,31 +182,36 @@ const pffTmpls = {
       const catDiv = $(`<div class="pff-cat-content"></div>`);
       for (let tpl in tmpls[cat]) {
         let item = tmpls[cat][tpl];
-        if(typeof tmpls[cat][tpl] == 'string') item = { name: tpl, text: tmpls[cat][tpl] };
+        if (typeof tmpls[cat][tpl] == 'string') item = {
+          name: tpl,
+          text: tmpls[cat][tpl],
+        };
         const textRaw = item.text.replace(/^\n/, '');
-        const title = textRaw.replace(/"/g, "'").replace(/<p>/g, '').replace(/<br ?\/?>/g, '\n');
+        const title = textRaw.replace(/"/g, '\'').
+            replace(/<p>/g, '').
+            replace(/<br ?\/?>/g, '\n');
         let link = 'javascript:';
-        if(item.id) link = `https://${location.hostname}/?action=handbookdataview&handbook=${win.PFF.tmplsRecord.handbook}&key=${item.id}`;
+        if (item.id) link = `https://${location.hostname}/?action=handbookdataview&handbook=${win.PFF.tmplsRecord.handbook}&key=${item.id}`;
         catDiv.append(
-          $(`<a href="${link}" title="${title}">${item.name.replace(/ /g, '&nbsp;')}</a>`).click(
-            () => {
-              pffTmpls.insertTemplate(textRaw);
-              return false;
-            }
-          )
+            $(`<a href="${link}" title="${title}">${item.name.replace(/ /g,
+                '&nbsp;')}</a>`).click(
+                () => {
+                  pffTmpls.insertTemplate(textRaw);
+                  return false;
+                },
+            ),
         );
       }
       tplsBlock.append(
-        $(`<div class="pff-cat"><span class="pff-cat-title">${cat}:</span> </div>`).append(catDiv)
+          $(`<div class="pff-cat"><span class="pff-cat-title">${cat}:</span> </div>`).
+              append(catDiv),
       );
     }
-    $('.task-add-block')
-      .last()
-      .after(
+    $('.task-add-block').last().after(
         $(
-          '<div class="pff-tpls"><span class="pff-tpls-title"><b>Шаблоны</b></span></div>'
-        ).append(tplsBlock)
-      );
+            '<div class="pff-tpls"><span class="pff-tpls-title"><b>Шаблоны</b></span></div>',
+        ).append(tplsBlock),
+    );
   },
 
   /**
@@ -212,7 +220,7 @@ const pffTmpls = {
    * Или грузит по урлу и отдает, здесь же проверяется свежесть кеша
    * Удаленные возвращают умолчальные шаблоны в случае неудачи
    */
-  getTemplates: function () {
+  getTemplates: function() {
     return new Promise((resolve, reject) => {
       var mtime = localStorage.pff_templates_mtime || new Date().getTime();
       var cache_age = new Date().getTime() - mtime;
@@ -222,32 +230,31 @@ const pffTmpls = {
 
       if (!localStorage.pff_templates) {
         const remoteUrl = pffTmpls.getRemoteTemplatesUrl();
-        if(remoteUrl.url){
+        if (remoteUrl.url) {
           pffTmpls.parseRemoteTemplates().then((tmpls) => {
             resolve(tmpls);
           });
-        }
-        else if(localStorage.pff_templates_mru) {
+        } else if (localStorage.pff_templates_mru) {
           // convert mru to text templates
           const mru = JSON.parse(localStorage.pff_templates_mru);
           let items = [];
-          for(let id in mru) {
+          for (let id in mru) {
             items.push(mru[id]);
           }
           items.sort((a, b) => {
-            if(a.count > b.count) return -1;
-            if(a.count < b.count) return 1;
+            if (a.count > b.count) return -1;
+            if (a.count < b.count) return 1;
             return 0;
           });
 
           let defaultCat = 'Часто используемые'; // TODO: var
           const tmpls = {[defaultCat]: []};
-          let itemsObj = {}
-          for(let item of items) {
+          let itemsObj = {};
+          for (let item of items) {
             itemsObj[item.name] = item.text;
-            if(!item.cat) item.cat = defaultCat;
-            if(!tmpls[item.cat]) tmpls[item.cat] = [];
-            tmpls[item.cat].push(item)
+            if (!item.cat) item.cat = defaultCat;
+            if (!tmpls[item.cat]) tmpls[item.cat] = [];
+            tmpls[item.cat].push(item);
           }
 
           resolve(tmpls);
@@ -263,7 +270,7 @@ const pffTmpls = {
   /**
    * Возвращает сохраненный или дефолтный урл
    */
-  getRemoteTemplatesUrl: function () {
+  getRemoteTemplatesUrl: function() {
     var store = $.parseJSON(localStorage.pff_remote_templates_url);
     return store || PFF.templates_remote_default;
   },
@@ -272,7 +279,7 @@ const pffTmpls = {
    * Сохраняет урл удаленных аналитик,
    * Если пусто или изменено, чистим кеш
    */
-  setRemoteTemplatesUrl: function (remote) {
+  setRemoteTemplatesUrl: function(remote) {
     if (remote.url == PFF.templates_remote_default.url) {
       return true;
     }
@@ -294,7 +301,7 @@ const pffTmpls = {
     return true;
   },
 
-  parseRemoteTemplates: function (opts) {
+  parseRemoteTemplates: function(opts) {
     return new Promise((resolve, reject) => {
       if (opts.format != 'yml') {
         console.log('only yml possible');
@@ -303,7 +310,7 @@ const pffTmpls = {
       GM_xmlhttpRequest({
         method: 'GET',
         url: opts.url,
-        onload: function (response) {
+        onload: function(response) {
           const tpls = jsyaml.load(response.responseText);
 
           const tplsCount = Object.keys(tpls).length;
@@ -322,4 +329,4 @@ const pffTmpls = {
     });
   },
 
-}
+};

@@ -10,7 +10,7 @@ const pffAnalitics = {
     // TODO: больше не используется
     if (win.PlanfixPage.task == 116702) {
       var dates = pffAnalitics.getDates(1, 5);
-      var analitics_arr = $.map(dates, function (date) {
+      var analitics_arr = $.map(dates, function(date) {
         return {
           group: 'Планируемое время работы',
           date: date,
@@ -20,7 +20,7 @@ const pffAnalitics = {
       });
       PFF.addTaskBlock('План на неделю', analitics_arr);
 
-      PFF.addTaskBlock('План на день', { name: 'План на день', count: 1 });
+      PFF.addTaskBlock('План на день', {name: 'План на день', count: 1});
     }
 
     PFF.addTaskBlock('План', '[Планируемое время работы]');
@@ -31,27 +31,29 @@ const pffAnalitics = {
     const userPost = Current.loginedPost;
     switch (userPost) {
       case 'Программист':
-        PFF.addTaskBlock('Программирование', { name: 'Поминутная работа программиста' });
+        PFF.addTaskBlock('Программирование',
+            {name: 'Поминутная работа программиста'});
         break;
       case 'Менеджер по сопровождению заказов':
-        PFF.addTaskBlock('тел. лёгкий', { name: 'Лёгкий разговор по телефону' });
-        PFF.addTaskBlock('тел. обычный', { name: 'Обычный разговор по телефону' });
-        PFF.addTaskBlock('тел. сложный', { name: 'Сложный разговор по телефону' });
-        PFF.addTaskBlock('письмо лёгкое', { name: 'Лёгкое письмо' });
+        PFF.addTaskBlock('тел. лёгкий', {name: 'Лёгкий разговор по телефону'});
+        PFF.addTaskBlock('тел. обычный', {name: 'Обычный разговор по телефону'});
+        PFF.addTaskBlock('тел. сложный', {name: 'Сложный разговор по телефону'});
+        PFF.addTaskBlock('письмо лёгкое', {name: 'Лёгкое письмо'});
         PFF.addTaskBlock('письмо обычное', {
           name: 'Письмо средней сложности / обычное письмо',
         });
-        PFF.addTaskBlock('письмо сложное', { name: 'Сложное письмо' });
+        PFF.addTaskBlock('письмо сложное', {name: 'Сложное письмо'});
         break;
     }
 
     PFF.addTaskBlock('|');
-    PFF.addTaskBlock('Инструкция', { group: 'Особые пометки', name: 'Инструкции' });
+    PFF.addTaskBlock('Инструкция',
+        {group: 'Особые пометки', name: 'Инструкции'});
 
     // парсим массив подготовленных аналитик
-    pffAnalitics.getAnalitics().then(function (tasks) {
+    pffAnalitics.getAnalitics().then(function(tasks) {
       PFF.addTaskBlock('|');
-      $.each(tasks, function (i, task) {
+      $.each(tasks, function(i, task) {
         PFF.addTaskBlock(task.name, task.analitics);
       });
     });
@@ -68,12 +70,12 @@ const pffAnalitics = {
     } */
   },
 
-    /**
+  /**
    * Возвращает массив дат d-m-Y от dayofweek в кол-ве count
    * Если текущая дата совпадает с dayofweek, берется сегодня,
    * иначе этот ближайший день недели
    */
-  getDates (dayofweek, count) {
+  getDates(dayofweek, count) {
     var dates = [];
 
     // next or current monday
@@ -86,7 +88,8 @@ const pffAnalitics = {
     }
 
     for (var i = 0; i < count; i++) {
-      dates.push(pad(d.getDate()) + '-' + pad(1 + d.getMonth()) + '-' + d.getFullYear());
+      dates.push(pad(d.getDate()) + '-' + pad(1 + d.getMonth()) + '-' +
+          d.getFullYear());
       d.setTime(d.getTime() + 86400000);
     }
 
@@ -98,12 +101,12 @@ const pffAnalitics = {
    * Предупреждает, если есть незаполненные или ошибочные
    * TODO: больше не нужна
    */
-  countTotalAnalitics: function () {
-    setTimeout(function () {
+  countTotalAnalitics: function() {
+    setTimeout(function() {
       var count_div = $('.analitics-total-wrap');
       var btn = $('.tr-action-commit .btn:first, .action-edit-save');
 
-      var highlight = function (state) {
+      var highlight = function(state) {
         if (state) {
           count_div.css('color', 'red');
           btn.css('border-color', 'red');
@@ -114,22 +117,20 @@ const pffAnalitics = {
       };
 
       if (count_div.length === 0) {
-        count_div = $('<div class="analitics-total-wrap"></div>')
-          .attr('style', 'float:right; margin-right:15px')
-          .html('Всего: <span class="analitics-total-count"></span>');
+        count_div = $('<div class="analitics-total-wrap"></div>').
+            attr('style', 'float:right; margin-right:15px').
+            html('Всего: <span class="analitics-total-count"></span>');
         $('.attach-new-analitic td.td-item-add-ex:first').append(count_div);
       }
       highlight(false);
 
       var counts = $(win.PFF.fields.vyrabotka.count);
       var totals = 0;
-      counts.each(function (i, count_field) {
+      counts.each(function(i, count_field) {
         var analitic = $(count_field).parents('.add-analitic-block');
         var count = $(count_field).val();
-        var hours_per_count = analitic
-          .find(win.PFF.fields.vyrabotka.hours_per_count)
-          .text()
-          .replace(',', '.');
+        var hours_per_count = analitic.find(
+            win.PFF.fields.vyrabotka.hours_per_count).text().replace(',', '.');
         var hours = count * hours_per_count;
         if (count === '' || hours_per_count === '') highlight(true);
         totals += hours;
@@ -144,9 +145,9 @@ const pffAnalitics = {
   /**
    * Умолчальные аналитики (задачи) из массива
    */
-  getDefaultAnalitics: function () {
+  getDefaultAnalitics: function() {
     var tasks = [];
-    $.each(PFF.analitics_default, function (i, item) {
+    $.each(PFF.analitics_default, function(i, item) {
       tasks.push({
         name: item[0],
         analitics: item[1],
@@ -158,7 +159,7 @@ const pffAnalitics = {
   /**
    * Возвращает сохраненный или дефолтный урл
    */
-  getRemoteAnaliticsUrl: function () {
+  getRemoteAnaliticsUrl: function() {
     var store = $.parseJSON(localStorage.pff_remote_analitics_url);
     return store || PFF.analitics_remote_default;
   },
@@ -167,7 +168,7 @@ const pffAnalitics = {
    * Сохраняет урл удаленных аналитик,
    * Если пусто или изменено, чистим кеш
    */
-  setRemoteAnaliticsUrl: function (remote) {
+  setRemoteAnaliticsUrl: function(remote) {
     if (remote.url == PFF.analitics_remote_default.url) {
       return true;
     }
@@ -195,7 +196,7 @@ const pffAnalitics = {
    * Или грузит по урлу и отдает, здесь же проверяется свежесть кеша
    * Удаленные возвращают умолчальные аналитики в случае неудачи
    */
-  getAnalitics: function () {
+  getAnalitics: function() {
     const PFF = win.PFF;
     var deferred = $.Deferred();
     if (PFF._analitics.length === 0) {
@@ -218,9 +219,9 @@ const pffAnalitics = {
     return deferred.promise();
   },
 
-  parseRemoteAnalitics: function (opts) {
+  parseRemoteAnalitics: function(opts) {
     var deferred = $.Deferred();
-    $.get(opts.url, function (data) {
+    $.get(opts.url, function(data) {
       var tasks = [];
       if (opts.format == 'text') {
         tasks = pffAnalitics.text2tasks(data);
@@ -244,12 +245,12 @@ const pffAnalitics = {
    * если в конце аналитики через дефис написана цифра - 1, она превратится в количество
    * @return массив, пригодный для addAnalitics()
    */
-  text2tasks: function (text) {
+  text2tasks: function(text) {
     var lines = text.split('\n');
     var lastLevel = -1;
     var tasks = [];
     var task;
-    $.each(lines, function (i, line) {
+    $.each(lines, function(i, line) {
       if (line === '') return;
 
       var level = line.match(/^\t*/)[0].length;
@@ -257,7 +258,7 @@ const pffAnalitics = {
 
       if (level === 0) {
         if (lastLevel != -1) tasks.push(task);
-        task = { name: text, analitics: [] };
+        task = {name: text, analitics: []};
       }
       if (level == 1) {
         task.analitics.push(text);
@@ -268,4 +269,4 @@ const pffAnalitics = {
     return tasks;
   },
 
-}
+};
