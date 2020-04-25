@@ -12,6 +12,6 @@
   "author": "Stanislav Popov",
   "license": "ISC",
   "dependencies": {
-    "@types/jquery": "^3.3.35"
+    "@types/jquery": "^1.10.27"
   }
 }
