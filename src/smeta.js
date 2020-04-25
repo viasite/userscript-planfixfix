@@ -1,8 +1,20 @@
+// smeta.js
+// console.log('include smeta.js');
 win = typeof unsafeWindow != 'undefined' ? unsafeWindow : window;
 var $ = win.$;
 
 // оформление сметы в 1 клик, https://tagilcity.planfix.ru/task/604890
-const smeta = {
+const pffSmeta = {
+  addActions() {
+    if (
+      Current.logined == win.PFF.adminId ||
+      win.PFF.isManager()
+    ) {
+      win.PFF.addTaskBlock('|');
+      win.PFF.addTaskBlock('Оформить смету', pffSmeta.run);
+    }
+  },
+
   // style html
   processHtml(html) {
     const newlines = [];
@@ -177,116 +189,194 @@ const smeta = {
   // main function
   run() {
     const editor = win.CKEDITOR.instances.ActionDescription;
-    const html = smeta.getSelectionHtml(editor);
-    const styledHtml = smeta.processHtml(html);
+    const html = pffSmeta.getSelectionHtml(editor);
+    const styledHtml = pffSmeta.processHtml(html);
 
     editor.insertHtml(styledHtml);
     //document.getElementsByClassName('b-task-description')[0].innerHTML = styledHtml;
     //console.log('html: '+html);
   },
-  };
 
-// сортировать смету, https://tagilcity.planfix.ru/task/608083
-const smetaOrder = function (opts) {
-  opts = {
-    ...{
-      analiticAid: 314, // смета на разработку
-      orderByFids: [950, 1093], // тип работ, №
-    },
-    ...opts,
-  };
-
-  const t = $('[data-aid="' + opts.analiticAid + '"] .tbl-list');
-  const rows = t.find('tr');
-  const rowsData = [];
-
-  // собираем массив с данными таблицы (ключ-значение по fid)
-  // сохраняем также ссылку на DOM-элемент ряда
-  rows.each(function () {
-    const r = $(this);
-    if (r.find('.td-head').length > 0) return;
-
-    const rowData = {
-      elem: this,
+  // сортировать смету, https://tagilcity.planfix.ru/task/608083
+  order(opts) {
+    opts = {
+      ...{
+        analiticAid: 314, // смета на разработку
+        orderByFids: [950, 1093], // тип работ, №
+      },
+      ...opts,
     };
 
-    r.find('td').each(function () {
-      const td = $(this);
+    const t = $('[data-aid="' + opts.analiticAid + '"] .tbl-list');
+    const rows = t.find('tr');
+    const rowsData = [];
 
-      const fid = td.find('[data-fid]').data('fid');
-      // ignore subfids
-      if (!fid || fid.toString().indexOf(':') !== -1) return;
+    // собираем массив с данными таблицы (ключ-значение по fid)
+    // сохраняем также ссылку на DOM-элемент ряда
+    rows.each(function () {
+      const r = $(this);
+      if (r.find('.td-head').length > 0) return;
 
-      const val = td.find('input:hidden').val();
+      const rowData = {
+        elem: this,
+      };
 
-      rowData[fid] = val;
+      r.find('td').each(function () {
+        const td = $(this);
+
+        const fid = td.find('[data-fid]').data('fid');
+        // ignore subfids
+        if (!fid || fid.toString().indexOf(':') !== -1) return;
+
+        const val = td.find('input:hidden').val();
+
+        rowData[fid] = val;
+      });
+
+      rowsData.push(rowData);
     });
 
-    rowsData.push(rowData);
-  });
+    // сортируем массив данных по нужным колонкам, предполагаем, что там int/float
+    const rowsDataSorted = rowsData.concat().sort((a, b) => {
+      for (let sfid of opts.orderByFids) {
+        if (a[sfid] == b[sfid]) continue;
 
-  // сортируем массив данных по нужным колонкам, предполагаем, что там int/float
-  const rowsDataSorted = rowsData.concat().sort((a, b) => {
-    for (let sfid of opts.orderByFids) {
-      if (a[sfid] == b[sfid]) continue;
-
-      // remove "
-      a[sfid] = a[sfid].replace(/"/g, '').replace(/,/g, '.');
-      //console.log(a[sfid]);
-      b[sfid] = b[sfid].replace(/"/g, '').replace(/,/g, '.');
-      //console.log(`a[${sfid}]:${a[sfid]}, b[${sfid}]:${b[sfid]}, a>b: ${parseFloat(a[sfid]) > parseFloat(b[sfid])}`);
-      return parseFloat(a[sfid]) > parseFloat(b[sfid]) ? 1 : -1;
-    }
-    return 0;
-  });
-  const newrows = [];
-  //console.log(rowsData);
-  //console.log(rowsDataSorted);
-
-  // прогоняем оригинальный массив, но вписываем туда значения из сортированного массива
-  rowsData.map(function (row, ind) {
-    const elem = $(row.elem);
-    const newData = rowsDataSorted[ind];
-    for (let fid in newData) {
-      elem.find('[data-fid="' + fid + '"] input:hidden').val(newData[fid]);
-    }
-  });
-
-  // обозначаем окончание цветом (визуально данные не поменяются)
-  t.css('background', '#e5ffe5');
-  setTimeout(() => { t.parents('.analitics-form').find('.btn-create').click() }, 1000);
-  /*alert(`Использование:
-  1. Сделать копию задачи
-  2. Открыть в копии редактор аналитик. Не должно быть отредактированных полей, то есть открыли и сразу переходим к следующему шагу.
-  3. Запустить сниппет
-  4. Таблица окрасится в зелёный цвет, это значит, что сортировка прошла
-  5. Нажать "Сохранить аналитику"
-  6. Открыть оригинальную задачу и скопированную отсортированную, проверить, что сортировка прошла правильно
-  7. Удалить копию, прогнать шаги 2-5 на оригинале`);*/
-};
-
-/**
-* Копирует аналитики "Смета на разработку" в "Реализация"
-*/
-const smetaToRelization = function () {
-  const smetaTable = $('[data-aid="314"] .tbl-list');
-  smetaTable.find('tr').each(function () {
-    const tr = $(this);
-    if (tr.find('input').length == 0) return;
-
-    const d = new Date();
-
-    const name = tr.find('[data-fid="934"]').text().trim();
-    const itemPrice = tr.find('[data-fid="934:h1016"]').text();
-    const customPrice = tr.find('[data-fid="1089"]').text();
-    const price = customPrice ? customPrice : itemPrice;
-    const date = pad(d.getDate()) + '-' + pad(1 + d.getMonth()) + '-' + d.getFullYear();
-
-    win.PFF._addRealization({
-      name: name,
-      group: 'Реализация',
-      price: price,
-      date: date,
+        // remove "
+        a[sfid] = a[sfid].replace(/"/g, '').replace(/,/g, '.');
+        //console.log(a[sfid]);
+        b[sfid] = b[sfid].replace(/"/g, '').replace(/,/g, '.');
+        //console.log(`a[${sfid}]:${a[sfid]}, b[${sfid}]:${b[sfid]}, a>b: ${parseFloat(a[sfid]) > parseFloat(b[sfid])}`);
+        return parseFloat(a[sfid]) > parseFloat(b[sfid]) ? 1 : -1;
+      }
+      return 0;
     });
-  });
+    const newrows = [];
+    //console.log(rowsData);
+    //console.log(rowsDataSorted);
+
+    // прогоняем оригинальный массив, но вписываем туда значения из сортированного массива
+    rowsData.map(function (row, ind) {
+      const elem = $(row.elem);
+      const newData = rowsDataSorted[ind];
+      for (let fid in newData) {
+        elem.find('[data-fid="' + fid + '"] input:hidden').val(newData[fid]);
+      }
+    });
+
+    // обозначаем окончание цветом (визуально данные не поменяются)
+    t.css('background', '#e5ffe5');
+    setTimeout(() => { t.parents('.analitics-form').find('.btn-create').click() }, 1000);
+    /*alert(`Использование:
+    1. Сделать копию задачи
+    2. Открыть в копии редактор аналитик. Не должно быть отредактированных полей, то есть открыли и сразу переходим к следующему шагу.
+    3. Запустить сниппет
+    4. Таблица окрасится в зелёный цвет, это значит, что сортировка прошла
+    5. Нажать "Сохранить аналитику"
+    6. Открыть оригинальную задачу и скопированную отсортированную, проверить, что сортировка прошла правильно
+    7. Удалить копию, прогнать шаги 2-5 на оригинале`);*/
+  },
+
+  /**
+  * Копирует аналитики "Смета на разработку" в "Реализация"
+  */
+  toRelization() {
+    const smetaTable = $('[data-aid="314"] .tbl-list');
+    smetaTable.find('tr').each(function () {
+      const tr = $(this);
+      if (tr.find('input').length == 0) return;
+
+      const d = new Date();
+
+      const name = tr.find('[data-fid="934"]').text().trim();
+      const itemPrice = tr.find('[data-fid="934:h1016"]').text();
+      const customPrice = tr.find('[data-fid="1089"]').text();
+      const price = customPrice ? customPrice : itemPrice;
+      const date = pad(d.getDate()) + '-' + pad(1 + d.getMonth()) + '-' + d.getFullYear();
+
+      pffSmeta._addRealization({
+        name: name,
+        group: 'Реализация',
+        price: price,
+        date: date,
+      });
+    });
+  },
+
+  /**
+   * Добавляет аналитику "Реализация"
+   */
+  _addRealization: function (opts) {
+    const PFF = win.PFF;
+    opts = {
+      ...{ count: 1 },
+      ...opts,
+    };
+    var deferred = $.Deferred();
+
+    PFF.deferred.then(function () {
+      // добавить другую аналитику
+      $('[data-action="add-new-analitic"]').click();
+
+      setTimeout(() => {
+        const div = $('.analitics-form').last();
+        if (opts.scrollTo) PFF.scrollTo(div);
+
+        setTimeout(() => {
+          // выбор группы аналитик
+          var select = div.find('select');
+          if (PFF.debug) console.log('select', select);
+          const option = select.find('option').filter(function () {
+            return $(this).text() == opts.group;
+          });
+          select.val(option.val()).change();
+
+          const analitic = div.find('[data-aname="' + opts.group + '"] .af-tbl-tr').last();
+          if (PFF.debug) console.log('analitic', analitic);
+
+          const select_handbook = analitic.find('select[data-handbookid]:first');
+          if (PFF.debug) console.log('select_handbook', select_handbook);
+          select_handbook.trigger('liszt:focus');
+
+          setTimeout(() => {
+            analitic.addClass('silentChosen');
+            analitic
+              .find('.chzn-search:first input')
+              .val(opts.name) /*.focus()*/
+              .keyup();
+            var count_focused = false;
+            select_handbook.bind('liszt:updated', function (e) {
+              var results = analitic.find('.chzn-results .active-result');
+              if (PFF.debug) console.log('results', results);
+              if (results.length == 1 || opts.select) {
+                results.first().mouseup();
+                analitic.find(PFF.fields.vyrabotka.count).focus();
+              }
+              // задержка из-за лага chosen
+              setTimeout(() => {
+                if (count_focused) return;
+                count_focused = true;
+                analitic.removeClass('silentChosen');
+
+                if (opts.count) {
+                  analitic.find(PFF.fields.realization.count).val(opts.count);
+                }
+                if (opts.price) {
+                  analitic.find(PFF.fields.realization.price).val(opts.price);
+                }
+                if (opts.date) {
+                  analitic.find(PFF.fields.realization.date).val(opts.date);
+                }
+              }, 2000);
+
+              deferred.resolve();
+            });
+          }, 500);
+        });
+      }, 500);
+    });
+
+    PFF.deferred = deferred;
+    return deferred.promise();
+  },
+
 };
