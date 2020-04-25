@@ -5,7 +5,9 @@
  * @param {string} win.Current.loginedPost должность
  * @param {Object} $ jQuery
  */
+let $; // заглушает ошибки в определении $ в модулях
 (function() {
+  'use strict';
   console.log('exec _planfixfix.js');
   let win = typeof window.unsafeWindow != 'undefined' ? window.unsafeWindow : window;
   let $ = win.$;
@@ -270,12 +272,17 @@
      * Можно передавать вместо аналитик функцию
      */
     addTaskBlock: function(name, action) {
+      const isAnalitic = (action) => {
+        return Array.isArray(action) ||
+        typeof action == 'object' ||
+        typeof action == 'string';
+      };
+
       const block = $('<div class="task-add-block"></div>').
           html(name).
           on('click', function() {
             PFF.resetDeferred();
-            if (Array.isArray(action) || typeof action == 'object' ||
-                typeof action == 'string') {
+            if (isAnalitic(action)) {
               PFF.analitics.addAnalitics(action);
             } else if (typeof action === 'function') {
               action();
@@ -283,14 +290,12 @@
           });
 
       //PFF.debug(block);
-      const isAnalitic = Array.isArray(action) || typeof action == 'object' ||
-          typeof action == 'string';
 
-      if (isAnalitic) {
-        const analitics = $.map(PFF.analitics.normalizeAnalitics(action),
-            function(analitic) {
-              return analitic.name;
-            });
+      if (isAnalitic(action)) {
+        const analitics = $.map(
+            PFF.analitics.normalizeAnalitics(action),
+            (analitic) => analitic.name,
+        );
         block.attr('title', analitics.join('\n'));
       }
       $('.task-add-block').last().after(block);
@@ -303,10 +308,12 @@
     scrollTo: function(elem) {
       /**
        * @param {Object} win.TaskCardPoolJS
+       * @param {Object} win.PlanfixPage
+       * @param {function} win.TaskCardPoolJS.getInstance
+       * @param task.scroller.scrollToBlock
        */
-      win.TaskCardPoolJS.getInstance(win.PlanfixPage.task).
-          scroller.
-          scrollToBlock(elem);
+      const task = win.TaskCardPoolJS.getInstance(win.PlanfixPage.task);
+      task.scroller.scrollToBlock(elem);
     },
 
     /**
