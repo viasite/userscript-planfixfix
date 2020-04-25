@@ -26,6 +26,9 @@ const pffTmpls = {
 
   // вставка шаблона, окно заполнения подстановок
   insertTemplate(textRaw) {
+    /**
+     * @param win.CKEDITOR.instances
+     */
     const editor = win.CKEDITOR.instances.ActionDescription;
     let text = textRaw.replace(/\n/g, '<br>');
 
@@ -58,6 +61,12 @@ const pffTmpls = {
           btns +
           '</div>';
 
+      /**
+       * @param {Object} win.CommonDialogScrollableJS
+       * @param {function} win.CommonDialogScrollableJS.setHeader
+       * @param {function} win.CommonDialogScrollableJS.setCloseHandler
+       * @param editor.insertHtml
+       */
       const dialog = new win.CommonDialogScrollableJS();
       dialog.closeByEsc = true;
       dialog.isMinimizable = true;
@@ -87,9 +96,10 @@ const pffTmpls = {
         $('.pff-tmpl-form input').each(function() {
           const input = $(this);
           const t = input.data('token');
-          const v = input.val();
-          if (v === '') pt = pt.replace(t,
-              `<span style="background:#ffff00">${t}</span>`);
+          const v = input.val().toString();
+          if (v === '') {
+            pt = pt.replace(t, `<span style="background:#ffff00">${t}</span>`);
+          }
           else pt = pt.replace(t, v);
         });
         $('.pff-tmpl-preview').html(pt);
@@ -97,10 +107,11 @@ const pffTmpls = {
 
       setTimeout(() => {
         redrawPreview();
-        $('.pff-tmpl-form input').
+        const inputs = $('.pff-tmpl-form input');
+        inputs.
             on('keypress blur change',
                 () => { setTimeout(redrawPreview, 50); });
-        $('.pff-tmpl-form input').first().trigger('focus');
+        inputs.first().trigger('focus');
         $('.pff-tmpl-form .btn-cancel').on('click', () => { dialog.close(); });
         $('.js-action-pff-insert-template').on('click', () => {
           editor.insertHtml($('.pff-tmpl-preview').html());
@@ -115,13 +126,16 @@ const pffTmpls = {
 
   // кнопка "вставить шаблон" в редакторе
   templateSelect: function() {
-    var editor = CKEDITOR.instances.ActionDescription;
+    const editor = CKEDITOR.instances.ActionDescription;
     editor.fire('pffTemplatesOpened');
 
-    var editorSelection = editor.getSelection();
-    var caretPosition = editorSelection.getRanges();
+    const editorSelection = editor.getSelection();
+    const caretPosition = editorSelection.getRanges();
 
-    var handbookSelectDialog = new HandbookSelectDialogJS();
+    /**
+     * @param win.HandbookSelectDialogJS
+     */
+    const handbookSelectDialog = new win.HandbookSelectDialogJS();
 
     setTimeout(() => {
       $(`[data-handbookid="${win.PFF.tmplsRecord.handbook}"]`).click();
@@ -130,14 +144,23 @@ const pffTmpls = {
       }, 700);
     }, 1000);
 
+    /**
+     * @param {String} type 'record' | 'text'
+     * @param {Object} exportData
+     * @param {number} exportData.handbookId
+     * @param {number} exportData.key
+     * @param {string} exportData.text
+     */
     handbookSelectDialog.onInsertData = function(type, exportData) {
       /**
        * @param win.AjaxJS запросы к сущностям ПФ
+       * @param sel.selectRanges
        */
-      editor.trigger('focus');
+      editor.focus();
 
       setTimeout(function() {
-        editor.getSelection().selectRanges(caretPosition);
+        const sel = editor.getSelection();
+        sel.selectRanges(caretPosition);
         if ('record' === type) {
           const opts = {
             command: 'handbook:getDataStringByKey',
@@ -146,14 +169,29 @@ const pffTmpls = {
           };
           win.AjaxJS.request({
             data: opts,
+            /**
+             *
+             * @param data
+             * @param {string[]} data.NamedPath
+             * @param data.NamedPath.Name
+             * @param {string[]} data.Items
+             * @param {Object[]} data.Items[].String
+             */
             success: (data) => {
+              /**
+               *
+               * @param {Object} f
+               * @param {Object} f.Field
+               * @param {number} f.Field.ID
+               * @param {string} f.Value
+               */
               let id = exportData.key, name, text;
               let cat = data.NamedPath[0]?.Name || 'Общие';
-              for (f of data.Items[0].String) {
-                if (f.Field.ID == win.PFF.tmplsRecord.name) {
+              for (let f of data.Items[0].String) {
+                if (f.Field.ID === win.PFF.tmplsRecord.name) {
                   name = f.Value;
                 }
-                if (f.Field.ID == win.PFF.tmplsRecord.text) {
+                if (f.Field.ID === win.PFF.tmplsRecord.text) {
                   text = f.Value;
                   pffTmpls.insertTemplate(text);
                 }
@@ -197,8 +235,7 @@ const pffTmpls = {
         if (item.id) link = `https://${location.hostname}/?action=handbookdataview&handbook=${win.PFF.tmplsRecord.handbook}&key=${item.id}`;
         catDiv.append(
             $(`<a href="${link}" title="${title}">${item.name.replace(/ /g,
-                '&nbsp;')}</a>`).click(
-                () => {
+                '&nbsp;')}</a>`).on('click', () => {
                   pffTmpls.insertTemplate(textRaw);
                   return false;
                 },
@@ -235,7 +272,7 @@ const pffTmpls = {
         const remoteUrl = pffTmpls.getRemoteTemplatesUrl();
         if (remoteUrl.url) {
           pffTmpls.parseRemoteTemplates().then((tmpls) => {
-            resolve(tmpls);
+            return resolve(tmpls);
           });
         } else if (localStorage.pff_templates_mru) {
           // convert mru to text templates
@@ -260,13 +297,14 @@ const pffTmpls = {
             tmpls[item.cat].push(item);
           }
 
-          resolve(tmpls);
+          return resolve(tmpls);
         }
       } else {
         const tmpls = JSON.parse(localStorage.pff_templates) || {};
         win.PFF.debug('use cached templates:', tmpls);
-        resolve(tmpls);
+        return resolve(tmpls);
       }
+      reject({});
     });
   },
 
@@ -310,23 +348,29 @@ const pffTmpls = {
         console.log('only yml possible');
         return reject(false);
       }
+
+      const storeItem = (response) => {
+        const tpls = jsyaml.load(response.responseText);
+
+        const tplsCount = Object.keys(tpls).length;
+        if (tplsCount > 0) {
+          win.PFF.debug('parsed remote templates:', tpls);
+          localStorage.pff_templates = JSON.stringify(tpls);
+          localStorage.pff_templates_mtime = new Date().getTime();
+          resolve(tpls);
+        } else {
+          win.PFF.debug('failed parse remote templates:', response.responseText);
+          resolve(win.PFF.templates_default);
+        }
+      };
+
+      /**
+       * @param win.GM_xmlhttpRequest
+       */
       GM_xmlhttpRequest({
         method: 'GET',
         url: opts.url,
-        onload: function(response) {
-          const tpls = jsyaml.load(response.responseText);
-
-          const tplsCount = Object.keys(tpls).length;
-          if (tplsCount > 0) {
-            win.PFF.debug('parsed remote templates:', tpls);
-            localStorage.pff_templates = JSON.stringify(tpls);
-            localStorage.pff_templates_mtime = new Date().getTime();
-            resolve(tpls);
-          } else {
-            win.PFF.debug('failed parse remote templates:', response.responseText);
-            resolve(win.PFF.templates_default);
-          }
-        },
+        onload: storeItem
       });
     });
   },
