@@ -1,7 +1,7 @@
 // tmpls.js
 // console.log('include tmpls.js');
 win = typeof unsafeWindow != 'undefined' ? unsafeWindow : window;
-$ = win.$;
+$ = $ || win.$;
 
 const pffTmpls = {
   addActions() {
@@ -68,7 +68,7 @@ const pffTmpls = {
               new Promise((resolve, reject) => {
                 let isValid = true;
                 $('.pff-tmpl-form input').each(function() {
-                  if ($(this).val() == '') {
+                  if ($(this).val() === '') {
                     isValid = false;
                   }
                 });
@@ -88,7 +88,7 @@ const pffTmpls = {
           const input = $(this);
           const t = input.data('token');
           const v = input.val();
-          if (v == '') pt = pt.replace(t,
+          if (v === '') pt = pt.replace(t,
               `<span style="background:#ffff00">${t}</span>`);
           else pt = pt.replace(t, v);
         });
@@ -100,9 +100,9 @@ const pffTmpls = {
         $('.pff-tmpl-form input').
             on('keypress blur change',
                 () => { setTimeout(redrawPreview, 50); });
-        $('.pff-tmpl-form input').first().focus();
-        $('.pff-tmpl-form .btn-cancel').click(() => { dialog.close(); });
-        $('.js-action-pff-insert-template').click(() => {
+        $('.pff-tmpl-form input').first().trigger('focus');
+        $('.pff-tmpl-form .btn-cancel').on('click', () => { dialog.close(); });
+        $('.js-action-pff-insert-template').on('click', () => {
           editor.insertHtml($('.pff-tmpl-preview').html());
           dialog.close();
           //$('.pff-tmpl-form').parents('.dialogWin').find('.destroy-button').click();
@@ -131,17 +131,20 @@ const pffTmpls = {
     }, 1000);
 
     handbookSelectDialog.onInsertData = function(type, exportData) {
-      editor.focus();
+      /**
+       * @param win.AjaxJS запросы к сущностям ПФ
+       */
+      editor.trigger('focus');
 
       setTimeout(function() {
         editor.getSelection().selectRanges(caretPosition);
-        if ('record' == type) {
+        if ('record' === type) {
           const opts = {
             command: 'handbook:getDataStringByKey',
             handbook: exportData.handbookId,
             key: exportData.key,
           };
-          AjaxJS.request({
+          win.AjaxJS.request({
             data: opts,
             success: (data) => {
               let id = exportData.key, name, text;
@@ -159,7 +162,7 @@ const pffTmpls = {
             },
           });
 
-        } else if ('text' == type) {
+        } else if ('text' === type) {
           pffTmpls.insertTemplate(exportData.text);
         }
       }, 200);
@@ -222,9 +225,9 @@ const pffTmpls = {
    */
   getTemplates: function() {
     return new Promise((resolve, reject) => {
-      var mtime = localStorage.pff_templates_mtime || new Date().getTime();
-      var cache_age = new Date().getTime() - mtime;
-      if (cache_age > PFF.templates_remote_cache_lifetime * 1000) {
+      const mtime = localStorage.pff_templates_mtime || new Date().getTime();
+      const cache_age = new Date().getTime() - mtime;
+      if (cache_age > win.PFF.templates_remote_cache_lifetime * 1000) {
         delete localStorage.pff_templates;
       }
 
@@ -271,8 +274,8 @@ const pffTmpls = {
    * Возвращает сохраненный или дефолтный урл
    */
   getRemoteTemplatesUrl: function() {
-    var store = $.parseJSON(localStorage.pff_remote_templates_url);
-    return store || PFF.templates_remote_default;
+    const store = localStorage.pff_remote_templates_url ? JSON.parse(localStorage.pff_remote_templates_url) : false;
+    return store || win.PFF.templates_remote_default;
   },
 
   /**
@@ -280,7 +283,7 @@ const pffTmpls = {
    * Если пусто или изменено, чистим кеш
    */
   setRemoteTemplatesUrl: function(remote) {
-    if (remote.url == PFF.templates_remote_default.url) {
+    if (remote.url === win.PFF.templates_remote_default.url) {
       return true;
     }
     if (remote.url === '') {
@@ -292,7 +295,7 @@ const pffTmpls = {
       alert('Возможны только https URL');
       return false;
     }
-    if (remote.format != 'yml') {
+    if (remote.format !== 'yml') {
       alert('Возможны только yml файлы');
       return false;
     }
@@ -303,7 +306,7 @@ const pffTmpls = {
 
   parseRemoteTemplates: function(opts) {
     return new Promise((resolve, reject) => {
-      if (opts.format != 'yml') {
+      if (opts.format !== 'yml') {
         console.log('only yml possible');
         return reject(false);
       }
@@ -316,13 +319,12 @@ const pffTmpls = {
           const tplsCount = Object.keys(tpls).length;
           if (tplsCount > 0) {
             debug('parsed remote templates:', tpls);
-            PFF._tpls = tpls;
             localStorage.pff_templates = JSON.stringify(tpls);
             localStorage.pff_templates_mtime = new Date().getTime();
             resolve(tpls);
           } else {
             debug('failed parse remote templates:', response.responseText);
-            resolve(PFF.getDefaultTemplates());
+            resolve(win.PFF.templates_default);
           }
         },
       });
