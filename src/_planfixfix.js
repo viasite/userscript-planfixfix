@@ -94,18 +94,18 @@
       Стандартное: {
         'Уточнение глюка': `URL, скрин, описание`,
         'Запрос доступов': `
-%name%, чтобы начать работы нам нужны:
-
-1. Доступ к панели управления хостинга
-2. Логин и пароль от админки сайта`,
+          %name%, чтобы начать работы нам нужны:
+          
+          1. Доступ к панели управления хостинга
+          2. Логин и пароль от админки сайта`,
       },
       Предложения: {
         'После аудита': `
-%name%, здравствуйте.
-
-Как и договорились с вами ранее, отправляем предложение по результатам проведенных технического и seo- аудитов.
-Содержимое расчета:
-`,
+          %name%, здравствуйте.
+          
+          Как и договорились с вами ранее, отправляем предложение по результатам проведенных технического и seo- аудитов.
+          Содержимое расчета:
+          `,
       },
     },
 
@@ -143,7 +143,7 @@
           $('.actions-quick-add-block-text').trigger('click'); // создание действия
           //console.log('debug: edit-draft-action');
           //$('.edit-draft-action').trigger('click'); // edit
-          //PFF.addAnalitics({ name: 'Поминутная работа программиста' });
+          //PFF.analitics.addAnalitics({ name: 'Поминутная работа программиста' });
         }, 2000);
       }
     },
@@ -250,63 +250,8 @@
       });*/
 
       /*$('body').delegate('.attach-new-analitic td.td-item-add-ex:first span.fakelink-dashed', 'click', function(e){
-        PFF.addAnalitics([{}]);
+        PFF.analitics.addAnalitics([{}]);
       });*/
-    },
-
-    /**
-     * Тупая функция, добавляет все аналитики из массива
-     * TODO: to pffAnalitics
-     */
-    addAnalitics: function(analitics_arr) {
-      analitics_arr = PFF.normalizeAnalitics(analitics_arr);
-      $.each(analitics_arr, function(i, opts) {
-        PFF._addAnalitic(opts);
-      });
-      //PFF.deferred.then(PFF.analitics.countTotalAnalitics);
-    },
-
-    /**
-     * Создает массив, элементы которого скармливаются в _addAnalitic() без изменений
-     * Может парсить строки типа:
-     * [Группа аналитик] Название аналитики - кол-во
-     * Группа по умолчанию - Выработка
-     */
-    normalizeAnalitics: function(analitics_arr) {
-      const analitics = [];
-      if (!Array.isArray(analitics_arr)) analitics_arr = [analitics_arr];
-      $.each(analitics_arr, function(i, opts) {
-        const isFirst = i === 0;
-        const isLast = i === analitics_arr.length - 1;
-        if (typeof opts == 'string') {
-          opts = {name: opts};
-        }
-
-        opts = $.extend(
-            {
-              name: '',
-              group: 'Выработка',
-              scrollTo: isFirst,
-              select: !isLast,
-            },
-            opts,
-        );
-
-        const count = opts.name.match(/ - (\d+)$/) || '';
-        if (count !== '') {
-          opts.name = opts.name.replace(count[0], '');
-          opts.count = count[1];
-        }
-
-        const group = opts.name.match(/^\[(.*?)] ?/) || '';
-        if (group !== '') {
-          opts.name = opts.name.replace(group[0], '');
-          opts.group = group[1];
-        }
-
-        analitics.push(opts);
-      });
-      return analitics;
     },
 
     // добавляет действие в редактор аналитик
@@ -320,113 +265,9 @@
     },
 
     /**
-     * Добавляет аналитику в действие
-     * Добавление идет через PFF.deferred, очередь добавления
-     * В deferred создержится последняя добавляемая аналитика
-     * @param {object} opts { name, group, count, scrollTo, select }
-     */
-    _addAnalitic: function(opts) {
-      const deferred = $.Deferred();
-
-      PFF.deferred.then(function() {
-        $('.task-add-analitic').trigger('click');
-
-        const timeout = $('.analitics-form').length === 0 ? 500 : 10;
-        //var timeout = 2000;
-        setTimeout(function() {
-          const div = $('.analitics-form').last();
-          if (opts.scrollTo) PFF.scrollTo(div);
-
-          setTimeout(function() {
-            // выбор группы аналитик
-            const select = div.find('select');
-            PFF.debug('select', select);
-
-            const option = select.find('option').filter(function() {
-              return $(this).text() === opts.group;
-            });
-            select.val(option.val()).trigger('change');
-
-            const analitic = div.find('.af-tbl-tr');
-            PFF.debug('analitic', analitic);
-
-            const select_handbook = analitic.find(
-                'select[data-handbookid]:first');
-            PFF.debug('select_handbook', select_handbook);
-            select_handbook.trigger('liszt:focus');
-
-            // выработка
-            if (opts.name) {
-              // выбор конкретной аналитики
-              // задержка из-за того, что иногда выбирается выработка "заказ такси"
-              setTimeout(function() {
-                analitic.addClass('silentChosen');
-                analitic.find('.chzn-search:first input').
-                    val(opts.name).
-                    trigger('keyup');
-                let count_focused = false;
-                select_handbook.on('liszt:updated', function() {
-                  const results = analitic.find('.chzn-results .active-result');
-                  // PFF.debug('results', results);
-                  if (results.length === 1 || opts.select) {
-                    results.first().trigger('mouseup');
-                    analitic.find(PFF.fields.vyrabotka.count).trigger('focus');
-                  }
-                  // задержка из-за лага chosen
-                  setTimeout(function() {
-                    if (count_focused) return;
-                    count_focused = true;
-                    analitic.removeClass('silentChosen');
-
-                    if (opts.count) {
-                      analitic.find(PFF.fields.vyrabotka.count).val(opts.count);
-                      analitic.find(PFF.fields.vyrabotka.comment).trigger('focus');
-                    } else {
-                      analitic.find(PFF.fields.vyrabotka.count).
-                          trigger('focus').
-                          on('keypress', function(e) {
-                            if (e.which === 13) {
-                              if (e.ctrlKey) {
-                                $('[data-action="saveParent"]').trigger('click');
-                              } else {
-                                $('[data-action="save"]').trigger('click');
-                              }
-                            }
-                          });
-                    }
-
-                    // планируемое время
-                    if (opts.date) {
-                      analitic.find('input.date').val(opts.date);
-                    }
-                    if (opts.begin) {
-                      analitic.find('select.timeperiodbegin').val(opts.begin);
-                    }
-                    if (opts.end) {
-                      analitic.find('select.timeperiodend').val(opts.end);
-                    }
-                  }, 1000);
-
-                  deferred.resolve();
-                });
-              }, 500);
-            }
-
-            if (!opts.name) {
-              deferred.resolve();
-            }
-          }, 500);
-        }, timeout);
-      });
-
-      PFF.deferred = deferred;
-      return deferred.promise();
-    },
-
-    /**
      * Добавляет ссылку на добавление аналитики в панель
      * В ссылку вписывается список аналитик
-     * Можно передавать вместо аналитик произвольную функцию
+     * Можно передавать вместо аналитик функцию
      */
     addTaskBlock: function(name, action) {
       const block = $('<div class="task-add-block"></div>').
@@ -435,15 +276,18 @@
             PFF.resetDeferred();
             if (Array.isArray(action) || typeof action == 'object' ||
                 typeof action == 'string') {
-              PFF.addAnalitics(action);
+              PFF.analitics.addAnalitics(action);
             } else if (typeof action === 'function') {
               action();
             }
           });
+
       //PFF.debug(block);
-      if (Array.isArray(action) || typeof action == 'object' || typeof action ==
-          'string') {
-        const analitics = $.map(PFF.normalizeAnalitics(action),
+      const isAnalitic = Array.isArray(action) || typeof action == 'object' ||
+          typeof action == 'string';
+
+      if (isAnalitic) {
+        const analitics = $.map(PFF.analitics.normalizeAnalitics(action),
             function(analitic) {
               return analitic.name;
             });
