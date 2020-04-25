@@ -3,7 +3,7 @@ win = typeof unsafeWindow != 'undefined' ? unsafeWindow : window;
 var $ = win.$;
 
 function debug() {
-  if (PlanfixFix.debug) console.log(...arguments);
+  if (PFF.debug) console.log(...arguments);
 }
 
 win.onerror = function (error, file, line) {
@@ -18,7 +18,7 @@ if (location.hostname !== 'tagilcity.planfix.ru') {
   return;
 }
 
-const PlanfixFix = {
+const PFF = {
   debug: true,
   deferred: false,
 
@@ -102,14 +102,14 @@ const PlanfixFix = {
     };
 
     // очередь аналитик
-    PlanfixFix.resetDeferred();
+    PFF.resetDeferred();
 
-    PlanfixFix.actionAlter();
+    PFF.actionAlter();
 
-    PlanfixFix.addStyles();
+    PFF.addStyles();
 
     // тестовое открытие нового действия
-    if (PlanfixFix.debug) {
+    if (PFF.debug) {
       console.log('debug: init');
       setTimeout(() => {
         win.onbeforeunload = undefined; // отменить предупреждение о закрытии окна
@@ -117,7 +117,7 @@ const PlanfixFix = {
         $('.actions-quick-add-block-text').click(); // создание действия
         //console.log('debug: edit-draft-action');
         //$('.edit-draft-action').click(); // edit
-        //PlanfixFix.addAnalitics({ name: 'Поминутная работа программиста' });
+        //PFF.addAnalitics({ name: 'Поминутная работа программиста' });
       }, 2000);
     }
   },
@@ -126,7 +126,7 @@ const PlanfixFix = {
   addCustomAnalitics: function () {
     // показывается в задаче, где одно и то же планируется на каждый день
     if (win.PlanfixPage.task == 116702) {
-      var dates = PlanfixFix.getDates(1, 5);
+      var dates = PFF.getDates(1, 5);
       var analitics_arr = $.map(dates, function (date) {
         return {
           group: 'Планируемое время работы',
@@ -135,30 +135,30 @@ const PlanfixFix = {
           end: '09:30',
         };
       });
-      PlanfixFix.addTaskBlock('План на неделю', analitics_arr);
+      PFF.addTaskBlock('План на неделю', analitics_arr);
 
-      PlanfixFix.addTaskBlock('План на день', { name: 'План на день', count: 1 });
+      PFF.addTaskBlock('План на день', { name: 'План на день', count: 1 });
     }
 
-    PlanfixFix.addTaskBlock('План', '[Планируемое время работы]');
-    PlanfixFix.addTaskBlock('|');
-    PlanfixFix.addTaskBlock('Выработка', {});
-    PlanfixFix.addTaskBlock('|');
+    PFF.addTaskBlock('План', '[Планируемое время работы]');
+    PFF.addTaskBlock('|');
+    PFF.addTaskBlock('Выработка', {});
+    PFF.addTaskBlock('|');
 
     var userPost = Current.loginedPost;
     switch (userPost) {
       case 'Программист':
-        PlanfixFix.addTaskBlock('Программирование', { name: 'Поминутная работа программиста' });
+        PFF.addTaskBlock('Программирование', { name: 'Поминутная работа программиста' });
         break;
       case 'Менеджер по сопровождению заказов':
-        PlanfixFix.addTaskBlock('тел. лёгкий', { name: 'Лёгкий разговор по телефону' });
-        PlanfixFix.addTaskBlock('тел. обычный', { name: 'Обычный разговор по телефону' });
-        PlanfixFix.addTaskBlock('тел. сложный', { name: 'Сложный разговор по телефону' });
-        PlanfixFix.addTaskBlock('письмо лёгкое', { name: 'Лёгкое письмо' });
-        PlanfixFix.addTaskBlock('письмо обычное', {
+        PFF.addTaskBlock('тел. лёгкий', { name: 'Лёгкий разговор по телефону' });
+        PFF.addTaskBlock('тел. обычный', { name: 'Обычный разговор по телефону' });
+        PFF.addTaskBlock('тел. сложный', { name: 'Сложный разговор по телефону' });
+        PFF.addTaskBlock('письмо лёгкое', { name: 'Лёгкое письмо' });
+        PFF.addTaskBlock('письмо обычное', {
           name: 'Письмо средней сложности / обычное письмо',
         });
-        PlanfixFix.addTaskBlock('письмо сложное', { name: 'Сложное письмо' });
+        PFF.addTaskBlock('письмо сложное', { name: 'Сложное письмо' });
         break;
     }
 
@@ -167,29 +167,29 @@ const PlanfixFix = {
       userPost == 'Менеджер по сопровождению заказов' ||
       userPost == 'Руководитель отдела продаж'
     ) {
-      PlanfixFix.addTaskBlock('|');
-      PlanfixFix.addTaskBlock('Инструкция', { group: 'Особые пометки', name: 'Инструкции' });
-      PlanfixFix.addTaskBlock('|');
-      PlanfixFix.addTaskBlock('Оформить смету', smeta.run);
+      PFF.addTaskBlock('|');
+      PFF.addTaskBlock('Инструкция', { group: 'Особые пометки', name: 'Инструкции' });
+      PFF.addTaskBlock('|');
+      PFF.addTaskBlock('Оформить смету', smeta.run);
     }
 
     // парсим массив подготовленных аналитик
-    PlanfixFix.getAnalitics().then(function (tasks) {
-      PlanfixFix.addTaskBlock('|');
+    PFF.getAnalitics().then(function (tasks) {
+      PFF.addTaskBlock('|');
       $.each(tasks, function (i, task) {
-        PlanfixFix.addTaskBlock(task.name, task.analitics);
+        PFF.addTaskBlock(task.name, task.analitics);
       });
     });
 
     // быстрые ответы
-    PlanfixFix.getTemplates().then(function (tmpls) {
-      PlanfixFix.addTextTemplates(tmpls);
+    PFF.getTemplates().then(function (tmpls) {
+      PFF.addTextTemplates(tmpls);
     });
 
     // тестовый вызов добавления аналитики
-    /* if (PlanfixFix.debug) {
-      PlanfixFix.addTaskBlock('|');
-      PlanfixFix.addTaskBlock('Удалить все', function () { // удалить аналитики из действия
+    /* if (PFF.debug) {
+      PFF.addTaskBlock('|');
+      PFF.addTaskBlock('Удалить все', function () { // удалить аналитики из действия
         $('.task-add-analitic').click();
         setTimeout(function () {
           $('[data-action="remove-all-analitics"]').click();
@@ -307,9 +307,9 @@ const PlanfixFix = {
     var handbookSelectDialog = new HandbookSelectDialogJS();
 
     setTimeout(() => {
-      $(`[data-handbookid="${PlanfixFix.tmplsRecord.handbook}"]`).click();
+      $(`[data-handbookid="${PFF.tmplsRecord.handbook}"]`).click();
       setTimeout(() => {
-        $(`[data-columnid="${PlanfixFix.tmplsRecord.name}"]`).click()
+        $(`[data-columnid="${PFF.tmplsRecord.name}"]`).click()
       }, 700);
     }, 1000);
 
@@ -330,20 +330,20 @@ const PlanfixFix = {
               let id = exportData.key, name, text;
               let cat = data.NamedPath[0]?.Name || 'Общие';
               for (f of data.Items[0].String) {
-                if(f.Field.ID == PlanfixFix.tmplsRecord.name){
+                if(f.Field.ID == PFF.tmplsRecord.name){
                   name = f.Value;
                 }
-                if(f.Field.ID == PlanfixFix.tmplsRecord.text){
+                if(f.Field.ID == PFF.tmplsRecord.text){
                   text = f.Value;
-                  PlanfixFix.insertTemplate(text);
+                  PFF.insertTemplate(text);
                 }
               }
-              PlanfixFix.updateTmplsMRU({id, name, text, cat});
+              PFF.updateTmplsMRU({id, name, text, cat});
             }
           });
 
         } else if('text' == type) {
-          PlanfixFix.insertTemplate(exportData.text);
+          PFF.insertTemplate(exportData.text);
         }
       }, 200);
     };
@@ -360,7 +360,7 @@ const PlanfixFix = {
   addTextTemplates: function (tmpls) {
     const tplsBlock = $('<div class="pff-tpls-content"></div>');
 
-    PlanfixFix.addTaskBlock('Шаблон', PlanfixFix.templateSelect);
+    PFF.addTaskBlock('Шаблон', PFF.templateSelect);
 
     for (let cat in tmpls) {
       const catDiv = $(`<div class="pff-cat-content"></div>`);
@@ -370,11 +370,11 @@ const PlanfixFix = {
         const textRaw = item.text.replace(/^\n/, '');
         const title = textRaw.replace(/"/g, "'").replace(/<p>/g, '').replace(/<br ?\/?>/g, '\n');
         let link = 'javascript:';
-        if(item.id) link = `https://${location.hostname}/?action=handbookdataview&handbook=${PlanfixFix.tmplsRecord.handbook}&key=${item.id}`;
+        if(item.id) link = `https://${location.hostname}/?action=handbookdataview&handbook=${PFF.tmplsRecord.handbook}&key=${item.id}`;
         catDiv.append(
           $(`<a href="${link}" title="${title}">${item.name.replace(/ /g, '&nbsp;')}</a>`).click(
             () => {
-              PlanfixFix.insertTemplate(textRaw);
+              PFF.insertTemplate(textRaw);
               return false;
             }
           )
@@ -435,27 +435,27 @@ const PlanfixFix = {
     // decorate original functions
     win.ActionListJS.prototype.createAction = function () {
       return this.createAction_orig().then(function () {
-        if (PlanfixFix.debug) console.log('after createAction');
-        PlanfixFix.addCustomAnalitics();
+        if (PFF.debug) console.log('after createAction');
+        PFF.addCustomAnalitics();
       });
     };
     /*win.ActionJS.prototype.createNewAction = function() {
       this.createNewAction_orig();
-      if (PlanfixFix.debug) console.log('after createNewAction');
-      setTimeout(PlanfixFix.addCustomAnalitics, 2000);
+      if (PFF.debug) console.log('after createNewAction');
+      setTimeout(PFF.addCustomAnalitics, 2000);
     };*/
     win.ActionJS.prototype.editDraft = function (draftid, task, insertBefore, actionList) {
       this.editDraft_orig(draftid, task, insertBefore, actionList);
-      if (PlanfixFix.debug) console.log('after editDraft');
-      setTimeout(PlanfixFix.addCustomAnalitics, 1000);
+      if (PFF.debug) console.log('after editDraft');
+      setTimeout(PFF.addCustomAnalitics, 1000);
     };
     win.ActionJS.prototype.edit = function (id, task, data, actionNode) {
       this.edit_orig(id, task, data, actionNode);
-      setTimeout(PlanfixFix.addCustomAnalitics, 1000);
+      setTimeout(PFF.addCustomAnalitics, 1000);
     };
     /*win.ActionJS.restoreAnaliticsForEdit = function(data){
       win.ActionJS.restoreAnaliticsForEdit_orig(data);
-      setTimeout(PlanfixFix.countTotalAnalitics, 2000);
+      setTimeout(PFF.countTotalAnalitics, 2000);
     };*/
 
     // редактор аналитик
@@ -511,17 +511,17 @@ const PlanfixFix = {
     win.MainMenuJS.showConfig_orig = win.MainMenuJS.showConfig;
     win.MainMenuJS.showConfig = function(show) {
       win.MainMenuJS.showConfig_orig(show);
-      PlanfixFix.addMenu();
+      PFF.addMenu();
     };
 
-    /*$('body').delegate(PlanfixFix.fields.vyrabotka.count, 'change keypress', PlanfixFix.countTotalAnalitics);
-    $('body').delegate(PlanfixFix.fields.vyrabotka.name, 'change', function(){
-    var hours_field = $(this).parents('.add-analitic-block').find(PlanfixFix.fields.vyrabotka.hours_per_count);
+    /*$('body').delegate(PFF.fields.vyrabotka.count, 'change keypress', PFF.countTotalAnalitics);
+    $('body').delegate(PFF.fields.vyrabotka.name, 'change', function(){
+    var hours_field = $(this).parents('.add-analitic-block').find(PFF.fields.vyrabotka.hours_per_count);
     hours_field.attr('title', (hours_field.val().replace(',', '.')*60).toFixed(1));
     });*/
 
     /*$('body').delegate('.attach-new-analitic td.td-item-add-ex:first span.fakelink-dashed', 'click', function(e){
-      PlanfixFix.addAnalitics([{}]);
+      PFF.addAnalitics([{}]);
     });*/
   },
 
@@ -529,11 +529,11 @@ const PlanfixFix = {
    * Тупая функция, добавляет все аналитики из массива
    */
   addAnalitics: function (analitics_arr) {
-    analitics_arr = PlanfixFix.normalizeAnalitics(analitics_arr);
+    analitics_arr = PFF.normalizeAnalitics(analitics_arr);
     $.each(analitics_arr, function (i, opts) {
-      PlanfixFix._addAnalitic(opts);
+      PFF._addAnalitic(opts);
     });
-    PlanfixFix.deferred.then(PlanfixFix.countTotalAnalitics);
+    PFF.deferred.then(PFF.countTotalAnalitics);
   },
 
   /**
@@ -581,26 +581,26 @@ const PlanfixFix = {
 
   /**
    * Добавляет аналитику в действие
-   * Добавление идет через PlanfixFix.deferred, очередь добавления
+   * Добавление идет через PFF.deferred, очередь добавления
    * В deferred создержится последняя добавляемая аналитика
    * @param {object} opts { name, group, count, scrollTo, select }
    */
   _addAnalitic: function (opts) {
     var deferred = $.Deferred();
 
-    PlanfixFix.deferred.then(function () {
+    PFF.deferred.then(function () {
       $('.task-add-analitic').click();
 
       var timeout = $('.analitics-form').size() === 0 ? 500 : 10;
       //var timeout = 2000;
       setTimeout(function () {
         var div = $('.analitics-form').last();
-        if (opts.scrollTo) PlanfixFix.scrollTo(div);
+        if (opts.scrollTo) PFF.scrollTo(div);
 
         setTimeout(function () {
           // выбор группы аналитик
           var select = div.find('select');
-          if (PlanfixFix.debug) console.log('select', select);
+          if (PFF.debug) console.log('select', select);
 
           var option = select.find('option').filter(function () {
             return $(this).text() == opts.group;
@@ -608,10 +608,10 @@ const PlanfixFix = {
           select.val(option.val()).change();
 
           var analitic = div.find('.af-tbl-tr');
-          if (PlanfixFix.debug) console.log('analitic', analitic);
+          if (PFF.debug) console.log('analitic', analitic);
 
           var select_handbook = analitic.find('select[data-handbookid]:first');
-          if (PlanfixFix.debug) console.log('select_handbook', select_handbook);
+          if (PFF.debug) console.log('select_handbook', select_handbook);
           select_handbook.trigger('liszt:focus');
 
           // выработка
@@ -627,10 +627,10 @@ const PlanfixFix = {
               var count_focused = false;
               select_handbook.bind('liszt:updated', function (e) {
                 var results = analitic.find('.chzn-results .active-result');
-                if (PlanfixFix.debug) console.log('results', results);
+                if (PFF.debug) console.log('results', results);
                 if (results.length == 1 || opts.select) {
                   results.first().mouseup();
-                  analitic.find(PlanfixFix.fields.vyrabotka.count).focus();
+                  analitic.find(PFF.fields.vyrabotka.count).focus();
                 }
                 // задержка из-за лага chosen
                 setTimeout(function () {
@@ -639,11 +639,11 @@ const PlanfixFix = {
                   analitic.removeClass('silentChosen');
 
                   if (opts.count) {
-                    analitic.find(PlanfixFix.fields.vyrabotka.count).val(opts.count);
-                    analitic.find(PlanfixFix.fields.vyrabotka.comment).focus();
+                    analitic.find(PFF.fields.vyrabotka.count).val(opts.count);
+                    analitic.find(PFF.fields.vyrabotka.comment).focus();
                   } else {
                     analitic
-                      .find(PlanfixFix.fields.vyrabotka.count)
+                      .find(PFF.fields.vyrabotka.count)
                       .focus()
                       .on('keypress', function (e) {
                         if (e.which == 13) {
@@ -680,7 +680,7 @@ const PlanfixFix = {
       }, timeout);
     });
 
-    PlanfixFix.deferred = deferred;
+    PFF.deferred = deferred;
     return deferred.promise();
   },
 
@@ -694,28 +694,28 @@ const PlanfixFix = {
     };
     var deferred = $.Deferred();
 
-    PlanfixFix.deferred.then(function () {
+    PFF.deferred.then(function () {
       // добавить другую аналитику
       $('[data-action="add-new-analitic"]').click();
 
       setTimeout(() => {
         const div = $('.analitics-form').last();
-        if (opts.scrollTo) PlanfixFix.scrollTo(div);
+        if (opts.scrollTo) PFF.scrollTo(div);
 
         setTimeout(() => {
           // выбор группы аналитик
           var select = div.find('select');
-          if (PlanfixFix.debug) console.log('select', select);
+          if (PFF.debug) console.log('select', select);
           const option = select.find('option').filter(function () {
             return $(this).text() == opts.group;
           });
           select.val(option.val()).change();
 
           const analitic = div.find('[data-aname="' + opts.group + '"] .af-tbl-tr').last();
-          if (PlanfixFix.debug) console.log('analitic', analitic);
+          if (PFF.debug) console.log('analitic', analitic);
 
           const select_handbook = analitic.find('select[data-handbookid]:first');
-          if (PlanfixFix.debug) console.log('select_handbook', select_handbook);
+          if (PFF.debug) console.log('select_handbook', select_handbook);
           select_handbook.trigger('liszt:focus');
 
           setTimeout(() => {
@@ -727,10 +727,10 @@ const PlanfixFix = {
             var count_focused = false;
             select_handbook.bind('liszt:updated', function (e) {
               var results = analitic.find('.chzn-results .active-result');
-              if (PlanfixFix.debug) console.log('results', results);
+              if (PFF.debug) console.log('results', results);
               if (results.length == 1 || opts.select) {
                 results.first().mouseup();
-                analitic.find(PlanfixFix.fields.vyrabotka.count).focus();
+                analitic.find(PFF.fields.vyrabotka.count).focus();
               }
               // задержка из-за лага chosen
               setTimeout(() => {
@@ -739,13 +739,13 @@ const PlanfixFix = {
                 analitic.removeClass('silentChosen');
 
                 if (opts.count) {
-                  analitic.find(PlanfixFix.fields.realization.count).val(opts.count);
+                  analitic.find(PFF.fields.realization.count).val(opts.count);
                 }
                 if (opts.price) {
-                  analitic.find(PlanfixFix.fields.realization.price).val(opts.price);
+                  analitic.find(PFF.fields.realization.price).val(opts.price);
                 }
                 if (opts.date) {
-                  analitic.find(PlanfixFix.fields.realization.date).val(opts.date);
+                  analitic.find(PFF.fields.realization.date).val(opts.date);
                 }
               }, 2000);
 
@@ -756,7 +756,7 @@ const PlanfixFix = {
       }, 500);
     });
 
-    PlanfixFix.deferred = deferred;
+    PFF.deferred = deferred;
     return deferred.promise();
   },
 
@@ -769,16 +769,16 @@ const PlanfixFix = {
     var block = $('<div class="task-add-block"></div>')
       .html(name)
       .click(function () {
-        PlanfixFix.resetDeferred();
+        PFF.resetDeferred();
         if ($.isArray(action) || typeof action == 'object' || typeof action == 'string') {
-          PlanfixFix.addAnalitics(action);
+          PFF.addAnalitics(action);
         } else if ($.isFunction(action)) {
           action();
         }
       });
-    //if (PlanfixFix.debug) console.log(block);
+    //if (PFF.debug) console.log(block);
     if ($.isArray(action) || typeof action == 'object' || typeof action == 'string') {
-      var analitics = $.map(PlanfixFix.normalizeAnalitics(action), function (analitic) {
+      var analitics = $.map(PFF.normalizeAnalitics(action), function (analitic) {
         return analitic.name;
       });
       block.attr('title', analitics.join('\n'));
@@ -795,22 +795,22 @@ const PlanfixFix = {
    */
   getAnalitics: function () {
     var deferred = $.Deferred();
-    if (PlanfixFix._analitics.length === 0) {
-      var mtime = localStorage.planfixfix_analitics_mtime || new Date().getTime();
+    if (PFF._analitics.length === 0) {
+      var mtime = localStorage.pff_analitics_mtime || new Date().getTime();
       var cache_age = new Date().getTime() - mtime;
-      if (cache_age > PlanfixFix.analitics_remote_cache_lifetime * 1000) {
-        PlanfixFix.clearCache();
+      if (cache_age > PFF.analitics_remote_cache_lifetime * 1000) {
+        PFF.clearCache();
       }
-      PlanfixFix._analitics = $.parseJSON(localStorage.planfixfix_analitics) || [];
+      PFF._analitics = $.parseJSON(localStorage.pff_analitics) || [];
 
-      /*if(PlanfixFix._analitics.length===0){
-                    deferred = PlanfixFix.parseRemoteAnalitics(
-                        PlanfixFix.getRemoteAnaliticsUrl()
+      /*if(PFF._analitics.length===0){
+                    deferred = PFF.parseRemoteAnalitics(
+                        PFF.getRemoteAnaliticsUrl()
                     );
                 }*/
     }
-    if (PlanfixFix._analitics.length > 0) {
-      deferred.resolve(PlanfixFix._analitics);
+    if (PFF._analitics.length > 0) {
+      deferred.resolve(PFF._analitics);
     }
     return deferred.promise();
   },
@@ -823,16 +823,16 @@ const PlanfixFix = {
    */
   getTemplates: function () {
     return new Promise((resolve, reject) => {
-      var mtime = localStorage.planfixfix_templates_mtime || new Date().getTime();
+      var mtime = localStorage.pff_templates_mtime || new Date().getTime();
       var cache_age = new Date().getTime() - mtime;
-      if (cache_age > PlanfixFix.templates_remote_cache_lifetime * 1000) {
-        delete localStorage.planfixfix_templates;
+      if (cache_age > PFF.templates_remote_cache_lifetime * 1000) {
+        delete localStorage.pff_templates;
       }
 
-      if (!localStorage.planfixfix_templates) {
-        const remoteUrl = PlanfixFix.getRemoteTemplatesUrl();
+      if (!localStorage.pff_templates) {
+        const remoteUrl = PFF.getRemoteTemplatesUrl();
         if(remoteUrl.url){
-          PlanfixFix.parseRemoteTemplates().then((tmpls) => {
+          PFF.parseRemoteTemplates().then((tmpls) => {
             resolve(tmpls);
           });
         }
@@ -862,7 +862,7 @@ const PlanfixFix = {
           resolve(tmpls);
         }
       } else {
-        const tmpls = JSON.parse(localStorage.planfixfix_templates) || {};
+        const tmpls = JSON.parse(localStorage.pff_templates) || {};
         debug('use cached templates:', tmpls);
         resolve(tmpls);
       }
@@ -874,7 +874,7 @@ const PlanfixFix = {
    */
   getDefaultAnalitics: function () {
     var tasks = [];
-    $.each(PlanfixFix.analitics_default, function (i, item) {
+    $.each(PFF.analitics_default, function (i, item) {
       tasks.push({
         name: item[0],
         analitics: item[1],
@@ -887,16 +887,16 @@ const PlanfixFix = {
    * Возвращает сохраненный или дефолтный урл
    */
   getRemoteAnaliticsUrl: function () {
-    var store = $.parseJSON(localStorage.planfixfix_remote_analitics_url);
-    return store || PlanfixFix.analitics_remote_default;
+    var store = $.parseJSON(localStorage.pff_remote_analitics_url);
+    return store || PFF.analitics_remote_default;
   },
 
   /**
    * Возвращает сохраненный или дефолтный урл
    */
   getRemoteTemplatesUrl: function () {
-    var store = $.parseJSON(localStorage.planfixfix_remote_templates_url);
-    return store || PlanfixFix.templates_remote_default;
+    var store = $.parseJSON(localStorage.pff_remote_templates_url);
+    return store || PFF.templates_remote_default;
   },
 
   /**
@@ -904,12 +904,12 @@ const PlanfixFix = {
    * Если пусто или изменено, чистим кеш
    */
   setRemoteAnaliticsUrl: function (remote) {
-    if (remote.url == PlanfixFix.analitics_remote_default.url) {
+    if (remote.url == PFF.analitics_remote_default.url) {
       return true;
     }
     if (remote.url === '') {
-      delete localStorage.planfixfix_remote_analitics_url;
-      PlanfixFix.clearCache();
+      delete localStorage.pff_remote_analitics_url;
+      PFF.clearCache();
       return true;
     }
     if (!remote.url.match(/^https:\/\//)) {
@@ -920,8 +920,8 @@ const PlanfixFix = {
       alert('Возможны только текстовые файлы');
       return false;
     }
-    PlanfixFix.clearCache();
-    localStorage.planfixfix_remote_analitics_url = JSON.stringify(remote);
+    PFF.clearCache();
+    localStorage.pff_remote_analitics_url = JSON.stringify(remote);
     return true;
   },
 
@@ -930,12 +930,12 @@ const PlanfixFix = {
    * Если пусто или изменено, чистим кеш
    */
   setRemoteTemplatesUrl: function (remote) {
-    if (remote.url == PlanfixFix.templates_remote_default.url) {
+    if (remote.url == PFF.templates_remote_default.url) {
       return true;
     }
     if (remote.url === '') {
-      delete localStorage.planfixfix_remote_templates_url;
-      delete localStorage.planfixfix_templates;
+      delete localStorage.pff_remote_templates_url;
+      delete localStorage.pff_templates;
       return true;
     }
     if (!remote.url.match(/^https:\/\//)) {
@@ -946,8 +946,8 @@ const PlanfixFix = {
       alert('Возможны только yml файлы');
       return false;
     }
-    delete localStorage.planfixfix_templates;
-    localStorage.planfixfix_remote_templates_url = JSON.stringify(remote);
+    delete localStorage.pff_templates;
+    localStorage.pff_remote_templates_url = JSON.stringify(remote);
     return true;
   },
 
@@ -956,14 +956,14 @@ const PlanfixFix = {
     $.get(opts.url, function (data) {
       var tasks = [];
       if (opts.format == 'text') {
-        tasks = PlanfixFix.text2tasks(data);
+        tasks = PFF.text2tasks(data);
       }
       if (tasks.length > 0) {
-        PlanfixFix._analitics = tasks;
-        localStorage.planfixfix_analitics = JSON.stringify(tasks);
-        localStorage.planfixfix_analitics_mtime = new Date().getTime();
+        PFF._analitics = tasks;
+        localStorage.pff_analitics = JSON.stringify(tasks);
+        localStorage.pff_analitics_mtime = new Date().getTime();
       }
-      if (tasks.length === 0) tasks = PlanfixFix.getDefaultAnalitics();
+      if (tasks.length === 0) tasks = PFF.getDefaultAnalitics();
       deferred.resolve(tasks);
     });
     return deferred;
@@ -984,13 +984,13 @@ const PlanfixFix = {
           const tplsCount = Object.keys(tpls).length;
           if (tplsCount > 0) {
             debug('parsed remote templates:', tpls);
-            PlanfixFix._tpls = tpls;
-            localStorage.planfixfix_templates = JSON.stringify(tpls);
-            localStorage.planfixfix_templates_mtime = new Date().getTime();
+            PFF._tpls = tpls;
+            localStorage.pff_templates = JSON.stringify(tpls);
+            localStorage.pff_templates_mtime = new Date().getTime();
             resolve(tpls);
           } else {
             debug('failed parse remote templates:', response.responseText);
-            resolve(PlanfixFix.getDefaultTemplates());
+            resolve(PFF.getDefaultTemplates());
           }
         },
       });
@@ -1033,7 +1033,7 @@ const PlanfixFix = {
    * Чистит сохраненные аналитики, которые загружались удаленно
    */
   clearCache: function () {
-    delete localStorage.planfixfix_analitics;
+    delete localStorage.pff_analitics;
   },
 
   /**
@@ -1063,13 +1063,13 @@ const PlanfixFix = {
       }
       highlight(false);
 
-      var counts = $(PlanfixFix.fields.vyrabotka.count);
+      var counts = $(PFF.fields.vyrabotka.count);
       var totals = 0;
       counts.each(function (i, count_field) {
         var analitic = $(count_field).parents('.add-analitic-block');
         var count = $(count_field).val();
         var hours_per_count = analitic
-          .find(PlanfixFix.fields.vyrabotka.hours_per_count)
+          .find(PFF.fields.vyrabotka.hours_per_count)
           .text()
           .replace(',', '.');
         var hours = count * hours_per_count;
@@ -1095,7 +1095,7 @@ const PlanfixFix = {
    * следующий _addAnalitic() исполнится мгновенно
    */
   resetDeferred: function () {
-    PlanfixFix.deferred = $.Deferred().resolve();
+    PFF.deferred = $.Deferred().resolve();
   },
 
   /**
@@ -1104,35 +1104,35 @@ const PlanfixFix = {
    * - url для удаленной загрузки аналитик
    */
   addMenu: function () {
-    $('<a href="javascript:" class="without-dragging main-menu-config-item">PlanfixFix</a>')
+    $('<a href="javascript:" class="without-dragging main-menu-config-item">PFF</a>')
       .appendTo('.main-config-ddl-wrapper')
       .click(function () {
-        var remoteAnalitics = PlanfixFix.getRemoteAnaliticsUrl();
-        var remoteTemplates = PlanfixFix.getRemoteTemplatesUrl();
+        var remoteAnalitics = PFF.getRemoteAnaliticsUrl();
+        var remoteTemplates = PFF.getRemoteTemplatesUrl();
         var html =
-          '<div class="planfixfix-settings">' +
+          '<div class="pff-settings">' +
           '<div class="form">' +
           '<div>URL для обновления аналитик, обязательно https://</div>' +
-          '<input style="width:400px" class="text-box" name="planfixfix_analitics_remote_url" value="' +
+          '<input style="width:400px" class="text-box" name="pff_analitics_remote_url" value="' +
           remoteAnalitics.url +
           '"/>' +
-          //.append('<input type="hidden" name="planfixfix_remote_format" value="text"/>')
+          //.append('<input type="hidden" name="pff_remote_format" value="text"/>')
           '<br>' +
 
           '<div>URL для обновления шаблонов писем (yml), обязательно https://</div>' +
-          '<input style="width:400px" class="text-box" name="planfixfix_templates_remote_url" value="' +
+          '<input style="width:400px" class="text-box" name="pff_templates_remote_url" value="' +
           remoteTemplates.url +
           '"/>' +
           '<input type="button" value="Сохранить"/>' +
           '</div>';
         win.drawDialog(300, 'auto', 300, html);
-        $('.planfixfix-settings [type="button"]').click(function () {
-          var isSave = PlanfixFix.setRemoteAnaliticsUrl({
-            url: $('[name="planfixfix_analitics_remote_url"]').val(),
+        $('.pff-settings [type="button"]').click(function () {
+          var isSave = PFF.setRemoteAnaliticsUrl({
+            url: $('[name="pff_analitics_remote_url"]').val(),
             format: 'text',
           });
-          isSave = isSave && PlanfixFix.setRemoteTemplatesUrl({
-            url: $('[name="planfixfix_templates_remote_url"]').val(),
+          isSave = isSave && PFF.setRemoteTemplatesUrl({
+            url: $('[name="pff_templates_remote_url"]').val(),
             format: 'yml',
           });
           if (isSave) {
@@ -1168,7 +1168,7 @@ const PlanfixFix = {
     return dates;
   },
 };
-win.PlanfixFix = PlanfixFix;
+win.PFF = PFF;
 const pad = function (num) {
   const A = num.toString();
   if (A.length > 1) return A;
@@ -1176,6 +1176,6 @@ const pad = function (num) {
 };
 
 $(function () {
-  PlanfixFix.init();
+  PFF.init();
 });
 })();

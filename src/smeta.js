@@ -282,7 +282,7 @@ const smetaToRelization = function () {
     const price = customPrice ? customPrice : itemPrice;
     const date = pad(d.getDate()) + '-' + pad(1 + d.getMonth()) + '-' + d.getFullYear();
 
-    win.PlanfixFix._addRealization({
+    win.PFF._addRealization({
       name: name,
       group: 'Реализация',
       price: price,

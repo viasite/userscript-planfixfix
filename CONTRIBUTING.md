@@ -28,8 +28,8 @@ var $ = win.$;
 // @include        https://tagilcity.planfix.ru/*
 // @match          https://tagilcity.planfix.ru/*
 // @grant          GM_xmlhttpRequest
+// @require        file:///C:/projects/js/userscript-planfixfix/src/_planfixfix.js
 // @require        file:///C:/projects/js/userscript-planfixfix/src/jsyaml.js
 // @require        file:///C:/projects/js/userscript-planfixfix/src/smeta.js
-// @require        file:///C:/projects/js/userscript-planfixfix/src/planfixfix.js
 // ==/UserScript==
 ```
