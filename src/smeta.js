@@ -236,9 +236,16 @@ const pffSmeta = {
 
   // get selection html from ckeditor
   getSelectionHtml(editor) {
+    /**
+     *
+     * @param {function} win.CKEDITOR.dom.element
+     * @param {function} sel.getRanges
+     * @param {function} el.getHtml
+     */
     const sel = editor.getSelection();
     const ranges = sel.getRanges();
-    const el = new win.CKEDITOR.dom.element('div');
+    const Element = win.CKEDITOR.dom.element;
+    const el = new Element('div');
     for (let i = 0, len = ranges.length; i < len; ++i) {
       el.append(ranges[i].cloneContents());
     }
