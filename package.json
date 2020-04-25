@@ -10,5 +10,8 @@
     "build": "bash scripts/build.sh"
   },
   "author": "Stanislav Popov",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "@types/jquery": "^3.3.35"
+  }
 }

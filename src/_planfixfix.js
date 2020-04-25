@@ -1,6 +1,12 @@
+/**
+ * @param {Object} window.unsafeWindow window
+ * @param {Object} win.Current текущий пользователь
+ * @param {string} win.Current.loginedPost должность
+ * @param {Object} $ jQuery
+ */
 (function() {
   console.log('exec _planfixfix.js');
-  let win = typeof unsafeWindow != 'undefined' ? unsafeWindow : window;
+  let win = typeof window.unsafeWindow != 'undefined' ? window.unsafeWindow : window;
   let $ = win.$;
 
   function debug() {
@@ -11,7 +17,7 @@
     console.log(error + ' (line ' + line + ')');
   };
 
-  if (win.top != win.self) {
+  if (win.top !== win.self) {
     return false; // ignore iframes
   }
 
@@ -25,8 +31,8 @@
     adminId: 9230, // тестовый пользователь
 
     isManager() {
-      return userPost == 'Менеджер по сопровождению заказов' ||
-          userPost == 'Руководитель отдела продаж';
+      return win.Current.loginedPost === 'Менеджер по сопровождению заказов' ||
+          win.Current.loginedPost === 'Руководитель отдела продаж';
     },
 
     fields: {
@@ -106,12 +112,13 @@
 
     init: function() {
       // init once
-      if ($('body').hasClass('pff_inited')) return false;
-      $('body').addClass('pff_inited');
+      const body = $('body');
+      if (body.hasClass('pff_inited')) return false;
+      body.addClass('pff_inited');
 
       // не пугаем планфикс своими ошибками
       win.onerror = function() {
-        return;
+        return true;
       };
 
       // подключение модулей из файлов
@@ -132,9 +139,9 @@
         setTimeout(() => {
           win.onbeforeunload = undefined; // отменить предупреждение о закрытии окна
           //console.log('debug: new action');
-          $('.actions-quick-add-block-text').click(); // создание действия
+          $('.actions-quick-add-block-text').trigger('click'); // создание действия
           //console.log('debug: edit-draft-action');
-          //$('.edit-draft-action').click(); // edit
+          //$('.edit-draft-action').trigger('click'); // edit
           //PFF.addAnalitics({ name: 'Поминутная работа программиста' });
         }, 2000);
       }
@@ -178,6 +185,11 @@
     },
 
     pfAlter: function() {
+      /**
+       *
+       * @param win.ActionListJS код блока действий
+       * @param win.AnaliticsWinJS редактор аналитик
+       */
       // save original functions
       win.ActionListJS.prototype.createAction_orig = win.ActionListJS.prototype.createAction;
       //win.ActionJS.prototype.createNewAction_orig = win.ActionJS.prototype.createNewAction;
@@ -189,19 +201,19 @@
       // decorate original functions
       win.ActionListJS.prototype.createAction = function() {
         return this.createAction_orig().then(function() {
-          if (PFF.debug) console.log('after createAction');
+          debug('after createAction');
           PFF.addActions();
         });
       };
       /*win.ActionJS.prototype.createNewAction = function() {
         this.createNewAction_orig();
-        if (PFF.debug) console.log('after createNewAction');
+        debug('after createNewAction');
         setTimeout(PFF.addActions, 2000);
       };*/
       win.ActionJS.prototype.editDraft = function(
           draftid, task, insertBefore, actionList) {
         this.editDraft_orig(draftid, task, insertBefore, actionList);
-        if (PFF.debug) console.log('after editDraft');
+        debug('after editDraft');
         setTimeout(PFF.addActions, 1000);
       };
       win.ActionJS.prototype.edit = function(id, task, data, actionNode) {
@@ -221,7 +233,7 @@
           const link = $(
               '<span style="margin-left:1em" class="fakelink-dashed">' + name +
               '</span>',
-          ).click(action);
+          ).on('click', action);
           $('.af-row-btn-add').append(link);
           return link;
         };
@@ -256,7 +268,7 @@
               const link = addAnaliticAction(
                   `Удалить ${sec.name} (${sec.count})`, () => {
                     for (let row of sec.rows) {
-                      row.find('[data-acr="delete"]').click();
+                      row.find('[data-acr="delete"]').trigger('click');
                       row.remove();
                     }
                     link.remove();
@@ -267,6 +279,10 @@
       };
 
       // menuitem
+      /**
+       *
+       * @param win.MainMenuJS главное меню
+       */
       win.MainMenuJS.showConfig_orig = win.MainMenuJS.showConfig;
       win.MainMenuJS.showConfig = function(show) {
         win.MainMenuJS.showConfig_orig(show);
@@ -303,11 +319,11 @@
      * Группа по умолчанию - Выработка
      */
     normalizeAnalitics: function(analitics_arr) {
-      var analitics = [];
-      if (!$.isArray(analitics_arr)) analitics_arr = [analitics_arr];
+      const analitics = [];
+      if (!Array.isArray(analitics_arr)) analitics_arr = [analitics_arr];
       $.each(analitics_arr, function(i, opts) {
-        var isFirst = i === 0;
-        var isLast = i === analitics_arr.length - 1;
+        const isFirst = i === 0;
+        const isLast = i === analitics_arr.length - 1;
         if (typeof opts == 'string') {
           opts = {name: opts};
         }
@@ -322,13 +338,13 @@
             opts,
         );
 
-        var count = opts.name.match(/ - (\d+)$/) || '';
+        const count = opts.name.match(/ - (\d+)$/) || '';
         if (count !== '') {
           opts.name = opts.name.replace(count[0], '');
           opts.count = count[1];
         }
 
-        var group = opts.name.match(/^\[(.*?)\] ?/) || '';
+        const group = opts.name.match(/^\[(.*?)] ?/) || '';
         if (group !== '') {
           opts.name = opts.name.replace(group[0], '');
           opts.group = group[1];
@@ -346,33 +362,33 @@
      * @param {object} opts { name, group, count, scrollTo, select }
      */
     _addAnalitic: function(opts) {
-      var deferred = $.Deferred();
+      const deferred = $.Deferred();
 
       PFF.deferred.then(function() {
-        $('.task-add-analitic').click();
+        $('.task-add-analitic').trigger('click');
 
-        var timeout = $('.analitics-form').size() === 0 ? 500 : 10;
+        const timeout = $('.analitics-form').length === 0 ? 500 : 10;
         //var timeout = 2000;
         setTimeout(function() {
-          var div = $('.analitics-form').last();
+          const div = $('.analitics-form').last();
           if (opts.scrollTo) PFF.scrollTo(div);
 
           setTimeout(function() {
             // выбор группы аналитик
-            var select = div.find('select');
-            if (PFF.debug) console.log('select', select);
+            const select = div.find('select');
+            debug('select', select);
 
-            var option = select.find('option').filter(function() {
-              return $(this).text() == opts.group;
+            const option = select.find('option').filter(function() {
+              return $(this).text() === opts.group;
             });
-            select.val(option.val()).change();
+            select.val(option.val()).trigger('change');
 
-            var analitic = div.find('.af-tbl-tr');
-            if (PFF.debug) console.log('analitic', analitic);
+            const analitic = div.find('.af-tbl-tr');
+            debug('analitic', analitic);
 
-            var select_handbook = analitic.find(
+            const select_handbook = analitic.find(
                 'select[data-handbookid]:first');
-            if (PFF.debug) console.log('select_handbook', select_handbook);
+            debug('select_handbook', select_handbook);
             select_handbook.trigger('liszt:focus');
 
             // выработка
@@ -383,14 +399,14 @@
                 analitic.addClass('silentChosen');
                 analitic.find('.chzn-search:first input').
                     val(opts.name).
-                    keyup();
-                var count_focused = false;
-                select_handbook.bind('liszt:updated', function(e) {
-                  var results = analitic.find('.chzn-results .active-result');
-                  if (PFF.debug) console.log('results', results);
-                  if (results.length == 1 || opts.select) {
-                    results.first().mouseup();
-                    analitic.find(PFF.fields.vyrabotka.count).focus();
+                    trigger('keyup');
+                let count_focused = false;
+                select_handbook.on('liszt:updated', function() {
+                  const results = analitic.find('.chzn-results .active-result');
+                  // debug('results', results);
+                  if (results.length === 1 || opts.select) {
+                    results.first().trigger('mouseup');
+                    analitic.find(PFF.fields.vyrabotka.count).trigger('focus');
                   }
                   // задержка из-за лага chosen
                   setTimeout(function() {
@@ -400,16 +416,16 @@
 
                     if (opts.count) {
                       analitic.find(PFF.fields.vyrabotka.count).val(opts.count);
-                      analitic.find(PFF.fields.vyrabotka.comment).focus();
+                      analitic.find(PFF.fields.vyrabotka.comment).trigger('focus');
                     } else {
                       analitic.find(PFF.fields.vyrabotka.count).
-                          focus().
+                          trigger('focus').
                           on('keypress', function(e) {
-                            if (e.which == 13) {
+                            if (e.which === 13) {
                               if (e.ctrlKey) {
-                                $('[data-action="saveParent"]').click();
+                                $('[data-action="saveParent"]').trigger('click');
                               } else {
-                                $('[data-action="save"]').click();
+                                $('[data-action="save"]').trigger('click');
                               }
                             }
                           });
@@ -449,21 +465,21 @@
      * Можно передавать вместо аналитик произвольную функцию
      */
     addTaskBlock: function(name, action) {
-      var block = $('<div class="task-add-block"></div>').
+      const block = $('<div class="task-add-block"></div>').
           html(name).
-          click(function() {
+          on('click', function() {
             PFF.resetDeferred();
-            if ($.isArray(action) || typeof action == 'object' ||
+            if (Array.isArray(action) || typeof action == 'object' ||
                 typeof action == 'string') {
               PFF.addAnalitics(action);
-            } else if ($.isFunction(action)) {
+            } else if (typeof action === 'function') {
               action();
             }
           });
       //if (PFF.debug) console.log(block);
-      if ($.isArray(action) || typeof action == 'object' || typeof action ==
+      if (Array.isArray(action) || typeof action == 'object' || typeof action ==
           'string') {
-        var analitics = $.map(PFF.normalizeAnalitics(action),
+        const analitics = $.map(PFF.normalizeAnalitics(action),
             function(analitic) {
               return analitic.name;
             });
@@ -484,6 +500,9 @@
      * Прокручивает до селектора, используется функция планфикса
      */
     scrollTo: function(elem) {
+      /**
+       * @param {Object} win.TaskCardPoolJS
+       */
       win.TaskCardPoolJS.getInstance(win.PlanfixPage.task).
           scroller.
           scrollToBlock(elem);
@@ -505,10 +524,10 @@
     addMenu: function() {
       $('<a href="javascript:" class="without-dragging main-menu-config-item">PlanfixFix</a>').
           appendTo('.main-config-ddl-wrapper').
-          click(function() {
-            var remoteAnalitics = PFF.analitics.getRemoteAnaliticsUrl();
-            var remoteTemplates = PFF.tmpls.getRemoteTemplatesUrl();
-            var html =
+          on('click', function() {
+            const remoteAnalitics = PFF.analitics.getRemoteAnaliticsUrl();
+            const remoteTemplates = PFF.tmpls.getRemoteTemplatesUrl();
+            const html =
                 '<div class="pff-settings">' +
                 '<div class="form">' +
                 '<div>URL для обновления аналитик, обязательно https://</div>' +
@@ -524,9 +543,12 @@
                 '"/>' +
                 '<input type="button" value="Сохранить"/>' +
                 '</div>';
+            /**
+             * @param win.drawDialog простая всплывалка, не модальная
+             */
             win.drawDialog(300, 'auto', 300, html);
-            $('.pff-settings [type="button"]').click(function() {
-              var isSave = PFF.analitics.setRemoteAnaliticsUrl({
+            $('.pff-settings [type="button"]').on('click', function() {
+              let isSave = PFF.analitics.setRemoteAnaliticsUrl({
                 url: $('[name="pff_analitics_remote_url"]').val(),
                 format: 'text',
               });
@@ -535,7 +557,7 @@
                 format: 'yml',
               });
               if (isSave) {
-                $('.dialogWin .destroy-button').click();
+                $('.dialogWin .destroy-button').trigger('click');
               }
             });
             return false;
