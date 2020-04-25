@@ -229,54 +229,7 @@
       // редактор аналитик
       win.AnaliticsWinJS.prototype.show = function(options) {
         this.show_orig(options);
-
-        const addAnaliticAction = (name, action) => {
-          const link = $(
-              '<span style="margin-left:1em" class="fakelink-dashed">' + name +
-              '</span>',
-          ).on('click', action);
-          $('.af-row-btn-add').append(link);
-          return link;
-        };
-
-        setTimeout(() => {
-          const smetaTable = $('[data-aid="314"] .tbl-list');
-          // смета на разработку
-          if (smetaTable.length > 0) {
-            // кнопка "Реализовать"
-            addAnaliticAction('Реализовать', PFF.smeta.toRelization);
-
-            // кнопка "Сортировать смету"
-            addAnaliticAction('Сортировать смету', PFF.smeta.order);
-
-            // удаление аналитик по блокам (этапам)
-            // TODO: to pffSmeta
-            const sections = {};
-            smetaTable.find('div[data-fid="950"]').each(function() {
-              const val = $(this).find('input:hidden').val();
-              if (!sections[val]) {
-                sections[val] = {
-                  name: $(this).text(),
-                  count: 0,
-                  rows: [],
-                };
-              }
-              sections[val].count++;
-              sections[val].rows.push($(this).parents('tr'));
-            });
-            for (let fid in sections) {
-              const sec = sections[fid];
-              const link = addAnaliticAction(
-                  `Удалить ${sec.name} (${sec.count})`, () => {
-                    for (let row of sec.rows) {
-                      row.find('[data-acr="delete"]').trigger('click');
-                      row.remove();
-                    }
-                    link.remove();
-                  });
-            }
-          }
-        }, 3000);
+        PFF.smeta.addAnaliticActions();
       };
 
       // menuitem
@@ -354,6 +307,16 @@
         analitics.push(opts);
       });
       return analitics;
+    },
+
+    // добавляет действие в редактор аналитик
+    addAnaliticAction(name, action) {
+      const link = $(
+          '<span style="margin-left:1em" class="fakelink-dashed">' + name +
+          '</span>',
+      ).on('click', action);
+      $('.af-row-btn-add').append(link);
+      return link;
     },
 
     /**

@@ -1,18 +1,71 @@
 // smeta.js
 // console.log('include smeta.js');
 win = typeof unsafeWindow != 'undefined' ? unsafeWindow : window;
-$ = win.$;
+$ = $ || win.$;
 
 // оформление сметы в 1 клик, https://tagilcity.planfix.ru/task/604890
 const pffSmeta = {
   addActions() {
     if (
-        Current.logined == win.PFF.adminId ||
+        parseInt(win.Current.logined) === win.PFF.adminId ||
         win.PFF.isManager()
     ) {
       win.PFF.addTaskBlock('|');
       win.PFF.addTaskBlock('Оформить смету', pffSmeta.run);
     }
+  },
+
+  addAnaliticActions() {
+    const PFF = win.PFF;
+    const maxAttempts = 10;
+    let i = 0
+    const interval = setInterval(() =>{
+      i++;
+      if(i >= maxAttempts) clearInterval(interval);
+
+      const smetaTable = $('[data-aid="314"] .tbl-list');
+      if(smetaTable.length === 0) return false;
+
+      clearInterval(interval);
+
+      // смета на разработку
+      if (smetaTable.length > 0) {
+        // кнопка "Реализовать"
+        PFF.addAnaliticAction('Реализовать', pffSmeta.toRelization);
+
+        // кнопка "Сортировать смету"
+        PFF.addAnaliticAction('Сортировать смету', pffSmeta.order);
+
+        // удаление аналитик по блокам (этапам)
+        // TODO: to pffSmeta
+        const sections = {};
+        smetaTable.find('div[data-fid="950"]').each(function() {
+          const val = $(this).find('input:hidden').val();
+          if (!sections[val]) {
+            sections[val] = {
+              name: $(this).text(),
+              count: 0,
+              rows: [],
+            };
+          }
+          sections[val].count++;
+          sections[val].rows.push($(this).parents('tr'));
+        });
+        for (let fid in sections) {
+          const sec = sections[fid];
+          const link = PFF.addAnaliticAction(
+              `Удалить ${sec.name} (${sec.count})`,
+              () => {
+                for (let row of sec.rows) {
+                  row.find('[data-acr="delete"]').trigger('click');
+                  row.remove();
+                }
+                link.remove();
+              },
+          );
+        }
+      }
+    }, 500);
   },
 
   // style html
@@ -59,7 +112,7 @@ const pffSmeta = {
       //console.log(line);
 
       // empty line
-      if (line.replace(/(;nbsp| )/g, '') == '') continue;
+      if (line.replace(/(;nbsp| )/g, '') === '') continue;
 
       // ignore summary for double conversion
       if (line.match(/^Итого.*?:/)) continue;
@@ -77,7 +130,7 @@ const pffSmeta = {
       //console.log(h);
 
       // is header?
-      if (h && line.indexOf(':') == -1) {
+      if (h && line.indexOf(':') === -1) {
         const name = h[1];
         const price = h[3];
 
@@ -95,7 +148,7 @@ const pffSmeta = {
         newlines.push('<ul>');
       } else {
         const item = line.match(
-            /(.*?):\s([0-9\s&nbsp;]+[&nbsp;\s]+руб\.)(, старая цена:)?([0-9\s\.&nbsp;]+(руб\.)?)? ?(.*)?/,
+            /(.*?):\s([0-9\s&nbsp;]+[&nbsp;\s]+руб\.)(, старая цена:)?([0-9\s.&nbsp;]+(руб\.)?)? ?(.*)?/,
         );
         //console.log(item);
 
@@ -192,7 +245,7 @@ const pffSmeta = {
     return el.getHtml();
   },
 
-  // main function
+  // вход в "Оформить смету"
   run() {
     const editor = win.CKEDITOR.instances.ActionDescription;
     const html = pffSmeta.getSelectionHtml(editor);
@@ -234,9 +287,7 @@ const pffSmeta = {
         // ignore subfids
         if (!fid || fid.toString().indexOf(':') !== -1) return;
 
-        const val = td.find('input:hidden').val();
-
-        rowData[fid] = val;
+        rowData[fid] = td.find('input:hidden').val();
       });
 
       rowsData.push(rowData);
@@ -245,7 +296,7 @@ const pffSmeta = {
     // сортируем массив данных по нужным колонкам, предполагаем, что там int/float
     const rowsDataSorted = rowsData.concat().sort((a, b) => {
       for (let sfid of opts.orderByFids) {
-        if (a[sfid] == b[sfid]) continue;
+        if (a[sfid] === b[sfid]) continue;
 
         // remove "
         a[sfid] = a[sfid].replace(/"/g, '').replace(/,/g, '.');
@@ -256,7 +307,6 @@ const pffSmeta = {
       }
       return 0;
     });
-    const newrows = [];
     //console.log(rowsData);
     //console.log(rowsDataSorted);
 
@@ -265,6 +315,7 @@ const pffSmeta = {
       const elem = $(row.elem);
       const newData = rowsDataSorted[ind];
       for (let fid in newData) {
+        if(!newData.hasOwnProperty(fid)) continue;
         elem.find('[data-fid="' + fid + '"] input:hidden').val(newData[fid]);
       }
     });
@@ -272,7 +323,7 @@ const pffSmeta = {
     // обозначаем окончание цветом (визуально данные не поменяются)
     t.css('background', '#e5ffe5');
     setTimeout(
-        () => { t.parents('.analitics-form').find('.btn-create').click(); },
+        () => { t.parents('.analitics-form').find('.btn-create').trigger('click'); },
         1000);
     /*alert(`Использование:
     1. Сделать копию задачи
@@ -297,7 +348,7 @@ const pffSmeta = {
     const smetaTable = $('[data-aid="314"] .tbl-list');
     smetaTable.find('tr').each(function() {
       const tr = $(this);
-      if (tr.find('input').length == 0) return;
+      if (tr.find('input').length === 0) return;
 
       const d = new Date();
 
@@ -326,7 +377,7 @@ const pffSmeta = {
       ...{count: 1},
       ...opts,
     };
-    var deferred = $.Deferred();
+    const deferred = $.Deferred();
 
     PFF.deferred.then(function() {
       // добавить другую аналитику
@@ -338,10 +389,10 @@ const pffSmeta = {
 
         setTimeout(() => {
           // выбор группы аналитик
-          var select = div.find('select');
-          if (PFF.debug) console.log('select', select);
+          const select = div.find('select');
+          PFF.debug('select', select);
           const option = select.find('option').filter(function() {
-            return $(this).text() == opts.group;
+            return $(this).text() === opts.group;
           });
           select.val(option.val()).change();
 
@@ -357,15 +408,14 @@ const pffSmeta = {
           setTimeout(() => {
             analitic.addClass('silentChosen');
             analitic.find('.chzn-search:first input').
-                val(opts.name) /*.focus()*/
-                .
-                keyup();
-            var count_focused = false;
-            select_handbook.bind('liszt:updated', function(e) {
-              var results = analitic.find('.chzn-results .active-result');
-              if (PFF.debug) console.log('results', results);
-              if (results.length == 1 || opts.select) {
-                results.first().mouseup();
+                val(opts.name).
+                trigger('keyup');
+            let count_focused = false;
+            select_handbook.on('liszt:updated', function() {
+              const results = analitic.find('.chzn-results .active-result');
+              // PFF.debug('results', results);
+              if (results.length === 1 || opts.select) {
+                results.first().trigger('mouseup');
                 analitic.find(PFF.fields.vyrabotka.count).focus();
               }
               // задержка из-за лага chosen
