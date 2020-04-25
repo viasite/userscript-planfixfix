@@ -288,6 +288,12 @@ const pffSmeta = {
    * Копирует аналитики "Смета на разработку" в "Реализация"
    */
   toRelization() {
+    const pad = function(num) {
+      const A = num.toString();
+      if (A.length > 1) return A;
+      else return ('00' + A).slice(-2);
+    };
+
     const smetaTable = $('[data-aid="314"] .tbl-list');
     smetaTable.find('tr').each(function() {
       const tr = $(this);

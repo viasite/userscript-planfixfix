@@ -6,23 +6,6 @@ $ = win.$;
 const pffAnalitics = {
   addActions() {
     const PFF = win.PFF;
-    // показывается в задаче, где одно и то же планируется на каждый день
-    // TODO: больше не используется
-    if (win.PlanfixPage.task == 116702) {
-      var dates = pffAnalitics.getDates(1, 5);
-      var analitics_arr = $.map(dates, function(date) {
-        return {
-          group: 'Планируемое время работы',
-          date: date,
-          begin: '09:00',
-          end: '09:30',
-        };
-      });
-      PFF.addTaskBlock('План на неделю', analitics_arr);
-
-      PFF.addTaskBlock('План на день', {name: 'План на день', count: 1});
-    }
-
     PFF.addTaskBlock('План', '[Планируемое время работы]');
     PFF.addTaskBlock('|');
     PFF.addTaskBlock('Выработка', {});
@@ -68,32 +51,6 @@ const pffAnalitics = {
         }, 200);
       });
     } */
-  },
-
-  /**
-   * Возвращает массив дат d-m-Y от dayofweek в кол-ве count
-   * Если текущая дата совпадает с dayofweek, берется сегодня,
-   * иначе этот ближайший день недели
-   */
-  getDates(dayofweek, count) {
-    var dates = [];
-
-    // next or current monday
-    const d = new Date();
-    var day = d.getDay();
-    if (day === 0) day = 7;
-    if (day != dayofweek) {
-      var diff = (dayofweek + 7 - day) * 86400 * 1000;
-      d.setTime(d.getTime() + diff);
-    }
-
-    for (var i = 0; i < count; i++) {
-      dates.push(pad(d.getDate()) + '-' + pad(1 + d.getMonth()) + '-' +
-          d.getFullYear());
-      d.setTime(d.getTime() + 86400000);
-    }
-
-    return dates;
   },
 
   /**

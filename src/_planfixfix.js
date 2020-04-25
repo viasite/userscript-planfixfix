@@ -544,13 +544,6 @@
   };
   win.PFF = PFF;
 
-// used in PFF.analitics.getDates, PFF.smeta.toRelization
-  const pad = function(num) {
-    const A = num.toString();
-    if (A.length > 1) return A;
-    else return ('00' + A).slice(-2);
-  };
-
   $(function() {
     // без этой задержки файлы не успевают подключаться
     setTimeout(() => {
