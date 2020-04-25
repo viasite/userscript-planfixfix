@@ -114,7 +114,7 @@ const pffAnalitics = {
    * добавляет все аналитики из массива
    */
   addAnalitics: function(analitics_arr) {
-    analitics_arr = win.PFF.normalizeAnalitics(analitics_arr);
+    analitics_arr = pffAnalitics.normalizeAnalitics(analitics_arr);
     $.each(analitics_arr, function(i, opts) {
       pffAnalitics._addAnalitic(opts);
     });
@@ -125,7 +125,15 @@ const pffAnalitics = {
    * Добавляет аналитику в действие
    * Добавление идет через PFF.deferred, очередь добавления
    * В deferred создержится последняя добавляемая аналитика
-   * @param {object} opts { name, group, count, scrollTo, select }
+   * @param {object} opts { name, group, count, scrollTo, select, begin, end }
+   * @param {string} opts.name
+   * @param {string} opts.group
+   * @param {number} opts.count
+   * @param {string} opts.date
+   * @param {string} opts.begin
+   * @param {string} opts.end
+   * @param {boolean} opts.scrollTo
+   * @param {boolean} opts.select
    */
   _addAnalitic: function(opts) {
     const PFF = win.PFF;
@@ -188,7 +196,7 @@ const pffAnalitics = {
                     analitic.find(PFF.fields.vyrabotka.count).
                         trigger('focus').
                         on('keypress', function(e) {
-                          if (e.which === 13) {
+                          if (e.key === 'Enter') {
                             if (e.ctrlKey) {
                               $('[data-action="saveParent"]').trigger('click');
                             } else {
@@ -237,7 +245,8 @@ const pffAnalitics = {
    * Возвращает сохраненный или дефолтный урл
    */
   getRemoteAnaliticsUrl: function() {
-    const store = localStorage.pff_remote_analitics_url ? JSON.parse(localStorage.pff_remote_analitics_url) : false;
+    const store = localStorage.pff_remote_analitics_url ? JSON.parse(
+        localStorage.pff_remote_analitics_url) : false;
     return store || win.PFF.analitics_remote_default;
   },
 
