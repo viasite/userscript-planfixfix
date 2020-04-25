@@ -1,6 +1,7 @@
 /**
  * @param {Object} window.unsafeWindow window
  * @param {Object} win.Current текущий пользователь
+ * @param {string} win.Current.logined id пользователя
  * @param {string} win.Current.loginedPost должность
  * @param {Object} $ jQuery
  */
@@ -8,10 +9,6 @@
   console.log('exec _planfixfix.js');
   let win = typeof window.unsafeWindow != 'undefined' ? window.unsafeWindow : window;
   let $ = win.$;
-
-  function debug() {
-    if (PFF.debug) console.log(...arguments);
-  }
 
   win.onerror = function(error, file, line) {
     console.log(error + ' (line ' + line + ')');
@@ -26,9 +23,13 @@
   }
 
   const PFF = {
-    debug: true,
+    isDebug: true,
     deferred: false,
     adminId: 9230, // тестовый пользователь
+
+    debug() {
+      if (PFF.isDebug) console.log(...arguments);
+    },
 
     isManager() {
       return win.Current.loginedPost === 'Менеджер по сопровождению заказов' ||
@@ -134,7 +135,7 @@
       PFF.addStyles();
 
       // тестовое открытие нового действия
-      if (PFF.debug) {
+      if (PFF.isDebug) {
         console.log('debug: init');
         setTimeout(() => {
           win.onbeforeunload = undefined; // отменить предупреждение о закрытии окна
@@ -201,19 +202,19 @@
       // decorate original functions
       win.ActionListJS.prototype.createAction = function() {
         return this.createAction_orig().then(function() {
-          debug('after createAction');
+          PFF.debug('after createAction');
           PFF.addActions();
         });
       };
       /*win.ActionJS.prototype.createNewAction = function() {
         this.createNewAction_orig();
-        debug('after createNewAction');
+        PFF.debug('after createNewAction');
         setTimeout(PFF.addActions, 2000);
       };*/
       win.ActionJS.prototype.editDraft = function(
           draftid, task, insertBefore, actionList) {
         this.editDraft_orig(draftid, task, insertBefore, actionList);
-        debug('after editDraft');
+        PFF.debug('after editDraft');
         setTimeout(PFF.addActions, 1000);
       };
       win.ActionJS.prototype.edit = function(id, task, data, actionNode) {
@@ -376,7 +377,7 @@
           setTimeout(function() {
             // выбор группы аналитик
             const select = div.find('select');
-            debug('select', select);
+            PFF.debug('select', select);
 
             const option = select.find('option').filter(function() {
               return $(this).text() === opts.group;
@@ -384,11 +385,11 @@
             select.val(option.val()).trigger('change');
 
             const analitic = div.find('.af-tbl-tr');
-            debug('analitic', analitic);
+            PFF.debug('analitic', analitic);
 
             const select_handbook = analitic.find(
                 'select[data-handbookid]:first');
-            debug('select_handbook', select_handbook);
+            PFF.debug('select_handbook', select_handbook);
             select_handbook.trigger('liszt:focus');
 
             // выработка
@@ -403,7 +404,7 @@
                 let count_focused = false;
                 select_handbook.on('liszt:updated', function() {
                   const results = analitic.find('.chzn-results .active-result');
-                  // debug('results', results);
+                  // PFF.debug('results', results);
                   if (results.length === 1 || opts.select) {
                     results.first().trigger('mouseup');
                     analitic.find(PFF.fields.vyrabotka.count).trigger('focus');
@@ -476,7 +477,7 @@
               action();
             }
           });
-      //if (PFF.debug) console.log(block);
+      //PFF.debug(block);
       if (Array.isArray(action) || typeof action == 'object' || typeof action ==
           'string') {
         const analitics = $.map(PFF.normalizeAnalitics(action),

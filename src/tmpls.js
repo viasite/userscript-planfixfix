@@ -264,7 +264,7 @@ const pffTmpls = {
         }
       } else {
         const tmpls = JSON.parse(localStorage.pff_templates) || {};
-        debug('use cached templates:', tmpls);
+        win.PFF.debug('use cached templates:', tmpls);
         resolve(tmpls);
       }
     });
@@ -318,12 +318,12 @@ const pffTmpls = {
 
           const tplsCount = Object.keys(tpls).length;
           if (tplsCount > 0) {
-            debug('parsed remote templates:', tpls);
+            win.PFF.debug('parsed remote templates:', tpls);
             localStorage.pff_templates = JSON.stringify(tpls);
             localStorage.pff_templates_mtime = new Date().getTime();
             resolve(tpls);
           } else {
-            debug('failed parse remote templates:', response.responseText);
+            win.PFF.debug('failed parse remote templates:', response.responseText);
             resolve(win.PFF.templates_default);
           }
         },

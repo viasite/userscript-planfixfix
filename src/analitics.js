@@ -42,7 +42,7 @@ const pffAnalitics = {
     });
 
     // тестовый вызов добавления аналитики
-    /* if (PFF.debug) {
+    /* if (PFF.isDebug) {
       PFF.addTaskBlock('|');
       PFF.addTaskBlock('Удалить все', function () { // удалить аналитики из действия
         $('.task-add-analitic').click();

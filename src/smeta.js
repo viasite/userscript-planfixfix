@@ -330,7 +330,7 @@ const pffSmeta = {
 
     PFF.deferred.then(function() {
       // добавить другую аналитику
-      $('[data-action="add-new-analitic"]').click();
+      $('[data-action="add-new-analitic"]').trigger('click');
 
       setTimeout(() => {
         const div = $('.analitics-form').last();
@@ -347,11 +347,11 @@ const pffSmeta = {
 
           const analitic = div.find(
               '[data-aname="' + opts.group + '"] .af-tbl-tr').last();
-          if (PFF.debug) console.log('analitic', analitic);
+          PFF.debug('analitic', analitic);
 
           const select_handbook = analitic.find(
               'select[data-handbookid]:first');
-          if (PFF.debug) console.log('select_handbook', select_handbook);
+          PFF.debug('select_handbook', select_handbook);
           select_handbook.trigger('liszt:focus');
 
           setTimeout(() => {
