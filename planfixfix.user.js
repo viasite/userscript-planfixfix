@@ -38,7 +38,7 @@
   }
 
   const PlanfixFix = {
-    debug: true,
+    debug: false,
     deferred: false,
 
     fields: {
@@ -201,9 +201,9 @@
       });
 
       // быстрые ответы
-      PlanfixFix.getTemplates().then(function (tmpls) {
+      /*PlanfixFix.getTemplates().then(function (tmpls) {
         PlanfixFix.addTextTemplates(tmpls);
-      });
+      });*/
 
       // тестовый вызов добавления аналитики
       /* if (PlanfixFix.debug) {
