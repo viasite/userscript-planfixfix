@@ -200,6 +200,8 @@ const pffTmpls = {
       setTimeout(() => {
         $(`[data-columnid="${win.PFF.tmplsRecord.name}"]`).trigger('click');
         pffTmpls.getTemplates().then((tmpls) => {
+          if(Object.keys(tmpls).length === 0) return;
+
           const tmplsBlock = pffTmpls.getQuickTemplates(tmpls);
           const tbl = $('.tbl-list-tasks');
           const firstRow = tbl.find('tr:nth-child(1)');
@@ -290,6 +292,8 @@ const pffTmpls = {
   },
 
   addActionTemplates(tmpls) {
+    if(Object.keys(tmpls).length === 0) return;
+
     const newTmplsBlock = pffTmpls.getQuickTemplates(tmpls);
     const existsTmplsBlock = $('.pff-tmpls');
     if(existsTmplsBlock.length > 0){
@@ -357,7 +361,8 @@ const pffTmpls = {
         win.PFF.debug('use cached templates:', tmpls);
         return resolve(tmpls);
       }
-      reject({});
+      resolve({});
+      reject();
     });
   },
 
