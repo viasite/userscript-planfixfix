@@ -1,3 +1,29 @@
+# [1.0.0](https://github.com/viasite/userscript-planfixfix/compare/v0.6.2...v1.0.0) (2020-04-27)
+
+
+### Bug Fixes
+
+*  Итого за все этапы ->Общий бюджет на запуск сайта ([41583f4](https://github.com/viasite/userscript-planfixfix/commit/41583f4))
+* кнопка "Сортировать смету" прячется при изменении сметы ([14fe55c](https://github.com/viasite/userscript-planfixfix/commit/14fe55c))
+* обнобления списка быстрых шаблонов при выборе шаблона ([1d88c97](https://github.com/viasite/userscript-planfixfix/commit/1d88c97))
+* обновление mru при выборе записи из быстрого списка ([305b94e](https://github.com/viasite/userscript-planfixfix/commit/305b94e))
+* починен пункт в меню ([a780746](https://github.com/viasite/userscript-planfixfix/commit/a780746))
+* правильная обработка пустого списка шаблонов ([8350772](https://github.com/viasite/userscript-planfixfix/commit/8350772))
+* предупреждение, когда нажали "Оформить смету" без выделенного текста ([5340d67](https://github.com/viasite/userscript-planfixfix/commit/5340d67))
+* стиль списка быстрых шаблонов для длинных названий ([35b6c52](https://github.com/viasite/userscript-planfixfix/commit/35b6c52))
+* текст "старая цена" перед зачёркнутой ценой ([fdaf822](https://github.com/viasite/userscript-planfixfix/commit/fdaf822))
+* шаблоны включены менеджерам и админам ([adfd026](https://github.com/viasite/userscript-planfixfix/commit/adfd026))
+
+
+### Features
+
+* быстрая простановка Особые пометки - Инструкции ([68cd2ed](https://github.com/viasite/userscript-planfixfix/commit/68cd2ed))
+* быстрые шаблоны в списке выбора шаблона ([0ed1728](https://github.com/viasite/userscript-planfixfix/commit/0ed1728))
+* вставка шаблона из справочника, панель популярных шаблонов (MRU) ([19b6a72](https://github.com/viasite/userscript-planfixfix/commit/19b6a72))
+* текстовые шаблоны в комментариях ([5005008](https://github.com/viasite/userscript-planfixfix/commit/5005008))
+
+
+
 ## [0.6.2](https://github.com/viasite/userscript-planfixfix/compare/v0.6.1...v0.6.2) (2020-04-22)
 
 
