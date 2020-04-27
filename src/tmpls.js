@@ -11,6 +11,51 @@ const pffTmpls = {
     });
   },
 
+  insertRecord(id, handbookId) {
+    if(!handbookId) handbookId = win.PFF.tmplsRecord.handbook;
+
+    const opts = {
+      command: 'handbook:getDataStringByKey',
+      handbook: handbookId,
+      key: id,
+    };
+
+    /**
+     *
+     * @param data
+     * @param {string[]} data.NamedPath
+     * @param data.NamedPath.Name
+     * @param {string[]} data.Items
+     * @param {Object[]} data.Items[].String
+     */
+    const afterResponse = (data) => {
+      /**
+       *
+       * @param {Object} f
+       * @param {Object} f.Field
+       * @param {number} f.Field.ID
+       * @param {string} f.Value
+       */
+      let name, text;
+      let cat = data.NamedPath[0]?.Name || 'Общие';
+      for (let f of data.Items[0].String) {
+        if (f.Field.ID === win.PFF.tmplsRecord.name) {
+          name = f.Value;
+        }
+        if (f.Field.ID === win.PFF.tmplsRecord.text) {
+          text = f.Value;
+          pffTmpls.insertTemplate(text);
+        }
+      }
+      pffTmpls.updateMRU({id, name, text, cat});
+    };
+
+    win.AjaxJS.request({
+      data: opts,
+      success: afterResponse,
+    });
+},
+
   updateMRU({id, name, text, cat}) {
     const mru = localStorage.pff_templates_mru ? JSON.parse(
         localStorage.pff_templates_mru) : {};
@@ -28,6 +73,7 @@ const pffTmpls = {
   insertTemplate(textRaw) {
     /**
      * @param win.CKEDITOR.instances
+     * @param win.CKEDITOR.instances.ActionDescription
      */
     const editor = win.CKEDITOR.instances.ActionDescription;
     let text = textRaw.replace(/\n/g, '<br>');
@@ -62,7 +108,8 @@ const pffTmpls = {
           '</div>';
 
       /**
-       * @param {Object} win.CommonDialogScrollableJS
+       * @param {function} win.CommonDialogScrollableJS
+       * @param {function} win.CommonDialogScrollableJS.draw
        * @param {function} win.CommonDialogScrollableJS.setHeader
        * @param {function} win.CommonDialogScrollableJS.setCloseHandler
        * @param editor.insertHtml
@@ -162,44 +209,7 @@ const pffTmpls = {
         const sel = editor.getSelection();
         sel.selectRanges(caretPosition);
         if ('record' === type) {
-          const opts = {
-            command: 'handbook:getDataStringByKey',
-            handbook: exportData.handbookId,
-            key: exportData.key,
-          };
-          win.AjaxJS.request({
-            data: opts,
-            /**
-             *
-             * @param data
-             * @param {string[]} data.NamedPath
-             * @param data.NamedPath.Name
-             * @param {string[]} data.Items
-             * @param {Object[]} data.Items[].String
-             */
-            success: (data) => {
-              /**
-               *
-               * @param {Object} f
-               * @param {Object} f.Field
-               * @param {number} f.Field.ID
-               * @param {string} f.Value
-               */
-              let id = exportData.key, name, text;
-              let cat = data.NamedPath[0]?.Name || 'Общие';
-              for (let f of data.Items[0].String) {
-                if (f.Field.ID === win.PFF.tmplsRecord.name) {
-                  name = f.Value;
-                }
-                if (f.Field.ID === win.PFF.tmplsRecord.text) {
-                  text = f.Value;
-                  pffTmpls.insertTemplate(text);
-                }
-              }
-              pffTmpls.updateMRU({id, name, text, cat});
-            },
-          });
-
+          pffTmpls.insertRecord(exportData.key);
         } else if ('text' === type) {
           pffTmpls.insertTemplate(exportData.text);
         }
