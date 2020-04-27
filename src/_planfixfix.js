@@ -172,11 +172,11 @@ let $; // заглушает ошибки в определении $ в мод�
 .pff-tpls-content { /* display: none; */ }
 .pff-tpls:hover { max-width: none; margin-left: 0; }
 .pff-tpls:hover .pff-tpls-content { display: block; }
-.pff-cat { margin-bottom: 15px; border-bottom: 3px solid transparent; }
-.pff-cat:hover { border-bottom-color: #3ba3d0; }
-.pff-cat-title { float:left; clear: left; width: 100px; padding-top: 2px; }
-.pff-cat-content { margin-left: 100px; }
-.pff-cat a { display: inline-block; padding: 2px 10px; }
+.pff-cat { margin-bottom: 15px; }
+.pff-cat-title { padding-top: 2px; border-bottom: 3px solid transparent; }
+.pff-cat:hover .pff-cat-title { border-bottom-color: #3ba3d0; }
+.pff-cat-content { margin-left: 0; }
+.pff-cat a { display: block; padding: 2px 15px; }
 
 .pff-tmpl-form input[type="text"] { width: 200px !important; }
 .pff-tmpl-form .btn-main { margin-left: 0; }
