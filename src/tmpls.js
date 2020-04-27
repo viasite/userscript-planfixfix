@@ -136,13 +136,15 @@ const pffTmpls = {
           () =>
               new Promise((resolve, reject) => {
                 let isValid = true;
-                $('.pff-tmpl-form input').each(function() {
+                const inputs = $('.pff-tmpl-form input');
+                inputs.each(function() {
                   if ($(this).val() === '') {
                     isValid = false;
                   }
                 });
+                win.PFF.debug('valid:', isValid);
                 if (isValid) {
-                  editor.insertHtml($('.pff-tmpl-preview').html());
+                  insertTokenizedTemplate();
                   resolve(true);
                 } else {
                   reject('required');
@@ -166,16 +168,49 @@ const pffTmpls = {
         $('.pff-tmpl-preview').html(pt);
       };
 
-      setTimeout(() => {
-        redrawPreview();
+      // сохраняет заполненные токены и вставляет текст в редактор
+      const insertTokenizedTemplate = () => {
         const inputs = $('.pff-tmpl-form input');
+        const tid = win.PlanfixPage.task;
+        const taskTokens = localStorage.pff_task_tokens ?
+            JSON.parse(localStorage.pff_task_tokens) : {};
+
+        if(!taskTokens[tid]) taskTokens[tid] = {}
+        inputs.each(function() {
+          const name = $(this).attr('name');
+          taskTokens[tid][name] = $(this).val();
+        });
+        localStorage.pff_task_tokens = JSON.stringify(taskTokens);
+
+        editor.insertHtml($('.pff-tmpl-preview').html());
+      };
+
+      setTimeout(() => {
+        const inputs = $('.pff-tmpl-form input');
+
         inputs.
             on('keypress blur change',
                 () => { setTimeout(redrawPreview, 50); });
         inputs.first().trigger('focus');
+
+        // stored token values
+        const tid = win.PlanfixPage.task;
+        const taskTokens = localStorage.pff_task_tokens ?
+        JSON.parse(localStorage.pff_task_tokens) : {};
+        inputs.each(function() {
+          const name = $(this).attr('name');
+          if(taskTokens[tid][name]) {
+            $(this).val(taskTokens[tid][name]);
+          }
+
+          if(name === 'Мои имя фамилия') $(this).val(win.Current.loginedName);
+        });
+
+        redrawPreview();
+
         $('.pff-tmpl-form .btn-cancel').on('click', () => { dialog.close(); });
         $('.js-action-pff-insert-template').on('click', () => {
-          editor.insertHtml($('.pff-tmpl-preview').html());
+          insertTokenizedTemplate();
           dialog.close();
           //$('.pff-tmpl-form').parents('.dialogWin').find('.destroy-button').click();
         });

@@ -2,6 +2,7 @@
  * @param {Object} window.unsafeWindow window
  * @param {Object} win.Current текущий пользователь
  * @param {string} win.Current.logined id пользователя
+ * @param {string} win.Current.loginedName имя фамилия
  * @param {string} win.Current.loginedPost должность
  * @param {Object} $ jQuery
  */
