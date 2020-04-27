@@ -255,7 +255,7 @@ const pffTmpls = {
   },
 
   getQuickTemplates(tmpls) {
-    const tplsBlock = $('<div class="pff-tpls-content"></div>');
+    const tmplsBlock = $('<div class="pff-tmpls-content"></div>');
     for (let cat in tmpls) {
       if(tmpls[cat].length === 0) continue;
       const catDiv = $(`<div class="pff-cat-content"></div>`);
@@ -282,14 +282,14 @@ const pffTmpls = {
         });
         a.appendTo(catDiv);
       }
-      tplsBlock.append(
+      tmplsBlock.append(
           $(`<div class="pff-cat"><span class="pff-cat-title">${cat}:</span> </div>`).
               append(catDiv),
       );
     }
 
-    const newTmplsBlock = $('<div class="pff-tpls"></div>');
-    newTmplsBlock.append(tplsBlock);
+    const newTmplsBlock = $('<div class="pff-tmpls"></div>');
+    newTmplsBlock.append(tmplsBlock);
 
     return newTmplsBlock;
   },
@@ -305,7 +305,7 @@ const pffTmpls = {
     else {
       const tmplsWrap = $('<div class="pff-action-tmpls"></div>');
 
-      const tmplsTitle = $('<span class="pff-tpls-title">Шаблоны</span>');
+      const tmplsTitle = $('<span class="pff-tmpls-title">Шаблоны</span>');
       tmplsTitle.on('click', () => { tmplsWrap.toggleClass('pff-action-tmpls_expanded') });
       tmplsWrap.append(tmplsTitle);
 
@@ -411,14 +411,14 @@ const pffTmpls = {
       }
 
       const storeItem = (response) => {
-        const tpls = jsyaml.load(response.responseText);
+        const tmpls = jsyaml.load(response.responseText);
 
-        const tplsCount = Object.keys(tpls).length;
-        if (tplsCount > 0) {
-          win.PFF.debug('parsed remote templates:', tpls);
-          localStorage.pff_templates = JSON.stringify(tpls);
+        const tmplsCount = Object.keys(tmpls).length;
+        if (tmplsCount > 0) {
+          win.PFF.debug('parsed remote templates:', tmpls);
+          localStorage.pff_templates = JSON.stringify(tmpls);
           localStorage.pff_templates_mtime = new Date().getTime();
-          resolve(tpls);
+          resolve(tmpls);
         } else {
           win.PFF.debug('failed parse remote templates:', response.responseText);
           resolve(win.PFF.templates_default);

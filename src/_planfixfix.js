@@ -180,13 +180,13 @@ let $; // заглушает ошибки в определении $ в мод�
 .silentChosen .chzn-drop{ width:1px !important; }
 
 /* text templates */
-.pff-tpls { line-height: 1.5rem; /* margin-left: 100px; max-width: 200px; */ }
-.pff-tpls-title { font-weight: bold; cursor: pointer; }
+.pff-tmpls { line-height: 1.5rem; /* margin-left: 100px; max-width: 200px; */ }
+.pff-tmpls-title { font-weight: bold; cursor: pointer; }
 .pff-action-tmpls { margin: 5px 0; }
-.pff-action-tmpls .pff-tpls-content { display: none; }
-.pff-action-tmpls_expanded .pff-tpls-content { display: block; }
-/*.pff-tpls:hover { max-width: none; margin-left: 0; }
-.pff-tpls:hover .pff-tpls-content { display: block; }*/
+.pff-action-tmpls .pff-tmpls-content { display: none; }
+.pff-action-tmpls_expanded .pff-tmpls-content { display: block; }
+/*.pff-tmpls:hover { max-width: none; margin-left: 0; }
+.pff-tmpls:hover .pff-tmpls-content { display: block; }*/
 .pff-cat { margin-bottom: 15px; }
 .pff-cat-title { padding-top: 2px; /* border-bottom: 3px solid transparent; */ }
 .pff-cat:hover { background: #f6f6f6; }
