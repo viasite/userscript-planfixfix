@@ -5,10 +5,16 @@ $ = $ || win.$;
 
 const pffTmpls = {
   addActions() {
-    // быстрые ответы
-    pffTmpls.getTemplates().then((tmpls) => {
-      pffTmpls.addTextTemplates(tmpls);
-    });
+    const PFF = win.PFF;
+    if(PFF.isManager() || PFF.isAdmin()){
+      PFF.addTaskBlock('|');
+      PFF.addTaskBlock('Шаблон', pffTmpls.templateSelect);
+
+      // быстрые ответы
+      pffTmpls.getTemplates().then((tmpls) => {
+        pffTmpls.addActionTemplates(tmpls);
+      });
+    }
   },
 
   insertRecord(id, handbookId) {
@@ -51,7 +57,7 @@ const pffTmpls = {
 
       // update quick templates
       pffTmpls.getTemplates().then((tmpls) => {
-        pffTmpls.addQuickTemplates(tmpls);
+        pffTmpls.addActionTemplates(tmpls);
       });
     };
 
@@ -243,13 +249,6 @@ const pffTmpls = {
     handbookSelectDialog.drawDialog(); // editor.extraHandbookData
   },
 
-  // быстрые ответы в редактор
-  addTextTemplates: function(tmpls) {
-    win.PFF.addTaskBlock('|');
-    win.PFF.addTaskBlock('Шаблон', pffTmpls.templateSelect);
-    pffTmpls.addQuickTemplates(tmpls);
-  },
-
   getQuickTemplates(tmpls) {
     const tplsBlock = $('<div class="pff-tpls-content"></div>');
     for (let cat in tmpls) {
@@ -290,7 +289,7 @@ const pffTmpls = {
     return newTmplsBlock;
   },
 
-  addQuickTemplates(tmpls) {
+  addActionTemplates(tmpls) {
     const newTmplsBlock = pffTmpls.getQuickTemplates(tmpls);
     const existsTmplsBlock = $('.pff-tmpls');
     if(existsTmplsBlock.length > 0){
