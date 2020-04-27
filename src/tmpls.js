@@ -48,6 +48,11 @@ const pffTmpls = {
         }
       }
       pffTmpls.updateMRU({id, name, text, cat});
+
+      // update quick templates
+      pffTmpls.getTemplates().then(function(tmpls) {
+        pffTmpls.addQuickTemplates(tmpls);
+      });
     };
 
     win.AjaxJS.request({
@@ -225,11 +230,14 @@ const pffTmpls = {
 
   // быстрые ответы в редактор
   addTextTemplates: function(tmpls) {
-    const tplsBlock = $('<div class="pff-tpls-content"></div>');
-
     win.PFF.addTaskBlock('Шаблон', pffTmpls.templateSelect);
+    pffTmpls.addQuickTemplates(tmpls);
+  },
 
+  addQuickTemplates(tmpls) {
+    const tplsBlock = $('<div class="pff-tpls-content"></div>');
     for (let cat in tmpls) {
+      if(tmpls[cat].length === 0) continue;
       const catDiv = $(`<div class="pff-cat-content"></div>`);
       for (let tpl in tmpls[cat]) {
         let item = tmpls[cat][tpl];
@@ -258,11 +266,17 @@ const pffTmpls = {
               append(catDiv),
       );
     }
-    $('.task-add-block').last().after(
-        $(
-            '<div class="pff-tpls"><span class="pff-tpls-title"><b>Шаблоны</b></span></div>',
-        ).append(tplsBlock),
-    );
+
+    const newTmplsBlock = $(
+      '<div class="pff-tpls"><span class="pff-tpls-title"><b>Шаблоны</b></span></div>',
+    ).append(tplsBlock);
+
+    const existsTmplsBlock = $('.pff-tmpls');
+    if(existsTmplsBlock.length > 0){
+      existsTmplsBlock.replaceWith(newTmplsBlock);
+    }
+
+    $('.task-add-block').last().after(newTmplsBlock);
   },
 
   /**
