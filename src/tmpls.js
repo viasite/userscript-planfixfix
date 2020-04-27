@@ -91,8 +91,10 @@ const pffTmpls = {
 
     text = text.replace(/---.*/, '').replace(/<p>$/, ''); // отсекаем примечания
 
-    const tokens = text.match(/(%[a-zа-яё_-]+%)/gi);
+    let tokens = text.match(/(%[a-zа-яё_-]+%)/gi);
     if (tokens) {
+      win.PFF.debug('tokens:', tokens);
+      tokens = tokens.filter((v, i, s) => s.indexOf(v) === i);
       const inputs = tokens.map((token) => {
         const name = token.replace(/%/g, '').replace(/_/g, ' ');
         let cls = 'text-box';
@@ -154,11 +156,12 @@ const pffTmpls = {
         $('.pff-tmpl-form input').each(function() {
           const input = $(this);
           const t = input.data('token');
+          const reg = new RegExp(t, 'g');
           const v = input.val().toString();
           if (v === '') {
-            pt = pt.replace(t, `<span style="background:#ffff00">${t}</span>`);
+            pt = pt.replace(reg, `<span style="background:#ffff00">${t}</span>`);
           }
-          else pt = pt.replace(t, v);
+          else pt = pt.replace(reg, v);
         });
         $('.pff-tmpl-preview').html(pt);
       };
