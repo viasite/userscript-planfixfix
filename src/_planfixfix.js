@@ -169,12 +169,16 @@ let $; // заглушает ошибки в определении $ в мод�
 
 /* text templates */
 .pff-tpls { line-height: 1.5rem; /* margin-left: 100px; max-width: 200px; */ }
-.pff-tpls-content { /* display: none; */ }
-.pff-tpls:hover { max-width: none; margin-left: 0; }
-.pff-tpls:hover .pff-tpls-content { display: block; }
+.pff-tpls-title { font-weight: bold; cursor: pointer; }
+.pff-action-tmpls { margin: 5px 0; }
+.pff-action-tmpls .pff-tpls-content { display: none; }
+.pff-action-tmpls_expanded .pff-tpls-content { display: block; }
+/*.pff-tpls:hover { max-width: none; margin-left: 0; }
+.pff-tpls:hover .pff-tpls-content { display: block; }*/
 .pff-cat { margin-bottom: 15px; }
-.pff-cat-title { padding-top: 2px; border-bottom: 3px solid transparent; }
-.pff-cat:hover .pff-cat-title { border-bottom-color: #3ba3d0; }
+.pff-cat-title { padding-top: 2px; /* border-bottom: 3px solid transparent; */ }
+.pff-cat:hover { background: #f6f6f6; }
+/*.pff-cat:hover .pff-cat-title { border-bottom-color: #3ba3d0; }*/
 .pff-cat-content { margin-left: 0; }
 .pff-cat a { display: block; padding: 2px 15px; }
 

@@ -6,7 +6,7 @@ $ = $ || win.$;
 const pffTmpls = {
   addActions() {
     // быстрые ответы
-    pffTmpls.getTemplates().then(function(tmpls) {
+    pffTmpls.getTemplates().then((tmpls) => {
       pffTmpls.addTextTemplates(tmpls);
     });
   },
@@ -50,7 +50,7 @@ const pffTmpls = {
       pffTmpls.updateMRU({id, name, text, cat});
 
       // update quick templates
-      pffTmpls.getTemplates().then(function(tmpls) {
+      pffTmpls.getTemplates().then((tmpls) => {
         pffTmpls.addQuickTemplates(tmpls);
       });
     };
@@ -190,9 +190,24 @@ const pffTmpls = {
     const handbookSelectDialog = new win.HandbookSelectDialogJS();
 
     setTimeout(() => {
-      $(`[data-handbookid="${win.PFF.tmplsRecord.handbook}"]`).click();
+      $(`[data-handbookid="${win.PFF.tmplsRecord.handbook}"]`).trigger('click');
       setTimeout(() => {
-        $(`[data-columnid="${win.PFF.tmplsRecord.name}"]`).click();
+        $(`[data-columnid="${win.PFF.tmplsRecord.name}"]`).trigger('click');
+        pffTmpls.getTemplates().then((tmpls) => {
+          const tmplsBlock = pffTmpls.getQuickTemplates(tmpls);
+          const tbl = $('.tbl-list-tasks');
+          const firstRow = tbl.find('tr:nth-child(1)');
+
+          const colspan = firstRow.find('td').length;
+          const tmplsCol = $(`<td colspan="${colspan-2}" style="padding-left: 10px;"></td>`);
+          tmplsCol.append(tmplsBlock);
+          const tmplsRow = $('<tr></tr>');
+          tmplsRow.append('<td colspan="2"></td>');
+          tmplsRow.append(tmplsCol);
+
+          firstRow.after(tmplsRow);
+        });
+
       }, 700);
     }, 1000);
 
@@ -230,11 +245,12 @@ const pffTmpls = {
 
   // быстрые ответы в редактор
   addTextTemplates: function(tmpls) {
+    win.PFF.addTaskBlock('|');
     win.PFF.addTaskBlock('Шаблон', pffTmpls.templateSelect);
     pffTmpls.addQuickTemplates(tmpls);
   },
 
-  addQuickTemplates(tmpls) {
+  getQuickTemplates(tmpls) {
     const tplsBlock = $('<div class="pff-tpls-content"></div>');
     for (let cat in tmpls) {
       if(tmpls[cat].length === 0) continue;
@@ -254,6 +270,7 @@ const pffTmpls = {
         const name = item.name.replace(/ /g, '&nbsp;');
         const a = $(`<a href="${link}" title="${title}">${name}</a>`);
         if(item.id) a.attr('data-id', item.id);
+        if(item.count) a.html(a.text() + `&nbsp;<sup>${item.count}</sup>`);
         a.on('click', () => {
           if(a.data('id')) pffTmpls.insertRecord(a.data('id'));
           else pffTmpls.insertTemplate(textRaw);
@@ -267,16 +284,28 @@ const pffTmpls = {
       );
     }
 
-    const newTmplsBlock = $(
-      '<div class="pff-tpls"><span class="pff-tpls-title"><b>Шаблоны</b></span></div>',
-    ).append(tplsBlock);
+    const newTmplsBlock = $('<div class="pff-tpls"></div>');
+    newTmplsBlock.append(tplsBlock);
 
+    return newTmplsBlock;
+  },
+
+  addQuickTemplates(tmpls) {
+    const newTmplsBlock = pffTmpls.getQuickTemplates(tmpls);
     const existsTmplsBlock = $('.pff-tmpls');
     if(existsTmplsBlock.length > 0){
       existsTmplsBlock.replaceWith(newTmplsBlock);
     }
+    else {
+      const tmplsWrap = $('<div class="pff-action-tmpls"></div>');
 
-    $('.task-add-block').last().after(newTmplsBlock);
+      const tmplsTitle = $('<span class="pff-tpls-title">Шаблоны</span>');
+      tmplsTitle.on('click', () => { tmplsWrap.toggleClass('pff-action-tmpls_expanded') });
+      tmplsWrap.append(tmplsTitle);
+
+      tmplsWrap.append(newTmplsBlock);
+      $('.task-add-block').last().after(tmplsWrap);
+    }
   },
 
   /**
