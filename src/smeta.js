@@ -260,11 +260,16 @@ const pffSmeta = {
   run() {
     const editor = win.CKEDITOR.instances.ActionDescription;
     const html = pffSmeta.getSelectionHtml(editor);
-    const styledHtml = pffSmeta.processHtml(html);
+    if(html.length === 0){
+      /**
+       * @param {function} win.show_sys_message
+       */
+      win.show_sys_message('Сначала выделите текст сметы', 'ERROR', undefined, undefined, {})
+      return;
+    }
 
+    const styledHtml = pffSmeta.processHtml(html);
     editor.insertHtml(styledHtml);
-    //document.getElementsByClassName('b-task-description')[0].innerHTML = styledHtml;
-    //console.log('html: '+html);
   },
 
   // сортировать смету, https://tagilcity.planfix.ru/task/608083
