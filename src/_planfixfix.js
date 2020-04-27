@@ -120,6 +120,11 @@ let $; // заглушает ошибки в определении $ в мод�
     _analitics: [],
 
     init: function() {
+      if(!PFF.isDebug && localStorage.pff_debug){
+        PFF.isDebug = true;
+        console.log('debug set from localStorage');
+      }
+
       // init once
       const body = $('body');
       if (body.hasClass('pff_inited')) return false;
