@@ -12,7 +12,7 @@
 Скрипт сборки просто склеит их по алфавиту.
 
 Чтобы обращаться к глобалам, надо их прокидывать через win.
-Начало любого отделённого файла как правило будет таким:
+Начало любого отделённого файла, как правило, будет таким:
 ``` js
 win = typeof unsafeWindow != 'undefined' ? unsafeWindow : window;
 var $ = win.$;
@@ -40,5 +40,19 @@ var $ = win.$;
 // @require        file:///C:/projects/js/userscript-planfixfix/src/jsyaml.js
 // @require        file:///C:/projects/js/userscript-planfixfix/src/smeta.js
 // @require        file:///C:/projects/js/userscript-planfixfix/src/tmpls.js
+// ==/UserScript==
+```
+
+Тест сборки:
+``` js
+// ==UserScript==
+// @name           PlanfixFix
+// @unwrap
+// @noframes
+// @run-at         document-end
+// @include        https://tagilcity.planfix.ru/*
+// @match          https://tagilcity.planfix.ru/*
+// @grant          GM_xmlhttpRequest
+// @require        file:///C:/projects/js/userscript-planfixfix/dist/planfixfix.user.js
 // ==/UserScript==
 ```

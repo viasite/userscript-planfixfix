@@ -24,7 +24,7 @@ let $; // заглушает ошибки в определении $ в мод�
   }
 
   const PFF = {
-    isDebug: true,
+    isDebug: false,
     deferred: false,
     adminIds: [ 9230 ], // тестовые пользователи
     managerPosts: [
