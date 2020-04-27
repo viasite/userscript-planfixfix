@@ -243,14 +243,15 @@ const pffTmpls = {
             replace(/<br ?\/?>/g, '\n');
         let link = 'javascript:';
         if (item.id) link = `https://${location.hostname}/?action=handbookdataview&handbook=${win.PFF.tmplsRecord.handbook}&key=${item.id}`;
-        catDiv.append(
-            $(`<a href="${link}" title="${title}">${item.name.replace(/ /g,
-                '&nbsp;')}</a>`).on('click', () => {
-                  pffTmpls.insertTemplate(textRaw);
-                  return false;
-                },
-            ),
-        );
+        const name = item.name.replace(/ /g, '&nbsp;');
+        const a = $(`<a href="${link}" title="${title}">${name}</a>`);
+        if(item.id) a.attr('data-id', item.id);
+        a.on('click', () => {
+          if(a.data('id')) pffTmpls.insertRecord(a.data('id'));
+          else pffTmpls.insertTemplate(textRaw);
+          return false;
+        });
+        a.appendTo(catDiv);
       }
       tplsBlock.append(
           $(`<div class="pff-cat"><span class="pff-cat-title">${cat}:</span> </div>`).

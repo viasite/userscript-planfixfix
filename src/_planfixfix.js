@@ -168,8 +168,8 @@ let $; // заглушает ошибки в определении $ в мод�
 .silentChosen .chzn-drop{ width:1px !important; }
 
 /* text templates */
-.pff-tpls { line-height: 1.5rem; margin-left: 100px; max-width: 200px; }
-.pff-tpls-content {display: none; }
+.pff-tpls { line-height: 1.5rem; /* margin-left: 100px; max-width: 200px; */ }
+.pff-tpls-content { /* display: none; */ }
 .pff-tpls:hover { max-width: none; margin-left: 0; }
 .pff-tpls:hover .pff-tpls-content { display: block; }
 .pff-cat { margin-bottom: 15px; border-bottom: 3px solid transparent; }
@@ -189,12 +189,15 @@ let $; // заглушает ошибки в определении $ в мод�
     pfAlter: function() {
       /**
        *
-       * @param win.ActionListJS код блока действий
+       * @param win.ActionListJS код списка действий
        * @param win.AnaliticsWinJS редактор аналитик
        */
       // save original functions
       win.ActionListJS.prototype.createAction_orig = win.ActionListJS.prototype.createAction;
       //win.ActionJS.prototype.createNewAction_orig = win.ActionJS.prototype.createNewAction;
+      /**
+       * @param win.ActionJS
+       */
       win.ActionJS.prototype.editDraft_orig = win.ActionJS.prototype.editDraft;
       win.ActionJS.prototype.edit_orig = win.ActionJS.prototype.edit;
       //win.ActionJS.restoreAnaliticsForEdit_orig = win.ActionJS.restoreAnaliticsForEdit;
@@ -308,6 +311,7 @@ let $; // заглушает ошибки в определении $ в мод�
       /**
        * @param {Object} win.TaskCardPoolJS
        * @param {Object} win.PlanfixPage
+       * @param {string} win.PlanfixPage.task
        * @param {function} win.TaskCardPoolJS.getInstance
        * @param task.scroller.scrollToBlock
        */
