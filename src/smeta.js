@@ -34,7 +34,12 @@ const pffSmeta = {
         PFF.addAnaliticAction('Реализовать', pffSmeta.toRelization);
 
         // кнопка "Сортировать смету"
-        PFF.addAnaliticAction('Сортировать смету', pffSmeta.order);
+        const sortLink = PFF.addAnaliticAction('Сортировать смету', pffSmeta.order);
+        // удалить кнопку при изменении сметы
+        smetaTable.on('click.pff_modified', () => {
+          smetaTable.off('click.pff_modified');
+          sortLink.remove();
+        });
 
         // удаление аналитик по блокам (этапам)
         // TODO: to pffSmeta

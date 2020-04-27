@@ -8,7 +8,6 @@
 let $; // заглушает ошибки в определении $ в модулях
 (function() {
   'use strict';
-  console.log('exec _planfixfix.js');
   let win = typeof window.unsafeWindow != 'undefined' ? window.unsafeWindow : window;
   let $ = win.$;
 
