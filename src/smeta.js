@@ -6,12 +6,11 @@ $ = $ || win.$;
 // оформление сметы в 1 клик, https://tagilcity.planfix.ru/task/604890
 const pffSmeta = {
   addActions() {
-    if (
-        parseInt(win.Current.logined) === win.PFF.adminId ||
-        win.PFF.isManager()
+    const PFF = win.PFF;
+    if (PFF.isAdmin() || PFF.isManager()
     ) {
-      win.PFF.addTaskBlock('|');
-      win.PFF.addTaskBlock('Оформить смету', pffSmeta.run);
+      PFF.addTaskBlock('|');
+      PFF.addTaskBlock('Оформить смету', pffSmeta.run);
     }
   },
 

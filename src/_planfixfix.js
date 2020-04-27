@@ -26,15 +26,22 @@ let $; // заглушает ошибки в определении $ в мод�
   const PFF = {
     isDebug: true,
     deferred: false,
-    adminId: 9230, // тестовый пользователь
+    adminIds: [ 9230 ], // тестовые пользователи
+    managerPosts: [
+      'Менеджер по сопровождению заказов',
+      'Руководитель отдела продаж'
+    ],
 
     debug() {
       if (PFF.isDebug) console.log(...arguments);
     },
 
+    isAdmin() {
+      return PFF.adminIds.includes(parseInt(win.Current.logined));
+    },
+
     isManager() {
-      return win.Current.loginedPost === 'Менеджер по сопровождению заказов' ||
-          win.Current.loginedPost === 'Руководитель отдела продаж';
+      return PFF.managerPosts.includes(win.Current.loginedPost);
     },
 
     fields: {
