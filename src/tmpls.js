@@ -130,6 +130,7 @@ const pffTmpls = {
       const dialog = new win.CommonDialogScrollableJS();
       dialog.closeByEsc = true;
       dialog.isMinimizable = true;
+      dialog.dateFormat = 'dd.mm.yy';
       dialog.draw(html);
       dialog.setHeader('Вставка шаблона');
       dialog.setCloseHandler(
