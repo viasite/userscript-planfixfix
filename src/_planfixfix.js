@@ -196,6 +196,7 @@ let $; // заглушает ошибки в определении $ в мод�
 .pff-cat a { display: block; padding: 2px 15px; }
 
 .pff-tmpl-form input[type="text"] { width: 200px !important; }
+.pff-tmpls-you-change { padding: 5px 10px; }
 .pff-tmpl-form .btn-main { margin-left: 0; }
 .pff-tmpl-form .btn-create { float: right; }
 .pff-tmpl-preview { width: 360px; margin: 30px 0; }

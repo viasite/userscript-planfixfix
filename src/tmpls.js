@@ -93,7 +93,7 @@ const pffTmpls = {
 
     let tokens = text.match(/(%[a-zа-яё_-]+%)/gi);
     if (tokens) {
-      win.PFF.debug('tokens:', tokens);
+      // inputs
       tokens = tokens.filter((v, i, s) => s.indexOf(v) === i);
       const inputs = tokens.map((token) => {
         const name = token.replace(/%/g, '').replace(/_/g, ' ');
@@ -105,16 +105,25 @@ const pffTmpls = {
               </span>`;
       });
 
-      const btns = `
-<div class="dialog-btn-wrapper">
-<button class="btn-main btn-create action-edit-save js-action-pff-insert-template">Вставить</button>
-<button class="btn-main btn-cancel">Отмена</button>
-</div>`;
+      // controls
+      const controls = `<div class="pff-tmpl-form-controls">
+      <a class="pff-tmpls-you-change" href="javascript:" data-type="old">Вы</a>
+      <a class="pff-tmpls-you-change" href="javascript:" data-type="new">вы</a>
+      </div>`;
 
+      // buttons
+      const btns = `
+        <div class="dialog-btn-wrapper">
+        <button class="btn-main btn-create action-edit-save js-action-pff-insert-template">Вставить</button>
+        <button class="btn-main btn-cancel">Отмена</button>
+        </div>`;
+
+      // form template
       const html =
           '<div class="pff-tmpl-form">' +
           '<div class="task-create-panel-fields">' +
           inputs.join('\n') +
+          controls +
           '</div>' +
           `<div class="pff-tmpl-preview">${text}</div>` +
           btns +
@@ -208,6 +217,22 @@ const pffTmpls = {
         });
 
         redrawPreview();
+
+        // Вы | вы
+        $('.pff-tmpls-you-change').on('click', function() {
+          const type = $(this).data('type');
+          const matched = text.match(/(\s|^)(вы|вас|вам|ваш(и|а|ему|его|ей)?)([\s,.!:)?]|$)/ig);
+          console.log(matched);
+          for(let m of matched) {
+            const newL = type === 'old' ? 'В' : 'в';
+            const rep = m.replace(/в/i, newL)
+            const reg = new RegExp(rep, 'gi');
+            console.log(`${m} -> ${rep}`);
+            text = text.replace(reg, rep);
+            console.log(text);
+          }
+          redrawPreview()
+        });
 
         $('.pff-tmpl-form .btn-cancel').on('click', () => { dialog.close(); });
         $('.js-action-pff-insert-template').on('click', () => {
