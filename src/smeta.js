@@ -235,38 +235,16 @@ const pffSmeta = {
     return `<p>${newlines.join('\n')}</p>`;
   },
 
-  // get selection html from ckeditor
-  getSelectionHtml(editor) {
-    /**
-     *
-     * @param {function} win.CKEDITOR.dom.element
-     * @param {function} sel.getRanges
-     * @param {function} el.getHtml
-     */
-    const sel = editor.getSelection();
-    const ranges = sel.getRanges();
-    const Element = win.CKEDITOR.dom.element;
-    const el = new Element('div');
-    for (let i = 0, len = ranges.length; i < len; ++i) {
-      el.append(ranges[i].cloneContents());
-    }
-    return el.getHtml();
-  },
-
   // вход в "Оформить смету"
   run() {
-    const editor = win.CKEDITOR.instances.ActionDescription;
-    const html = pffSmeta.getSelectionHtml(editor);
+    const html = win.PFF.editorGetSelection();
     if(html.length === 0){
-      /**
-       * @param {function} win.show_sys_message
-       */
       win.show_sys_message('Сначала выделите текст сметы', 'ERROR', undefined, undefined, {})
       return;
     }
 
     const styledHtml = pffSmeta.processHtml(html);
-    editor.insertHtml(styledHtml);
+    win.PFF.editorInsertHtml(styledHtml);
   },
 
   // сортировать смету, https://tagilcity.planfix.ru/task/608083

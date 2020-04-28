@@ -4,6 +4,7 @@
  * @param {string} win.Current.logined id пользователя
  * @param {string} win.Current.loginedName имя фамилия
  * @param {string} win.Current.loginedPost должность
+ * @param {function} win.show_sys_message всплывалка вверху
  * @param {Object} $ jQuery
  */
 let $; // заглушает ошибки в определении $ в модулях
@@ -305,6 +306,29 @@ let $; // заглушает ошибки в определении $ в мод�
 
       const throttledFunction = win.CKEDITOR.tools.eventsBuffer(250, refresh);
       editor.on('selectionCheck', throttledFunction.input);
+    },
+
+    // get selection html from ckeditor
+    editorGetSelection() {
+      /**
+       * @param {function} win.CKEDITOR.dom.element
+       * @param {function} sel.getRanges
+       * @param {function} el.getHtml
+       */
+      const editor = win.CKEDITOR.instances.ActionDescription;
+      const sel = editor.getSelection();
+      const ranges = sel.getRanges();
+      const Element = win.CKEDITOR.dom.element;
+      const el = new Element('div');
+      for (let i = 0, len = ranges.length; i < len; ++i) {
+        el.append(ranges[i].cloneContents());
+      }
+      return el.getHtml();
+    },
+
+    editorInsertHtml(html) {
+      const editor = win.CKEDITOR.instances.ActionDescription;
+      editor.insertHtml(html);
     },
 
     // добавляет действие в редактор аналитик
