@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name           PlanfixFix
 // @author         popstas
-// @version        1.1.1
+// @version        1.1.2
 // @namespace      viasite.ru
 // @description    Some planfix.ru improvements
 // @unwrap
@@ -18,6 +18,7 @@
  * @param {string} win.Current.logined id пользователя
  * @param {string} win.Current.loginedName имя фамилия
  * @param {string} win.Current.loginedPost должность
+ * @param {function} win.show_sys_message всплывалка вверху
  * @param {Object} $ jQuery
  */
 let $; // заглушает ошибки в определении $ в модулях
@@ -168,7 +169,7 @@ let $; // заглушает ошибки в определении $ в мод�
         setTimeout(() => {
           win.onbeforeunload = undefined; // отменить предупреждение о закрытии окна
           //console.log('debug: new action');
-          // $('.actions-quick-add-block-text').trigger('click'); // создание действия
+          $('.actions-quick-add-block-text').trigger('click'); // создание действия
           //console.log('debug: edit-draft-action');
           //$('.edit-draft-action').trigger('click'); // edit
           //PFF.analitics.addAnalitics({ name: 'Поминутная работа программиста' });
@@ -181,6 +182,8 @@ let $; // заглушает ошибки в определении $ в мод�
       PFF.analitics.addActions();
       PFF.smeta.addActions();
       PFF.tmpls.addActions();
+
+      PFF.editorSelectionWatch(win.CKEDITOR.instances.ActionDescription);
     },
 
     /**
@@ -189,6 +192,9 @@ let $; // заглушает ошибки в определении $ в мод�
     addStyles: function() {
       $('body').append(
           `<style>
+.task-add-block.only-selection { visibility: hidden; }
+.pff_editor-selection .only-selection { visibility: visible; }
+
 /*.task-custom-field-val { display: inline !important; }*/
 .chzn-container .chzn-results{ max-height:400px !important; }
 .chzn-drop{ width:850px !important; border-style:solid !important; border-width:1px !important; }
@@ -291,6 +297,54 @@ let $; // заглушает ошибки в определении $ в мод�
       });*/
     },
 
+    // добавляет класс блоку действия, когда выделен текст
+    editorSelectionWatch(editor) {
+      // https://stackoverflow.com/questions/27348572/enable-ckeditor-toolbar-button-only-with-valid-text-selection
+      function refresh() {
+        /**
+         * @param editor.editable
+         * @param editor.getDocument
+         * @param win.CKEDITOR.tools.eventsBuffer
+         */
+        const editable = editor.editable();
+        if (!editable) return;
+
+        const range = editable.getDocument().getSelection().getRanges()[0];
+        const isSelection = range && !range.collapsed;
+
+        const selClass = 'pff_editor-selection';
+        const actionBlock = $('.b-add-action');
+        if(isSelection) actionBlock.addClass(selClass);
+        else actionBlock.removeClass(selClass);
+      }
+
+      const throttledFunction = win.CKEDITOR.tools.eventsBuffer(250, refresh);
+      editor.on('selectionCheck', throttledFunction.input);
+    },
+
+    // get selection html from ckeditor
+    editorGetSelection() {
+      /**
+       * @param {function} win.CKEDITOR.dom.element
+       * @param {function} sel.getRanges
+       * @param {function} el.getHtml
+       */
+      const editor = win.CKEDITOR.instances.ActionDescription;
+      const sel = editor.getSelection();
+      const ranges = sel.getRanges();
+      const Element = win.CKEDITOR.dom.element;
+      const el = new Element('div');
+      for (let i = 0, len = ranges.length; i < len; ++i) {
+        el.append(ranges[i].cloneContents());
+      }
+      return el.getHtml();
+    },
+
+    editorInsertHtml(html) {
+      const editor = win.CKEDITOR.instances.ActionDescription;
+      editor.insertHtml(html);
+    },
+
     // добавляет действие в редактор аналитик
     addAnaliticAction(name, action, analiticAid) {
       const link = $(
@@ -331,7 +385,13 @@ let $; // заглушает ошибки в определении $ в мод�
      * В ссылку вписывается список аналитик
      * Можно передавать вместо аналитик функцию
      */
-    addTaskBlock: function(name, action) {
+    addTaskBlock: function(name, action, opts = {}) {
+      opts = {
+        ...{
+          class: '',
+        }, ...opts,
+      };
+
       const isAnalitic = (action) => {
         return Array.isArray(action) ||
         typeof action == 'object' ||
@@ -349,6 +409,7 @@ let $; // заглушает ошибки в определении $ в мод�
             }
           });
 
+      if(opts.class) block.addClass(opts.class);
       //PFF.debug(block);
 
       if (isAnalitic(action)) {
@@ -864,7 +925,11 @@ const pffSmeta = {
     if (PFF.isAdmin() || PFF.isManager()
     ) {
       PFF.addTaskBlock('|');
-      PFF.addTaskBlock('Оформить смету', pffSmeta.run);
+      PFF.addTaskBlock(
+          'Оформить смету',
+          pffSmeta.run,
+          {class: 'only-selection'},
+      );
     }
   },
 
@@ -1085,38 +1150,16 @@ const pffSmeta = {
     return `<p>${newlines.join('\n')}</p>`;
   },
 
-  // get selection html from ckeditor
-  getSelectionHtml(editor) {
-    /**
-     *
-     * @param {function} win.CKEDITOR.dom.element
-     * @param {function} sel.getRanges
-     * @param {function} el.getHtml
-     */
-    const sel = editor.getSelection();
-    const ranges = sel.getRanges();
-    const Element = win.CKEDITOR.dom.element;
-    const el = new Element('div');
-    for (let i = 0, len = ranges.length; i < len; ++i) {
-      el.append(ranges[i].cloneContents());
-    }
-    return el.getHtml();
-  },
-
   // вход в "Оформить смету"
   run() {
-    const editor = win.CKEDITOR.instances.ActionDescription;
-    const html = pffSmeta.getSelectionHtml(editor);
+    const html = win.PFF.editorGetSelection();
     if(html.length === 0){
-      /**
-       * @param {function} win.show_sys_message
-       */
       win.show_sys_message('Сначала выделите текст сметы', 'ERROR', undefined, undefined, {})
       return;
     }
 
     const styledHtml = pffSmeta.processHtml(html);
-    editor.insertHtml(styledHtml);
+    win.PFF.editorInsertHtml(styledHtml);
   },
 
   // сортировать смету, https://tagilcity.planfix.ru/task/608083
@@ -1334,15 +1377,25 @@ $ = $ || win.$;
 const pffTmpls = {
   addActions() {
     const PFF = win.PFF;
-    if(PFF.isManager() || PFF.isAdmin()){
-      PFF.addTaskBlock('|');
-      PFF.addTaskBlock('Шаблон', pffTmpls.templateSelect);
+    if (!PFF.isManager() && !PFF.isAdmin()) return;
 
-      // быстрые ответы
-      pffTmpls.getTemplates().then((tmpls) => {
-        pffTmpls.addActionTemplates(tmpls);
-      });
-    }
+    PFF.addTaskBlock('|');
+    PFF.addTaskBlock('Шаблон', pffTmpls.templateSelect);
+
+    // замена "вы" для выделенного в редакторе текста
+    [{name: 'Вы', isNew: false}, {name: 'вы', isNew: true}].map(
+        ({name, isNew}) => {
+          PFF.addTaskBlock(name, () => {
+            let html = PFF.editorGetSelection();
+            html = pffTmpls.replaceVy(html, isNew);
+            PFF.editorInsertHtml(html);
+          }, {class: 'only-selection'});
+        });
+
+    // быстрые ответы
+    pffTmpls.getTemplates().then((tmpls) => {
+      pffTmpls.addActionTemplates(tmpls);
+    });
   },
 
   insertRecord(id, handbookId) {
@@ -1393,7 +1446,7 @@ const pffTmpls = {
       data: opts,
       success: afterResponse,
     });
-},
+  },
 
   updateMRU({id, name, text, cat}) {
     const mru = localStorage.pff_templates_mru ? JSON.parse(
@@ -1468,6 +1521,7 @@ const pffTmpls = {
           btns +
           '</div>';
 
+      // noinspection JSValidateTypes
       /**
        * @param {function} win.CommonDialogScrollableJS
        * @param {function} win.CommonDialogScrollableJS.draw
@@ -1481,26 +1535,26 @@ const pffTmpls = {
       dialog.dateFormat = 'dd.mm.yy';
       dialog.draw(html);
       dialog.setHeader('Вставка шаблона');
-      dialog.setCloseHandler(
-          () =>
-              new Promise((resolve, reject) => {
-                let isValid = true;
-                const inputs = $('.pff-tmpl-form input');
-                inputs.each(function() {
-                  if ($(this).val() === '') {
-                    isValid = false;
-                  }
-                });
-                win.PFF.debug('valid:', isValid);
-                if (isValid) {
-                  insertTokenizedTemplate();
-                  resolve(true);
-                } else {
-                  reject('required');
-                }
-              }),
-      );
-      //win.drawDialog(300, 'auto', 300, html);
+
+      const closeHandler = () => {
+        new Promise((resolve) => {
+          let isValid = true;
+          const inputs = $('.pff-tmpl-form input');
+          inputs.each(function() {
+            if ($(this).val() === '') {
+              isValid = false;
+            }
+          });
+          win.PFF.debug('valid:', isValid);
+          if (isValid) {
+            insertTokenizedTemplate();
+            resolve(true);
+          } else {
+            resolve(false);
+          }
+        });
+      };
+      dialog.setCloseHandler(closeHandler);
 
       const redrawPreview = () => {
         let pt = text;
@@ -1538,7 +1592,7 @@ const pffTmpls = {
         const inputs = $('.pff-tmpl-form input');
 
         inputs.
-            on('keypress blur change',
+            on('keypress blur change paste',
                 () => { setTimeout(redrawPreview, 50); });
         inputs.first().trigger('focus');
 
@@ -1555,41 +1609,48 @@ const pffTmpls = {
         JSON.parse(localStorage.pff_task_tokens) : {};
         inputs.each(function() {
           const name = $(this).attr('name');
-          if(taskTokens[tid][name]) {
+          if(taskTokens[tid] && taskTokens[tid][name]) {
             $(this).val(taskTokens[tid][name]);
           }
 
           if(name === 'Мои имя фамилия') $(this).val(win.Current.loginedName);
         });
 
-        redrawPreview();
-
         // Вы | вы
         $('.pff-tmpls-you-change').on('click', function() {
           const type = $(this).data('type');
-          const matched = text.match(/(\s|^)(вы|вас|вам|ваш(и|а|ему|его|ей)?)([\s,.!:)?]|$)/ig);
-          console.log(matched);
-          for(let m of matched) {
-            const newL = type === 'old' ? 'В' : 'в';
-            const rep = m.replace(/в/i, newL)
-            const reg = new RegExp(rep, 'gi');
-            console.log(`${m} -> ${rep}`);
-            text = text.replace(reg, rep);
-            console.log(text);
-          }
-          redrawPreview()
+          text = pffTmpls.replaceVy(text, type !== 'old');
+          redrawPreview();
         });
 
+        // кнопки сохранить / отменить
         $('.pff-tmpl-form .btn-cancel').on('click', () => { dialog.close(); });
         $('.js-action-pff-insert-template').on('click', () => {
           insertTokenizedTemplate();
           dialog.close();
           //$('.pff-tmpl-form').parents('.dialogWin').find('.destroy-button').click();
         });
+
+        redrawPreview();
+
       }, 100);
     } else {
       editor.insertHtml(text);
     }
+  },
+
+  // Вы | вы
+  replaceVy(html, isNew) {
+    const matched = html.match(/(\s|^)(вы|вас|вам|ваш(и|а|ему|его|ей)?)([\s,.!:)?]|$)/ig);
+    //win.PFF.debug(matched);
+    for(let m of matched) {
+      const newL = isNew ? 'в' : 'В';
+      const rep = m.replace(/в/i, newL)
+      const reg = new RegExp(rep, 'gi');
+      //win.PFF.debug(`${m} -> ${rep}`);
+      html = html.replace(reg, rep);
+    }
+    return html;
   },
 
   // кнопка "вставить шаблон" в редакторе

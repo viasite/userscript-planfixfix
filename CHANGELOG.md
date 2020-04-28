@@ -1,3 +1,18 @@
+## [1.1.2](https://github.com/viasite/userscript-planfixfix/compare/v1.1.1...v1.1.2) (2020-04-28)
+
+
+### Bug Fixes
+
+* кнопки .only-selection скрываются, когда текст не выделен ([b9b1954](https://github.com/viasite/userscript-planfixfix/commit/b9b1954))
+* правильная работа шаблона первый раз на странице ([51d867b](https://github.com/viasite/userscript-planfixfix/commit/51d867b))
+
+
+### Features
+
+* замена "вы" для выделенного в редакторе текста ([c55e2b0](https://github.com/viasite/userscript-planfixfix/commit/c55e2b0))
+
+
+
 ## [1.1.1](https://github.com/viasite/userscript-planfixfix/compare/v1.1.0...v1.1.1) (2020-04-28)
 
 
