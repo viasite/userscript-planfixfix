@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name           PlanfixFix
 // @author         popstas
-// @version        1.0.0
+// @version        1.1.0
 // @namespace      viasite.ru
 // @description    Some planfix.ru improvements
 // @unwrap
@@ -16,6 +16,7 @@
  * @param {Object} window.unsafeWindow window
  * @param {Object} win.Current текущий пользователь
  * @param {string} win.Current.logined id пользователя
+ * @param {string} win.Current.loginedName имя фамилия
  * @param {string} win.Current.loginedPost должность
  * @param {Object} $ jQuery
  */
@@ -134,6 +135,11 @@ let $; // заглушает ошибки в определении $ в мод�
     _analitics: [],
 
     init: function() {
+      if(!PFF.isDebug && localStorage.pff_debug){
+        PFF.isDebug = true;
+        console.log('debug set from localStorage');
+      }
+
       // init once
       const body = $('body');
       if (body.hasClass('pff_inited')) return false;
@@ -189,13 +195,13 @@ let $; // заглушает ошибки в определении $ в мод�
 .silentChosen .chzn-drop{ width:1px !important; }
 
 /* text templates */
-.pff-tpls { line-height: 1.5rem; /* margin-left: 100px; max-width: 200px; */ }
-.pff-tpls-title { font-weight: bold; cursor: pointer; }
+.pff-tmpls { line-height: 1.5rem; /* margin-left: 100px; max-width: 200px; */ }
+.pff-tmpls-title { font-weight: bold; cursor: pointer; }
 .pff-action-tmpls { margin: 5px 0; }
-.pff-action-tmpls .pff-tpls-content { display: none; }
-.pff-action-tmpls_expanded .pff-tpls-content { display: block; }
-/*.pff-tpls:hover { max-width: none; margin-left: 0; }
-.pff-tpls:hover .pff-tpls-content { display: block; }*/
+.pff-action-tmpls .pff-tmpls-content { display: none; }
+.pff-action-tmpls_expanded .pff-tmpls-content { display: block; }
+/*.pff-tmpls:hover { max-width: none; margin-left: 0; }
+.pff-tmpls:hover .pff-tmpls-content { display: block; }*/
 .pff-cat { margin-bottom: 15px; }
 .pff-cat-title { padding-top: 2px; /* border-bottom: 3px solid transparent; */ }
 .pff-cat:hover { background: #f6f6f6; }
@@ -204,6 +210,7 @@ let $; // заглушает ошибки в определении $ в мод�
 .pff-cat a { display: block; padding: 2px 15px; }
 
 .pff-tmpl-form input[type="text"] { width: 200px !important; }
+.pff-tmpls-you-change { padding: 5px 10px; }
 .pff-tmpl-form .btn-main { margin-left: 0; }
 .pff-tmpl-form .btn-create { float: right; }
 .pff-tmpl-preview { width: 360px; margin: 30px 0; }
@@ -1377,8 +1384,10 @@ const pffTmpls = {
 
     text = text.replace(/---.*/, '').replace(/<p>$/, ''); // отсекаем примечания
 
-    const tokens = text.match(/(%[a-zа-яё_-]+%)/gi);
+    let tokens = text.match(/(%[a-zа-яё_-]+%)/gi);
     if (tokens) {
+      // inputs
+      tokens = tokens.filter((v, i, s) => s.indexOf(v) === i);
       const inputs = tokens.map((token) => {
         const name = token.replace(/%/g, '').replace(/_/g, ' ');
         let cls = 'text-box';
@@ -1389,16 +1398,25 @@ const pffTmpls = {
               </span>`;
       });
 
-      const btns = `
-<div class="dialog-btn-wrapper">
-<button class="btn-main btn-create action-edit-save js-action-pff-insert-template">Вставить</button>
-<button class="btn-main btn-cancel">Отмена</button>
-</div>`;
+      // controls
+      const controls = `<div class="pff-tmpl-form-controls">
+      <a class="pff-tmpls-you-change" href="javascript:" data-type="old">Вы</a>
+      <a class="pff-tmpls-you-change" href="javascript:" data-type="new">вы</a>
+      </div>`;
 
+      // buttons
+      const btns = `
+        <div class="dialog-btn-wrapper">
+        <button class="btn-main btn-create action-edit-save js-action-pff-insert-template">Вставить</button>
+        <button class="btn-main btn-cancel">Отмена</button>
+        </div>`;
+
+      // form template
       const html =
           '<div class="pff-tmpl-form">' +
           '<div class="task-create-panel-fields">' +
           inputs.join('\n') +
+          controls +
           '</div>' +
           `<div class="pff-tmpl-preview">${text}</div>` +
           btns +
@@ -1414,19 +1432,22 @@ const pffTmpls = {
       const dialog = new win.CommonDialogScrollableJS();
       dialog.closeByEsc = true;
       dialog.isMinimizable = true;
+      dialog.dateFormat = 'dd.mm.yy';
       dialog.draw(html);
       dialog.setHeader('Вставка шаблона');
       dialog.setCloseHandler(
           () =>
               new Promise((resolve, reject) => {
                 let isValid = true;
-                $('.pff-tmpl-form input').each(function() {
+                const inputs = $('.pff-tmpl-form input');
+                inputs.each(function() {
                   if ($(this).val() === '') {
                     isValid = false;
                   }
                 });
+                win.PFF.debug('valid:', isValid);
                 if (isValid) {
-                  editor.insertHtml($('.pff-tmpl-preview').html());
+                  insertTokenizedTemplate();
                   resolve(true);
                 } else {
                   reject('required');
@@ -1440,25 +1461,75 @@ const pffTmpls = {
         $('.pff-tmpl-form input').each(function() {
           const input = $(this);
           const t = input.data('token');
+          const reg = new RegExp(t, 'g');
           const v = input.val().toString();
           if (v === '') {
-            pt = pt.replace(t, `<span style="background:#ffff00">${t}</span>`);
+            pt = pt.replace(reg, `<span style="background:#ffff00">${t}</span>`);
           }
-          else pt = pt.replace(t, v);
+          else pt = pt.replace(reg, v);
         });
         $('.pff-tmpl-preview').html(pt);
       };
 
-      setTimeout(() => {
-        redrawPreview();
+      // сохраняет заполненные токены и вставляет текст в редактор
+      const insertTokenizedTemplate = () => {
         const inputs = $('.pff-tmpl-form input');
+        const tid = win.PlanfixPage.task;
+        const taskTokens = localStorage.pff_task_tokens ?
+            JSON.parse(localStorage.pff_task_tokens) : {};
+
+        if(!taskTokens[tid]) taskTokens[tid] = {}
+        inputs.each(function() {
+          const name = $(this).attr('name');
+          taskTokens[tid][name] = $(this).val();
+        });
+        localStorage.pff_task_tokens = JSON.stringify(taskTokens);
+
+        editor.insertHtml($('.pff-tmpl-preview').html());
+      };
+
+      setTimeout(() => {
+        const inputs = $('.pff-tmpl-form input');
+
         inputs.
             on('keypress blur change',
                 () => { setTimeout(redrawPreview, 50); });
         inputs.first().trigger('focus');
+
+        // stored token values
+        const tid = win.PlanfixPage.task;
+        const taskTokens = localStorage.pff_task_tokens ?
+        JSON.parse(localStorage.pff_task_tokens) : {};
+        inputs.each(function() {
+          const name = $(this).attr('name');
+          if(taskTokens[tid][name]) {
+            $(this).val(taskTokens[tid][name]);
+          }
+
+          if(name === 'Мои имя фамилия') $(this).val(win.Current.loginedName);
+        });
+
+        redrawPreview();
+
+        // Вы | вы
+        $('.pff-tmpls-you-change').on('click', function() {
+          const type = $(this).data('type');
+          const matched = text.match(/(\s|^)(вы|вас|вам|ваш(и|а|ему|его|ей)?)([\s,.!:)?]|$)/ig);
+          console.log(matched);
+          for(let m of matched) {
+            const newL = type === 'old' ? 'В' : 'в';
+            const rep = m.replace(/в/i, newL)
+            const reg = new RegExp(rep, 'gi');
+            console.log(`${m} -> ${rep}`);
+            text = text.replace(reg, rep);
+            console.log(text);
+          }
+          redrawPreview()
+        });
+
         $('.pff-tmpl-form .btn-cancel').on('click', () => { dialog.close(); });
         $('.js-action-pff-insert-template').on('click', () => {
-          editor.insertHtml($('.pff-tmpl-preview').html());
+          insertTokenizedTemplate();
           dialog.close();
           //$('.pff-tmpl-form').parents('.dialogWin').find('.destroy-button').click();
         });
@@ -1485,6 +1556,7 @@ const pffTmpls = {
       $(`[data-handbookid="${win.PFF.tmplsRecord.handbook}"]`).trigger('click');
       setTimeout(() => {
         $(`[data-columnid="${win.PFF.tmplsRecord.name}"]`).trigger('click');
+
         pffTmpls.getTemplates().then((tmpls) => {
           if(Object.keys(tmpls).length === 0) return;
 
@@ -1500,6 +1572,8 @@ const pffTmpls = {
           tmplsRow.append(tmplsCol);
 
           firstRow.after(tmplsRow);
+
+          $('.common-filter-value').on('keypress', () => tmplsRow.remove());
         });
 
       }, 700);
@@ -1538,7 +1612,7 @@ const pffTmpls = {
   },
 
   getQuickTemplates(tmpls) {
-    const tplsBlock = $('<div class="pff-tpls-content"></div>');
+    const tmplsBlock = $('<div class="pff-tmpls-content"></div>');
     for (let cat in tmpls) {
       if(tmpls[cat].length === 0) continue;
       const catDiv = $(`<div class="pff-cat-content"></div>`);
@@ -1565,14 +1639,14 @@ const pffTmpls = {
         });
         a.appendTo(catDiv);
       }
-      tplsBlock.append(
+      tmplsBlock.append(
           $(`<div class="pff-cat"><span class="pff-cat-title">${cat}:</span> </div>`).
               append(catDiv),
       );
     }
 
-    const newTmplsBlock = $('<div class="pff-tpls"></div>');
-    newTmplsBlock.append(tplsBlock);
+    const newTmplsBlock = $('<div class="pff-tmpls"></div>');
+    newTmplsBlock.append(tmplsBlock);
 
     return newTmplsBlock;
   },
@@ -1588,7 +1662,7 @@ const pffTmpls = {
     else {
       const tmplsWrap = $('<div class="pff-action-tmpls"></div>');
 
-      const tmplsTitle = $('<span class="pff-tpls-title">Шаблоны</span>');
+      const tmplsTitle = $('<span class="pff-tmpls-title">Шаблоны</span>');
       tmplsTitle.on('click', () => { tmplsWrap.toggleClass('pff-action-tmpls_expanded') });
       tmplsWrap.append(tmplsTitle);
 
@@ -1694,14 +1768,14 @@ const pffTmpls = {
       }
 
       const storeItem = (response) => {
-        const tpls = jsyaml.load(response.responseText);
+        const tmpls = jsyaml.load(response.responseText);
 
-        const tplsCount = Object.keys(tpls).length;
-        if (tplsCount > 0) {
-          win.PFF.debug('parsed remote templates:', tpls);
-          localStorage.pff_templates = JSON.stringify(tpls);
+        const tmplsCount = Object.keys(tmpls).length;
+        if (tmplsCount > 0) {
+          win.PFF.debug('parsed remote templates:', tmpls);
+          localStorage.pff_templates = JSON.stringify(tmpls);
           localStorage.pff_templates_mtime = new Date().getTime();
-          resolve(tpls);
+          resolve(tmpls);
         } else {
           win.PFF.debug('failed parse remote templates:', response.responseText);
           resolve(win.PFF.templates_default);

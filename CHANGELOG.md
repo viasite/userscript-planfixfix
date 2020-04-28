@@ -1,3 +1,21 @@
+# [1.1.0](https://github.com/viasite/userscript-planfixfix/compare/v1.0.0...v1.1.0) (2020-04-28)
+
+
+### Bug Fixes
+
+* одинаковые подстановки в тексте не обрабатывались ([1efceff](https://github.com/viasite/userscript-planfixfix/commit/1efceff))
+* при обновлении быстрых шаблонов дублировался заголовок ([438d056](https://github.com/viasite/userscript-planfixfix/commit/438d056))
+* прятать быстрые шаблоны при начале поиска обычных шаблонов ([4689679](https://github.com/viasite/userscript-planfixfix/commit/4689679))
+* формат даты дд.мм.гг в выборе шаблона ([8a70976](https://github.com/viasite/userscript-planfixfix/commit/8a70976))
+
+
+### Features
+
+* запоминание подстановок в задаче ([48380a5](https://github.com/viasite/userscript-planfixfix/commit/48380a5))
+* переключатель "Вы/вы" ([719c615](https://github.com/viasite/userscript-planfixfix/commit/719c615))
+
+
+
 # [1.0.0](https://github.com/viasite/userscript-planfixfix/compare/v0.6.2...v1.0.0) (2020-04-27)
 
 
