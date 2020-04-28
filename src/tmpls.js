@@ -11,6 +11,16 @@ const pffTmpls = {
     PFF.addTaskBlock('|');
     PFF.addTaskBlock('Шаблон', pffTmpls.templateSelect);
 
+    // замена "вы" для выделенного в редакторе текста
+    [{name: 'Вы', isNew: false}, {name: 'вы', isNew: true}].map(
+        ({name, isNew}) => {
+          PFF.addTaskBlock(name, () => {
+            let html = PFF.editorGetSelection();
+            html = pffTmpls.replaceVy(html, isNew);
+            PFF.editorInsertHtml(html);
+          }, {class: 'only-selection'});
+        });
+
     // быстрые ответы
     pffTmpls.getTemplates().then((tmpls) => {
       pffTmpls.addActionTemplates(tmpls);
