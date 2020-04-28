@@ -154,7 +154,7 @@ let $; // заглушает ошибки в определении $ в мод�
         setTimeout(() => {
           win.onbeforeunload = undefined; // отменить предупреждение о закрытии окна
           //console.log('debug: new action');
-          $('.actions-quick-add-block-text').trigger('click'); // создание действия
+          // $('.actions-quick-add-block-text').trigger('click'); // создание действия
           //console.log('debug: edit-draft-action');
           //$('.edit-draft-action').trigger('click'); // edit
           //PFF.analitics.addAnalitics({ name: 'Поминутная работа программиста' });
@@ -175,6 +175,7 @@ let $; // заглушает ошибки в определении $ в мод�
     addStyles: function() {
       $('body').append(
           `<style>
+/*.task-custom-field-val { display: inline !important; }*/
 .chzn-container .chzn-results{ max-height:400px !important; }
 .chzn-drop{ width:850px !important; border-style:solid !important; border-width:1px !important; }
 .silentChosen .chzn-container .chzn-results{ max-height:1px !important; }

@@ -30,14 +30,16 @@ const pffSmeta = {
       // смета на разработку
       if (smetaTable.length > 0) {
         // кнопка "Реализовать"
-        PFF.addAnaliticAction('Реализовать', pffSmeta.toRelization);
+        const realizeLink = PFF.addAnaliticAction('Реализовать', pffSmeta.toRelization);
 
         // кнопка "Сортировать смету"
         const sortLink = PFF.addAnaliticAction('Сортировать смету', pffSmeta.order);
-        // удалить кнопку при изменении сметы
+
+        // удалить кнопки при изменении сметы
         smetaTable.on('click.pff_modified', () => {
           smetaTable.off('click.pff_modified');
           sortLink.remove();
+          realizeLink.remove();
         });
 
         // удаление аналитик по блокам (этапам)
@@ -384,6 +386,12 @@ const pffSmeta = {
     });
   },
 
+  pause(i) {
+    return new Promise((resolve) => {
+      setTimeout(resolve, i);
+    });
+  },
+
   /**
    * Добавляет аналитику "Реализация"
    */
@@ -393,73 +401,73 @@ const pffSmeta = {
       ...{count: 1},
       ...opts,
     };
-    const deferred = $.Deferred();
-
-    PFF.deferred.then(function() {
-      // добавить другую аналитику
+    return new Promise((resolve) => {
       $('[data-action="add-new-analitic"]').trigger('click');
 
-      setTimeout(() => {
-        const div = $('.analitics-form').last();
+      let div, analitic, select_handbook;
+
+      pffSmeta.pause(500).then(() => {
+
+        div = $('.analitics-form').last();
         if (opts.scrollTo) PFF.scrollTo(div);
+      }).then(() => {
+        return pffSmeta.pause(500);
+      }).then(() => {
 
-        setTimeout(() => {
-          // выбор группы аналитик
-          const select = div.find('select');
-          PFF.debug('select', select);
-          const option = select.find('option').filter(function() {
-            return $(this).text() === opts.group;
-          });
-          select.val(option.val()).change();
+        // выбор группы аналитик
+        const select = div.find('select');
+        PFF.debug('select', select);
 
-          const analitic = div.find(
-              '[data-aname="' + opts.group + '"] .af-tbl-tr').last();
-          PFF.debug('analitic', analitic);
-
-          const select_handbook = analitic.find(
-              'select[data-handbookid]:first');
-          PFF.debug('select_handbook', select_handbook);
-          select_handbook.trigger('liszt:focus');
-
-          setTimeout(() => {
-            analitic.addClass('silentChosen');
-            analitic.find('.chzn-search:first input').
-                val(opts.name).
-                trigger('keyup');
-            let count_focused = false;
-            select_handbook.on('liszt:updated', function() {
-              const results = analitic.find('.chzn-results .active-result');
-              // PFF.debug('results', results);
-              if (results.length === 1 || opts.select) {
-                results.first().trigger('mouseup');
-                analitic.find(PFF.fields.vyrabotka.count).focus();
-              }
-              // задержка из-за лага chosen
-              setTimeout(() => {
-                if (count_focused) return;
-                count_focused = true;
-                analitic.removeClass('silentChosen');
-
-                if (opts.count) {
-                  analitic.find(PFF.fields.realization.count).val(opts.count);
-                }
-                if (opts.price) {
-                  analitic.find(PFF.fields.realization.price).val(opts.price);
-                }
-                if (opts.date) {
-                  analitic.find(PFF.fields.realization.date).val(opts.date);
-                }
-              }, 2000);
-
-              deferred.resolve();
-            });
-          }, 500);
+        const option = select.find('option').filter(function() {
+          return $(this).text() === opts.group;
         });
-      }, 500);
+        select.val(option.val()).change();
+
+        analitic = div.find(
+            '[data-aname="' + opts.group + '"] .af-tbl-tr').last();
+        PFF.debug('analitic', analitic);
+
+        select_handbook = analitic.find(
+            'select.task-custom-field-val:first');
+        PFF.debug('select_handbook', select_handbook);
+        select_handbook.trigger('liszt:focus');
+      }).then(() => {
+        return pffSmeta.pause(2000);
+      }).then(() => {
+
+        analitic.addClass('silentChosen');
+        analitic.find('.chzn-search:first input').
+            val(opts.name).
+            trigger('keyup');
+        let count_focused = false;
+
+        select_handbook.on('liszt:updated', function() {
+          const results = analitic.find('.chzn-results .active-result');
+          PFF.debug('results', results);
+          if (results.length === 1 || opts.select) {
+            results.first().trigger('mouseup');
+            analitic.find(PFF.fields.realization.count).trigger('focus');
+          }
+          // задержка из-за лага chosen
+          setTimeout(() => {
+            if (count_focused) return;
+            count_focused = true;
+            analitic.removeClass('silentChosen');
+
+            if (opts.count) {
+              analitic.find(PFF.fields.realization.count).val(opts.count);
+            }
+            if (opts.price) {
+              analitic.find(PFF.fields.realization.price).val(opts.price);
+            }
+            if (opts.date) {
+              analitic.find(PFF.fields.realization.date).val(opts.date);
+            }
+          }, 2000);
+
+          resolve();
+        });
+      });
     });
-
-    PFF.deferred = deferred;
-    return deferred.promise();
-  },
-
+  }
 };
