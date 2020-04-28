@@ -150,6 +150,7 @@ const pffTmpls = {
           btns +
           '</div>';
 
+      // noinspection JSValidateTypes
       /**
        * @param {function} win.CommonDialogScrollableJS
        * @param {function} win.CommonDialogScrollableJS.draw
@@ -165,7 +166,7 @@ const pffTmpls = {
       dialog.setHeader('Вставка шаблона');
 
       const closeHandler = () => {
-        new Promise((resolve, reject) => {
+        new Promise((resolve) => {
           let isValid = true;
           const inputs = $('.pff-tmpl-form input');
           inputs.each(function() {
