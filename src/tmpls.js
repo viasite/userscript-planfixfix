@@ -50,7 +50,7 @@ const pffTmpls = {
         }
         if (f.Field.ID === win.PFF.tmplsRecord.text) {
           text = f.Value;
-          pffTmpls.insertTemplate(text);
+          pffTmpls.insertTemplate(text, id, handbookId);
         }
       }
       pffTmpls.updateMRU({id, name, text, cat});
@@ -81,7 +81,7 @@ const pffTmpls = {
   },
 
   // вставка шаблона, окно заполнения подстановок
-  insertTemplate(textRaw) {
+  insertTemplate(textRaw, recordId, handbookId) {
     /**
      * @param win.CKEDITOR.instances
      * @param win.CKEDITOR.instances.ActionDescription
@@ -105,6 +105,16 @@ const pffTmpls = {
               </span>`;
       });
 
+      // record link
+      /**
+       * @param win.HandbookDataCKEditorJS
+       */
+      let recordLink = '';
+      if(recordId && handbookId) {
+        const link = `/?action=handbookdataview&amp;handbook=${handbookId}&amp;key=${recordId}`
+        recordLink = `<a href="${link}" class="ckeditor-handbook-data-item" data-handbookid="${handbookId}" data-key="${recordId}" target="_blank">Посмотреть запись</a>`;
+      }
+
       // controls
       const controls = `<div class="pff-tmpl-form-controls">
       <a class="pff-tmpls-you-change" href="javascript:" data-type="old">Вы</a>
@@ -121,6 +131,7 @@ const pffTmpls = {
       // form template
       const html =
           '<div class="pff-tmpl-form">' +
+          recordLink +
           '<div class="task-create-panel-fields">' +
           inputs.join('\n') +
           controls +
@@ -202,6 +213,13 @@ const pffTmpls = {
             on('keypress blur change',
                 () => { setTimeout(redrawPreview, 50); });
         inputs.first().trigger('focus');
+
+        // record link click
+        $('.pff-tmpl-form .ckeditor-handbook-data-item').on('click', function(e) {
+          win.HandbookDataCKEditorJS.show($(this), null);
+          e.preventDefault();
+          return false;
+        });
 
         // stored token values
         const tid = win.PlanfixPage.task;
