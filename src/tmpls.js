@@ -227,7 +227,7 @@ const pffTmpls = {
         JSON.parse(localStorage.pff_task_tokens) : {};
         inputs.each(function() {
           const name = $(this).attr('name');
-          if(taskTokens[tid][name]) {
+          if(taskTokens[tid] && taskTokens[tid][name]) {
             $(this).val(taskTokens[tid][name]);
           }
 
