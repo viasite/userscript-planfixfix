@@ -17,62 +17,52 @@ const pffSmeta = {
   addAnaliticActions() {
     const PFF = win.PFF;
     const smetaAid = 314;
-    const maxAttempts = 10;
-    let i = 0
-    const interval = setInterval(() =>{
-      i++;
-      if(i >= maxAttempts) clearInterval(interval);
 
-      const smetaTable = $(`[data-aid="${smetaAid}"] .tbl-list`);
-      if(smetaTable.length === 0) return false;
-
-      clearInterval(interval);
-
+    PFF.waitFor(`[data-aid="${smetaAid}"] .tbl-list`).then(smetaTable => {
       // смета на разработку
-      if (smetaTable.length > 0) {
-        // кнопка "Реализовать"
-        const realizeLink = PFF.addAnaliticAction('Реализовать', pffSmeta.toRelization, smetaAid);
+      if(smetaTable.length === 0) return;
 
-        // кнопка "Сортировать смету"
-        const sortLink = PFF.addAnaliticAction('Сортировать смету', pffSmeta.order, smetaAid);
+      // кнопка "Реализовать"
+      const realizeLink = PFF.addAnaliticAction('Реализовать', pffSmeta.toRelization, smetaAid);
 
-        // удалить кнопки при изменении сметы
-        smetaTable.on('click.pff_modified', () => {
-          smetaTable.off('click.pff_modified');
-          sortLink.remove();
-          realizeLink.remove();
-        });
+      // кнопка "Сортировать смету"
+      const sortLink = PFF.addAnaliticAction('Сортировать смету', pffSmeta.order, smetaAid);
 
-        // удаление аналитик по блокам (этапам)
-        // TODO: to pffSmeta
-        const sections = {};
-        smetaTable.find('div[data-fid="950"]').each(function() {
-          const val = $(this).find('input:hidden').val();
-          if (!sections[val]) {
-            sections[val] = {
-              name: $(this).text(),
-              count: 0,
-              rows: [],
-            };
-          }
-          sections[val].count++;
-          sections[val].rows.push($(this).parents('tr'));
-        });
-        for (let fid in sections) {
-          const sec = sections[fid];
-          const link = PFF.addAnaliticAction(
-              `Удалить ${sec.name} (${sec.count})`,
-              () => {
-                for (let row of sec.rows) {
-                  row.find('[data-acr="delete"]').trigger('click');
-                  row.remove();
-                }
-                link.remove();
-              }, smetaAid,
-          );
+      // удалить кнопки при изменении сметы
+      smetaTable.on('click.pff_modified', () => {
+        smetaTable.off('click.pff_modified');
+        sortLink.remove();
+        realizeLink.remove();
+      });
+
+      // удаление аналитик по блокам (этапам)
+      const sections = {};
+      smetaTable.find('div[data-fid="950"]').each(function() {
+        const val = $(this).find('input:hidden').val();
+        if (!sections[val]) {
+          sections[val] = {
+            name: $(this).text(),
+            count: 0,
+            rows: [],
+          };
         }
+        sections[val].count++;
+        sections[val].rows.push($(this).parents('tr'));
+      });
+      for (let fid in sections) {
+        const sec = sections[fid];
+        const link = PFF.addAnaliticAction(
+            `Удалить ${sec.name} (${sec.count})`,
+            () => {
+              for (let row of sec.rows) {
+                row.find('[data-acr="delete"]').trigger('click');
+                row.remove();
+              }
+              link.remove();
+            }, smetaAid,
+        );
       }
-    }, 500);
+    });
   },
 
   // style html

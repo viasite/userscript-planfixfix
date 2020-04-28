@@ -291,6 +291,27 @@ let $; // заглушает ошибки в определении $ в мод�
       return link;
     },
 
+    // ждёт появления элемента и возвращает его через promise
+    waitFor(selector, delay = 500, attempts = 10) {
+      return new Promise((resolve, reject) => {
+        let i = 0;
+        const interval = setInterval(() => {
+          i++;
+          if (i >= attempts){
+            clearInterval(interval);
+            return reject(false);
+          }
+
+          const elem = $(selector);
+          if (elem.length === 0) return false;
+
+          // found
+          clearInterval(interval);
+          resolve(elem);
+        }, delay);
+      });
+    },
+
     /**
      * Добавляет ссылку на добавление аналитики в панель
      * В ссылку вписывается список аналитик

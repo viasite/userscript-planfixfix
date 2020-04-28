@@ -266,6 +266,7 @@ const pffTmpls = {
 
   // кнопка "вставить шаблон" в редакторе
   templateSelect: function() {
+    const PFF = win.PFF;
     const editor = CKEDITOR.instances.ActionDescription;
     editor.fire('pffTemplatesOpened');
 
@@ -277,32 +278,34 @@ const pffTmpls = {
      */
     const handbookSelectDialog = new win.HandbookSelectDialogJS();
 
-    setTimeout(() => {
-      $(`[data-handbookid="${win.PFF.tmplsRecord.handbook}"]`).trigger('click');
-      setTimeout(() => {
-        $(`[data-columnid="${win.PFF.tmplsRecord.name}"]`).trigger('click');
+    const handbookItemSel = `[data-handbookid="${PFF.tmplsRecord.handbook}"]`;
+    const nameColSel = `[data-columnid="${PFF.tmplsRecord.name}"]`;
 
-        pffTmpls.getTemplates().then((tmpls) => {
-          if(Object.keys(tmpls).length === 0) return;
+    PFF.waitFor(handbookItemSel).then(handbookItem => {
+      handbookItem.trigger('click');
+      return PFF.waitFor(nameColSel);
+    }).then(nameCol => {
+      nameCol.trigger('click');
 
-          const tmplsBlock = pffTmpls.getQuickTemplates(tmpls);
-          const tbl = $('.tbl-list-tasks');
-          const firstRow = tbl.find('tr:nth-child(1)');
+      pffTmpls.getTemplates().then((tmpls) => {
+        if(Object.keys(tmpls).length === 0) return;
 
-          const colspan = firstRow.find('td').length;
-          const tmplsCol = $(`<td colspan="${colspan-2}" style="padding-left: 10px;"></td>`);
-          tmplsCol.append(tmplsBlock);
-          const tmplsRow = $('<tr></tr>');
-          tmplsRow.append('<td colspan="2"></td>');
-          tmplsRow.append(tmplsCol);
+        const tmplsBlock = pffTmpls.getQuickTemplates(tmpls);
+        const tbl = $('.tbl-list-tasks');
+        const firstRow = tbl.find('tr:nth-child(1)');
 
-          firstRow.after(tmplsRow);
+        const colspan = firstRow.find('td').length;
+        const tmplsCol = $(`<td colspan="${colspan-2}" style="padding-left: 10px;"></td>`);
+        tmplsCol.append(tmplsBlock);
+        const tmplsRow = $('<tr></tr>');
+        tmplsRow.append('<td colspan="2"></td>');
+        tmplsRow.append(tmplsCol);
 
-          $('.common-filter-value').on('keypress', () => tmplsRow.remove());
-        });
+        firstRow.after(tmplsRow);
 
-      }, 700);
-    }, 1000);
+        $('.common-filter-value').on('keypress paste', () => tmplsRow.remove());
+      });
+    });
 
     /**
      * @param {String} type 'record' | 'text'
