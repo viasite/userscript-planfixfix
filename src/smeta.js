@@ -16,13 +16,14 @@ const pffSmeta = {
 
   addAnaliticActions() {
     const PFF = win.PFF;
+    const smetaAid = 314;
     const maxAttempts = 10;
     let i = 0
     const interval = setInterval(() =>{
       i++;
       if(i >= maxAttempts) clearInterval(interval);
 
-      const smetaTable = $('[data-aid="314"] .tbl-list');
+      const smetaTable = $(`[data-aid="${smetaAid}"] .tbl-list`);
       if(smetaTable.length === 0) return false;
 
       clearInterval(interval);
@@ -30,10 +31,10 @@ const pffSmeta = {
       // смета на разработку
       if (smetaTable.length > 0) {
         // кнопка "Реализовать"
-        const realizeLink = PFF.addAnaliticAction('Реализовать', pffSmeta.toRelization);
+        const realizeLink = PFF.addAnaliticAction('Реализовать', pffSmeta.toRelization, smetaAid);
 
         // кнопка "Сортировать смету"
-        const sortLink = PFF.addAnaliticAction('Сортировать смету', pffSmeta.order);
+        const sortLink = PFF.addAnaliticAction('Сортировать смету', pffSmeta.order, smetaAid);
 
         // удалить кнопки при изменении сметы
         smetaTable.on('click.pff_modified', () => {
@@ -67,7 +68,7 @@ const pffSmeta = {
                   row.remove();
                 }
                 link.remove();
-              },
+              }, smetaAid,
           );
         }
       }

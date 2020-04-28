@@ -278,12 +278,16 @@ let $; // заглушает ошибки в определении $ в мод�
     },
 
     // добавляет действие в редактор аналитик
-    addAnaliticAction(name, action) {
+    addAnaliticAction(name, action, analiticAid) {
       const link = $(
           '<span style="margin-left:1em" class="fakelink-dashed">' + name +
           '</span>',
       ).on('click', action);
-      $('.af-row-btn-add').append(link);
+      if(analiticAid){
+        $(`[data-aid="${analiticAid}"] .af-row-btn-add`).append(link);
+      } else {
+        $('.af-row-btn-add').append(link);
+      }
       return link;
     },
 
