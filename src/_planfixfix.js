@@ -154,7 +154,7 @@ let $; // заглушает ошибки в определении $ в мод�
         setTimeout(() => {
           win.onbeforeunload = undefined; // отменить предупреждение о закрытии окна
           //console.log('debug: new action');
-          // $('.actions-quick-add-block-text').trigger('click'); // создание действия
+          $('.actions-quick-add-block-text').trigger('click'); // создание действия
           //console.log('debug: edit-draft-action');
           //$('.edit-draft-action').trigger('click'); // edit
           //PFF.analitics.addAnalitics({ name: 'Поминутная работа программиста' });
@@ -167,6 +167,8 @@ let $; // заглушает ошибки в определении $ в мод�
       PFF.analitics.addActions();
       PFF.smeta.addActions();
       PFF.tmpls.addActions();
+
+      PFF.editorSelectionWatch(win.CKEDITOR.instances.ActionDescription);
     },
 
     /**
@@ -175,6 +177,9 @@ let $; // заглушает ошибки в определении $ в мод�
     addStyles: function() {
       $('body').append(
           `<style>
+.task-add-block.only-selection { visibility: hidden; }
+.pff_editor-selection .only-selection { visibility: visible; }
+
 /*.task-custom-field-val { display: inline !important; }*/
 .chzn-container .chzn-results{ max-height:400px !important; }
 .chzn-drop{ width:850px !important; border-style:solid !important; border-width:1px !important; }
@@ -277,6 +282,31 @@ let $; // заглушает ошибки в определении $ в мод�
       });*/
     },
 
+    // добавляет класс блоку действия, когда выделен текст
+    editorSelectionWatch(editor) {
+      // https://stackoverflow.com/questions/27348572/enable-ckeditor-toolbar-button-only-with-valid-text-selection
+      function refresh() {
+        /**
+         * @param editor.editable
+         * @param editor.getDocument
+         * @param win.CKEDITOR.tools.eventsBuffer
+         */
+        const editable = editor.editable();
+        if (!editable) return;
+
+        const range = editable.getDocument().getSelection().getRanges()[0];
+        const isSelection = range && !range.collapsed;
+
+        const selClass = 'pff_editor-selection';
+        const actionBlock = $('.b-add-action');
+        if(isSelection) actionBlock.addClass(selClass);
+        else actionBlock.removeClass(selClass);
+      }
+
+      const throttledFunction = win.CKEDITOR.tools.eventsBuffer(250, refresh);
+      editor.on('selectionCheck', throttledFunction.input);
+    },
+
     // добавляет действие в редактор аналитик
     addAnaliticAction(name, action, analiticAid) {
       const link = $(
@@ -317,7 +347,13 @@ let $; // заглушает ошибки в определении $ в мод�
      * В ссылку вписывается список аналитик
      * Можно передавать вместо аналитик функцию
      */
-    addTaskBlock: function(name, action) {
+    addTaskBlock: function(name, action, opts = {}) {
+      opts = {
+        ...{
+          class: '',
+        }, ...opts,
+      };
+
       const isAnalitic = (action) => {
         return Array.isArray(action) ||
         typeof action == 'object' ||
@@ -335,6 +371,7 @@ let $; // заглушает ошибки в определении $ в мод�
             }
           });
 
+      if(opts.class) block.addClass(opts.class);
       //PFF.debug(block);
 
       if (isAnalitic(action)) {

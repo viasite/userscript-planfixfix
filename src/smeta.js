@@ -10,7 +10,11 @@ const pffSmeta = {
     if (PFF.isAdmin() || PFF.isManager()
     ) {
       PFF.addTaskBlock('|');
-      PFF.addTaskBlock('Оформить смету', pffSmeta.run);
+      PFF.addTaskBlock(
+          'Оформить смету',
+          pffSmeta.run,
+          {class: 'only-selection'},
+      );
     }
   },
 
