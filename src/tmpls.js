@@ -37,7 +37,6 @@ const pffTmpls = {
     };
 
     /**
-     *
      * @param data
      * @param {string[]} data.NamedPath
      * @param data.NamedPath.Name
@@ -71,6 +70,9 @@ const pffTmpls = {
       });
     };
 
+    /**
+     * @param win.AjaxJS запросы к сущностям ПФ
+     */
     win.AjaxJS.request({
       data: opts,
       success: afterResponse,
@@ -92,13 +94,7 @@ const pffTmpls = {
 
   // вставка шаблона, окно заполнения подстановок
   insertTemplate(textRaw, recordId, handbookId) {
-    /**
-     * @param win.CKEDITOR.instances
-     * @param win.CKEDITOR.instances.ActionDescription
-     */
-    const editor = win.CKEDITOR.instances.ActionDescription;
     let text = textRaw.replace(/\n/g, '<br>');
-
     text = text.replace(/---.*/, '').replace(/<p>$/, ''); // отсекаем примечания
 
     let tokens = text.match(/(%[a-zа-яё_-]+%)/gi);
@@ -125,8 +121,8 @@ const pffTmpls = {
         recordLink = `<a href="${link}" class="ckeditor-handbook-data-item" data-handbookid="${handbookId}" data-key="${recordId}" target="_blank">Посмотреть запись</a>`;
       }
 
-      // controls
-      const controls = `<div class="pff-tmpl-form-controls">
+      // vyLinks
+      const vyLinks = `<div class="pff-tmpl-form-controls">
       <a class="pff-tmpls-you-change" href="javascript:" data-type="old">Вы</a>
       <a class="pff-tmpls-you-change" href="javascript:" data-type="new">вы</a>
       </div>`;
@@ -139,12 +135,11 @@ const pffTmpls = {
         </div>`;
 
       // form template
-      const html =
-          '<div class="pff-tmpl-form">' +
+      const html = '<div class="pff-tmpl-form">' +
           recordLink +
           '<div class="task-create-panel-fields">' +
           inputs.join('\n') +
-          controls +
+          vyLinks +
           '</div>' +
           `<div class="pff-tmpl-preview">${text}</div>` +
           btns +
@@ -152,11 +147,9 @@ const pffTmpls = {
 
       // noinspection JSValidateTypes
       /**
-       * @param {function} win.CommonDialogScrollableJS
        * @param {function} win.CommonDialogScrollableJS.draw
        * @param {function} win.CommonDialogScrollableJS.setHeader
        * @param {function} win.CommonDialogScrollableJS.setCloseHandler
-       * @param editor.insertHtml
        */
       const dialog = new win.CommonDialogScrollableJS();
       dialog.closeByEsc = true;
@@ -214,9 +207,10 @@ const pffTmpls = {
         });
         localStorage.pff_task_tokens = JSON.stringify(taskTokens);
 
-        editor.insertHtml($('.pff-tmpl-preview').html());
+        win.PFF.editorInsertHtml($('.pff-tmpl-preview').html());
       };
 
+      // tmpl editor init
       setTimeout(() => {
         const inputs = $('.pff-tmpl-form input');
 
@@ -257,14 +251,13 @@ const pffTmpls = {
         $('.js-action-pff-insert-template').on('click', () => {
           insertTokenizedTemplate();
           dialog.close();
-          //$('.pff-tmpl-form').parents('.dialogWin').find('.destroy-button').click();
         });
 
         redrawPreview();
 
       }, 100);
     } else {
-      editor.insertHtml(text);
+      win.PFF.editorInsertHtml(text);
     }
   },
 
@@ -285,11 +278,6 @@ const pffTmpls = {
   // кнопка "вставить шаблон" в редакторе
   templateSelect: function() {
     const PFF = win.PFF;
-    const editor = CKEDITOR.instances.ActionDescription;
-    editor.fire('pffTemplatesOpened');
-
-    const editorSelection = editor.getSelection();
-    const caretPosition = editorSelection.getRanges();
 
     /**
      * @param win.HandbookSelectDialogJS
@@ -333,25 +321,13 @@ const pffTmpls = {
      * @param {string} exportData.text
      */
     handbookSelectDialog.onInsertData = function(type, exportData) {
-      /**
-       * @param win.AjaxJS запросы к сущностям ПФ
-       * @param sel.selectRanges
-       */
-      editor.focus();
-
       setTimeout(function() {
-        const sel = editor.getSelection();
-        sel.selectRanges(caretPosition);
         if ('record' === type) {
           pffTmpls.insertRecord(exportData.key);
         } else if ('text' === type) {
           pffTmpls.insertTemplate(exportData.text);
         }
       }, 200);
-    };
-
-    handbookSelectDialog.onClose = function() {
-      editor.fire('pffTemplatesClosed');
     };
 
     handbookSelectDialog.drawDialog(); // editor.extraHandbookData
