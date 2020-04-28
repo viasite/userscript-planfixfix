@@ -54,10 +54,20 @@ let $; // заглушает ошибки в определении $ в мод�
         hours_per_count: '.analitic-data[data-fid="741:h915"]',
       },
       realization: {
+        analiticName: 'Реализация',
         count: '[data-fid="990"] input',
         price: '[data-fid="994"] input',
         date: '[data-fid="996"] input',
       },
+      smeta: {
+        aid: 314, // смета на разработку
+        orderByFids: [950, 1093], // тип работ, №
+        name: '[data-fid="934"]',
+        price: '[data-fid="934:h1016"]',
+        customPrice: '[data-fid="1089"]',
+        discont: '[data-fid="942"]',
+        block: 'div[data-fid="950"]' // div обязателен
+      }
     },
     // Шаблоны
     tmplsRecord: {

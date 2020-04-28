@@ -20,7 +20,7 @@ const pffSmeta = {
 
   addAnaliticActions() {
     const PFF = win.PFF;
-    const smetaAid = 314;
+    const smetaAid = PFF.fields.smeta.aid;
 
     PFF.waitFor(`[data-aid="${smetaAid}"] .tbl-list`).then(smetaTable => {
       // смета на разработку
@@ -41,7 +41,7 @@ const pffSmeta = {
 
       // удаление аналитик по блокам (этапам)
       const sections = {};
-      smetaTable.find('div[data-fid="950"]').each(function() {
+      smetaTable.find(PFF.fields.smeta.block).each(function() {
         const val = $(this).find('input:hidden').val();
         if (!sections[val]) {
           sections[val] = {
@@ -251,8 +251,8 @@ const pffSmeta = {
   order(opts) {
     opts = {
       ...{
-        analiticAid: 314, // смета на разработку
-        orderByFids: [950, 1093], // тип работ, №
+        analiticAid: win.PFF.fields.smeta.aid,
+        orderByFids: win.PFF.fields.smeta.orderByFids
       },
       ...opts,
     };
@@ -307,7 +307,7 @@ const pffSmeta = {
       const newData = rowsDataSorted[ind];
       for (let fid in newData) {
         if(!newData.hasOwnProperty(fid)) continue;
-        elem.find('[data-fid="' + fid + '"] input:hidden').val(newData[fid]);
+        elem.find(`[data-fid="${fid}'] input:hidden`).val(newData[fid]);
       }
     });
 
@@ -330,26 +330,27 @@ const pffSmeta = {
    * Копирует аналитики "Смета на разработку" в "Реализация"
    */
   toRelization() {
+    const PFF = win.PFF;
+
     const pad = function(num) {
       const A = num.toString();
       if (A.length > 1) return A;
       else return ('00' + A).slice(-2);
     };
 
-    const smetaTable = $('[data-aid="314"] .tbl-list');
+    const smetaTable = $(`[data-aid="${PFF.fields.smeta.aid}"] .tbl-list`);
     smetaTable.find('tr').each(function() {
       const tr = $(this);
       if (tr.find('input').length === 0) return;
 
       const d = new Date();
 
-      // TODO: в настройки PFF
-      const name = tr.find('[data-fid="934"]').text().trim();
-      const itemPrice = tr.find('[data-fid="934:h1016"]').text();
-      const customPrice = tr.find('[data-fid="1089"]').text();
+      const name = tr.find(PFF.fields.smeta.name).text().trim();
+      const itemPrice = tr.find(PFF.fields.smeta.price).text();
+      const customPrice = tr.find(PFF.fields.smeta.customPrice).text();
       let price = parseInt(customPrice ? customPrice : itemPrice);
-      const discont = parseInt(tr.find('[data-fid="942"]').text());
-      if(discont > 0) price = Math.round(price * discont / 100);
+      const discont = parseInt(tr.find(PFF.fields.smeta.discont).text());
+      if (discont > 0) price = Math.round(price * discont / 100);
       const date = pad(d.getDate()) + '-' + pad(1 + d.getMonth()) + '-' +
           d.getFullYear();
 
@@ -360,7 +361,7 @@ const pffSmeta = {
 
       pffSmeta._addRealization({
         name: name,
-        group: 'Реализация',
+        group: PFF.fields.realization.analiticName,
         price: price,
         date: date,
       });
