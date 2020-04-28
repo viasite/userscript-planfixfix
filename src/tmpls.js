@@ -263,6 +263,7 @@ const pffTmpls = {
       $(`[data-handbookid="${win.PFF.tmplsRecord.handbook}"]`).trigger('click');
       setTimeout(() => {
         $(`[data-columnid="${win.PFF.tmplsRecord.name}"]`).trigger('click');
+
         pffTmpls.getTemplates().then((tmpls) => {
           if(Object.keys(tmpls).length === 0) return;
 
@@ -278,6 +279,8 @@ const pffTmpls = {
           tmplsRow.append(tmplsCol);
 
           firstRow.after(tmplsRow);
+
+          $('.common-filter-value').on('keypress', () => tmplsRow.remove());
         });
 
       }, 700);
