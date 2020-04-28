@@ -361,12 +361,20 @@ const pffSmeta = {
 
       const d = new Date();
 
+      // TODO: в настройки PFF
       const name = tr.find('[data-fid="934"]').text().trim();
       const itemPrice = tr.find('[data-fid="934:h1016"]').text();
       const customPrice = tr.find('[data-fid="1089"]').text();
-      const price = customPrice ? customPrice : itemPrice;
+      let price = parseInt(customPrice ? customPrice : itemPrice);
+      const discont = parseInt(tr.find('[data-fid="942"]').text());
+      if(discont > 0) price = Math.round(price * discont / 100);
       const date = pad(d.getDate()) + '-' + pad(1 + d.getMonth()) + '-' +
           d.getFullYear();
+
+      if (name === '') {
+        win.show_sys_message('Заполните пустые аналитики в реализации!',
+            'ERROR', undefined, undefined, {});
+      }
 
       pffSmeta._addRealization({
         name: name,
@@ -425,39 +433,41 @@ const pffSmeta = {
       }).then(() => {
         return pffSmeta.pause(2000);
       }).then(() => {
+        if (opts.count) {
+          analitic.find(PFF.fields.realization.count).val(opts.count);
+        }
+        if (opts.price) {
+          analitic.find(PFF.fields.realization.price).val(opts.price);
+        }
+        if (opts.date) {
+          analitic.find(PFF.fields.realization.date).val(opts.date);
+        }
 
-        analitic.addClass('silentChosen');
-        analitic.find('.chzn-search:first input').
-            val(opts.name).
-            trigger('keyup');
-        let count_focused = false;
+        if(opts.name) {
+          analitic.addClass('silentChosen');
+          analitic.find('.chzn-search:first input').
+              val(opts.name).
+              trigger('keyup');
+          let count_focused = false;
 
-        select_handbook.on('liszt:updated', function() {
-          const results = analitic.find('.chzn-results .active-result');
-          PFF.debug('results', results);
-          if (results.length === 1 || opts.select) {
-            results.first().trigger('mouseup');
-            analitic.find(PFF.fields.realization.count).trigger('focus');
-          }
-          // задержка из-за лага chosen
-          setTimeout(() => {
-            if (count_focused) return;
-            count_focused = true;
-            analitic.removeClass('silentChosen');
-
-            if (opts.count) {
-              analitic.find(PFF.fields.realization.count).val(opts.count);
+          select_handbook.on('liszt:updated', function() {
+            const results = analitic.find('.chzn-results .active-result');
+            PFF.debug('results', results);
+            if (results.length === 1 || opts.select) {
+              results.first().trigger('mouseup');
+              analitic.find(PFF.fields.realization.count).trigger('focus');
             }
-            if (opts.price) {
-              analitic.find(PFF.fields.realization.price).val(opts.price);
-            }
-            if (opts.date) {
-              analitic.find(PFF.fields.realization.date).val(opts.date);
-            }
-          }, 2000);
+            // задержка из-за лага chosen
+            setTimeout(() => {
+              if (count_focused) return;
+              count_focused = true;
+              analitic.removeClass('silentChosen');
 
-          resolve();
-        });
+            }, 2000);
+
+            resolve();
+          });
+        }
       });
     });
   }
