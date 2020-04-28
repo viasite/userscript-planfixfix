@@ -1,3 +1,19 @@
+## [1.1.1](https://github.com/viasite/userscript-planfixfix/compare/v1.1.0...v1.1.1) (2020-04-28)
+
+
+### Bug Fixes
+
+* починена кнопка "Реализовать" (кроме пустых аналитик) ([98a4a05](https://github.com/viasite/userscript-planfixfix/commit/98a4a05))
+* реализация пустых аналитик ([094e4e3](https://github.com/viasite/userscript-planfixfix/commit/094e4e3))
+* теперь действия прикрепляются только к блоку своей аналитики ([c0f8277](https://github.com/viasite/userscript-planfixfix/commit/c0f8277))
+
+
+### Features
+
+* ссылка на просмотр записи из окна вставки шаблона ([2186d13](https://github.com/viasite/userscript-planfixfix/commit/2186d13))
+
+
+
 # [1.1.0](https://github.com/viasite/userscript-planfixfix/compare/v1.0.0...v1.1.0) (2020-04-28)
 
 

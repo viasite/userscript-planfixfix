@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name           PlanfixFix
 // @author         popstas
-// @version        1.1.0
+// @version        1.1.1
 // @namespace      viasite.ru
 // @description    Some planfix.ru improvements
 // @unwrap
@@ -168,7 +168,7 @@ let $; // заглушает ошибки в определении $ в мод�
         setTimeout(() => {
           win.onbeforeunload = undefined; // отменить предупреждение о закрытии окна
           //console.log('debug: new action');
-          $('.actions-quick-add-block-text').trigger('click'); // создание действия
+          // $('.actions-quick-add-block-text').trigger('click'); // создание действия
           //console.log('debug: edit-draft-action');
           //$('.edit-draft-action').trigger('click'); // edit
           //PFF.analitics.addAnalitics({ name: 'Поминутная работа программиста' });
@@ -189,6 +189,7 @@ let $; // заглушает ошибки в определении $ в мод�
     addStyles: function() {
       $('body').append(
           `<style>
+/*.task-custom-field-val { display: inline !important; }*/
 .chzn-container .chzn-results{ max-height:400px !important; }
 .chzn-drop{ width:850px !important; border-style:solid !important; border-width:1px !important; }
 .silentChosen .chzn-container .chzn-results{ max-height:1px !important; }
@@ -291,13 +292,38 @@ let $; // заглушает ошибки в определении $ в мод�
     },
 
     // добавляет действие в редактор аналитик
-    addAnaliticAction(name, action) {
+    addAnaliticAction(name, action, analiticAid) {
       const link = $(
           '<span style="margin-left:1em" class="fakelink-dashed">' + name +
           '</span>',
       ).on('click', action);
-      $('.af-row-btn-add').append(link);
+      if(analiticAid){
+        $(`[data-aid="${analiticAid}"] .af-row-btn-add`).append(link);
+      } else {
+        $('.af-row-btn-add').append(link);
+      }
       return link;
+    },
+
+    // ждёт появления элемента и возвращает его через promise
+    waitFor(selector, delay = 500, attempts = 10) {
+      return new Promise((resolve, reject) => {
+        let i = 0;
+        const interval = setInterval(() => {
+          i++;
+          if (i >= attempts){
+            clearInterval(interval);
+            return reject(false);
+          }
+
+          const elem = $(selector);
+          if (elem.length === 0) return false;
+
+          // found
+          clearInterval(interval);
+          resolve(elem);
+        }, delay);
+      });
     },
 
     /**
@@ -844,60 +870,53 @@ const pffSmeta = {
 
   addAnaliticActions() {
     const PFF = win.PFF;
-    const maxAttempts = 10;
-    let i = 0
-    const interval = setInterval(() =>{
-      i++;
-      if(i >= maxAttempts) clearInterval(interval);
+    const smetaAid = 314;
 
-      const smetaTable = $('[data-aid="314"] .tbl-list');
-      if(smetaTable.length === 0) return false;
-
-      clearInterval(interval);
-
+    PFF.waitFor(`[data-aid="${smetaAid}"] .tbl-list`).then(smetaTable => {
       // смета на разработку
-      if (smetaTable.length > 0) {
-        // кнопка "Реализовать"
-        PFF.addAnaliticAction('Реализовать', pffSmeta.toRelization);
+      if(smetaTable.length === 0) return;
 
-        // кнопка "Сортировать смету"
-        const sortLink = PFF.addAnaliticAction('Сортировать смету', pffSmeta.order);
-        // удалить кнопку при изменении сметы
-        smetaTable.on('click.pff_modified', () => {
-          smetaTable.off('click.pff_modified');
-          sortLink.remove();
-        });
+      // кнопка "Реализовать"
+      const realizeLink = PFF.addAnaliticAction('Реализовать', pffSmeta.toRelization, smetaAid);
 
-        // удаление аналитик по блокам (этапам)
-        // TODO: to pffSmeta
-        const sections = {};
-        smetaTable.find('div[data-fid="950"]').each(function() {
-          const val = $(this).find('input:hidden').val();
-          if (!sections[val]) {
-            sections[val] = {
-              name: $(this).text(),
-              count: 0,
-              rows: [],
-            };
-          }
-          sections[val].count++;
-          sections[val].rows.push($(this).parents('tr'));
-        });
-        for (let fid in sections) {
-          const sec = sections[fid];
-          const link = PFF.addAnaliticAction(
-              `Удалить ${sec.name} (${sec.count})`,
-              () => {
-                for (let row of sec.rows) {
-                  row.find('[data-acr="delete"]').trigger('click');
-                  row.remove();
-                }
-                link.remove();
-              },
-          );
+      // кнопка "Сортировать смету"
+      const sortLink = PFF.addAnaliticAction('Сортировать смету', pffSmeta.order, smetaAid);
+
+      // удалить кнопки при изменении сметы
+      smetaTable.on('click.pff_modified', () => {
+        smetaTable.off('click.pff_modified');
+        sortLink.remove();
+        realizeLink.remove();
+      });
+
+      // удаление аналитик по блокам (этапам)
+      const sections = {};
+      smetaTable.find('div[data-fid="950"]').each(function() {
+        const val = $(this).find('input:hidden').val();
+        if (!sections[val]) {
+          sections[val] = {
+            name: $(this).text(),
+            count: 0,
+            rows: [],
+          };
         }
+        sections[val].count++;
+        sections[val].rows.push($(this).parents('tr'));
+      });
+      for (let fid in sections) {
+        const sec = sections[fid];
+        const link = PFF.addAnaliticAction(
+            `Удалить ${sec.name} (${sec.count})`,
+            () => {
+              for (let row of sec.rows) {
+                row.find('[data-acr="delete"]').trigger('click');
+                row.remove();
+              }
+              link.remove();
+            }, smetaAid,
+        );
       }
-    }, 500);
+    });
   },
 
   // style html
@@ -1196,12 +1215,20 @@ const pffSmeta = {
 
       const d = new Date();
 
+      // TODO: в настройки PFF
       const name = tr.find('[data-fid="934"]').text().trim();
       const itemPrice = tr.find('[data-fid="934:h1016"]').text();
       const customPrice = tr.find('[data-fid="1089"]').text();
-      const price = customPrice ? customPrice : itemPrice;
+      let price = parseInt(customPrice ? customPrice : itemPrice);
+      const discont = parseInt(tr.find('[data-fid="942"]').text());
+      if(discont > 0) price = Math.round(price * discont / 100);
       const date = pad(d.getDate()) + '-' + pad(1 + d.getMonth()) + '-' +
           d.getFullYear();
+
+      if (name === '') {
+        win.show_sys_message('Заполните пустые аналитики в реализации!',
+            'ERROR', undefined, undefined, {});
+      }
 
       pffSmeta._addRealization({
         name: name,
@@ -1209,6 +1236,12 @@ const pffSmeta = {
         price: price,
         date: date,
       });
+    });
+  },
+
+  pause(i) {
+    return new Promise((resolve) => {
+      setTimeout(resolve, i);
     });
   },
 
@@ -1221,75 +1254,77 @@ const pffSmeta = {
       ...{count: 1},
       ...opts,
     };
-    const deferred = $.Deferred();
-
-    PFF.deferred.then(function() {
-      // добавить другую аналитику
+    return new Promise((resolve) => {
       $('[data-action="add-new-analitic"]').trigger('click');
 
-      setTimeout(() => {
-        const div = $('.analitics-form').last();
+      let div, analitic, select_handbook;
+
+      pffSmeta.pause(500).then(() => {
+
+        div = $('.analitics-form').last();
         if (opts.scrollTo) PFF.scrollTo(div);
+      }).then(() => {
+        return pffSmeta.pause(500);
+      }).then(() => {
 
-        setTimeout(() => {
-          // выбор группы аналитик
-          const select = div.find('select');
-          PFF.debug('select', select);
-          const option = select.find('option').filter(function() {
-            return $(this).text() === opts.group;
-          });
-          select.val(option.val()).change();
+        // выбор группы аналитик
+        const select = div.find('select');
+        PFF.debug('select', select);
 
-          const analitic = div.find(
-              '[data-aname="' + opts.group + '"] .af-tbl-tr').last();
-          PFF.debug('analitic', analitic);
-
-          const select_handbook = analitic.find(
-              'select[data-handbookid]:first');
-          PFF.debug('select_handbook', select_handbook);
-          select_handbook.trigger('liszt:focus');
-
-          setTimeout(() => {
-            analitic.addClass('silentChosen');
-            analitic.find('.chzn-search:first input').
-                val(opts.name).
-                trigger('keyup');
-            let count_focused = false;
-            select_handbook.on('liszt:updated', function() {
-              const results = analitic.find('.chzn-results .active-result');
-              // PFF.debug('results', results);
-              if (results.length === 1 || opts.select) {
-                results.first().trigger('mouseup');
-                analitic.find(PFF.fields.vyrabotka.count).focus();
-              }
-              // задержка из-за лага chosen
-              setTimeout(() => {
-                if (count_focused) return;
-                count_focused = true;
-                analitic.removeClass('silentChosen');
-
-                if (opts.count) {
-                  analitic.find(PFF.fields.realization.count).val(opts.count);
-                }
-                if (opts.price) {
-                  analitic.find(PFF.fields.realization.price).val(opts.price);
-                }
-                if (opts.date) {
-                  analitic.find(PFF.fields.realization.date).val(opts.date);
-                }
-              }, 2000);
-
-              deferred.resolve();
-            });
-          }, 500);
+        const option = select.find('option').filter(function() {
+          return $(this).text() === opts.group;
         });
-      }, 500);
+        select.val(option.val()).change();
+
+        analitic = div.find(
+            '[data-aname="' + opts.group + '"] .af-tbl-tr').last();
+        PFF.debug('analitic', analitic);
+
+        select_handbook = analitic.find(
+            'select.task-custom-field-val:first');
+        PFF.debug('select_handbook', select_handbook);
+        select_handbook.trigger('liszt:focus');
+      }).then(() => {
+        return pffSmeta.pause(2000);
+      }).then(() => {
+        if (opts.count) {
+          analitic.find(PFF.fields.realization.count).val(opts.count);
+        }
+        if (opts.price) {
+          analitic.find(PFF.fields.realization.price).val(opts.price);
+        }
+        if (opts.date) {
+          analitic.find(PFF.fields.realization.date).val(opts.date);
+        }
+
+        if(opts.name) {
+          analitic.addClass('silentChosen');
+          analitic.find('.chzn-search:first input').
+              val(opts.name).
+              trigger('keyup');
+          let count_focused = false;
+
+          select_handbook.on('liszt:updated', function() {
+            const results = analitic.find('.chzn-results .active-result');
+            PFF.debug('results', results);
+            if (results.length === 1 || opts.select) {
+              results.first().trigger('mouseup');
+              analitic.find(PFF.fields.realization.count).trigger('focus');
+            }
+            // задержка из-за лага chosen
+            setTimeout(() => {
+              if (count_focused) return;
+              count_focused = true;
+              analitic.removeClass('silentChosen');
+
+            }, 2000);
+
+            resolve();
+          });
+        }
+      });
     });
-
-    PFF.deferred = deferred;
-    return deferred.promise();
-  },
-
+  }
 };
 // tmpls.js
 // console.log('include tmpls.js');
@@ -1343,7 +1378,7 @@ const pffTmpls = {
         }
         if (f.Field.ID === win.PFF.tmplsRecord.text) {
           text = f.Value;
-          pffTmpls.insertTemplate(text);
+          pffTmpls.insertTemplate(text, id, handbookId);
         }
       }
       pffTmpls.updateMRU({id, name, text, cat});
@@ -1374,7 +1409,7 @@ const pffTmpls = {
   },
 
   // вставка шаблона, окно заполнения подстановок
-  insertTemplate(textRaw) {
+  insertTemplate(textRaw, recordId, handbookId) {
     /**
      * @param win.CKEDITOR.instances
      * @param win.CKEDITOR.instances.ActionDescription
@@ -1398,6 +1433,16 @@ const pffTmpls = {
               </span>`;
       });
 
+      // record link
+      /**
+       * @param win.HandbookDataCKEditorJS
+       */
+      let recordLink = '';
+      if(recordId && handbookId) {
+        const link = `/?action=handbookdataview&amp;handbook=${handbookId}&amp;key=${recordId}`
+        recordLink = `<a href="${link}" class="ckeditor-handbook-data-item" data-handbookid="${handbookId}" data-key="${recordId}" target="_blank">Посмотреть запись</a>`;
+      }
+
       // controls
       const controls = `<div class="pff-tmpl-form-controls">
       <a class="pff-tmpls-you-change" href="javascript:" data-type="old">Вы</a>
@@ -1414,6 +1459,7 @@ const pffTmpls = {
       // form template
       const html =
           '<div class="pff-tmpl-form">' +
+          recordLink +
           '<div class="task-create-panel-fields">' +
           inputs.join('\n') +
           controls +
@@ -1496,6 +1542,13 @@ const pffTmpls = {
                 () => { setTimeout(redrawPreview, 50); });
         inputs.first().trigger('focus');
 
+        // record link click
+        $('.pff-tmpl-form .ckeditor-handbook-data-item').on('click', function(e) {
+          win.HandbookDataCKEditorJS.show($(this), null);
+          e.preventDefault();
+          return false;
+        });
+
         // stored token values
         const tid = win.PlanfixPage.task;
         const taskTokens = localStorage.pff_task_tokens ?
@@ -1541,6 +1594,7 @@ const pffTmpls = {
 
   // кнопка "вставить шаблон" в редакторе
   templateSelect: function() {
+    const PFF = win.PFF;
     const editor = CKEDITOR.instances.ActionDescription;
     editor.fire('pffTemplatesOpened');
 
@@ -1552,32 +1606,34 @@ const pffTmpls = {
      */
     const handbookSelectDialog = new win.HandbookSelectDialogJS();
 
-    setTimeout(() => {
-      $(`[data-handbookid="${win.PFF.tmplsRecord.handbook}"]`).trigger('click');
-      setTimeout(() => {
-        $(`[data-columnid="${win.PFF.tmplsRecord.name}"]`).trigger('click');
+    const handbookItemSel = `[data-handbookid="${PFF.tmplsRecord.handbook}"]`;
+    const nameColSel = `[data-columnid="${PFF.tmplsRecord.name}"]`;
 
-        pffTmpls.getTemplates().then((tmpls) => {
-          if(Object.keys(tmpls).length === 0) return;
+    PFF.waitFor(handbookItemSel).then(handbookItem => {
+      handbookItem.trigger('click');
+      return PFF.waitFor(nameColSel);
+    }).then(nameCol => {
+      nameCol.trigger('click');
 
-          const tmplsBlock = pffTmpls.getQuickTemplates(tmpls);
-          const tbl = $('.tbl-list-tasks');
-          const firstRow = tbl.find('tr:nth-child(1)');
+      pffTmpls.getTemplates().then((tmpls) => {
+        if(Object.keys(tmpls).length === 0) return;
 
-          const colspan = firstRow.find('td').length;
-          const tmplsCol = $(`<td colspan="${colspan-2}" style="padding-left: 10px;"></td>`);
-          tmplsCol.append(tmplsBlock);
-          const tmplsRow = $('<tr></tr>');
-          tmplsRow.append('<td colspan="2"></td>');
-          tmplsRow.append(tmplsCol);
+        const tmplsBlock = pffTmpls.getQuickTemplates(tmpls);
+        const tbl = $('.tbl-list-tasks');
+        const firstRow = tbl.find('tr:nth-child(1)');
 
-          firstRow.after(tmplsRow);
+        const colspan = firstRow.find('td').length;
+        const tmplsCol = $(`<td colspan="${colspan-2}" style="padding-left: 10px;"></td>`);
+        tmplsCol.append(tmplsBlock);
+        const tmplsRow = $('<tr></tr>');
+        tmplsRow.append('<td colspan="2"></td>');
+        tmplsRow.append(tmplsCol);
 
-          $('.common-filter-value').on('keypress', () => tmplsRow.remove());
-        });
+        firstRow.after(tmplsRow);
 
-      }, 700);
-    }, 1000);
+        $('.common-filter-value').on('keypress paste', () => tmplsRow.remove());
+      });
+    });
 
     /**
      * @param {String} type 'record' | 'text'
