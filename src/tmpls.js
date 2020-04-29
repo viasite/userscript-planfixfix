@@ -334,7 +334,7 @@ const pffTmpls = {
   },
 
   getQuickTemplates(tmpls) {
-    const tmplsBlock = $('<div class="pff-tmpls-content"></div>');
+    const tmplsBlock = $('<div class="pff-tmpls"></div>');
     for (let cat in tmpls) {
       if(tmpls[cat].length === 0) continue;
       const catDiv = $(`<div class="pff-cat-content"></div>`);
@@ -367,13 +367,18 @@ const pffTmpls = {
       );
     }
 
-    const newTmplsBlock = $('<div class="pff-tmpls"></div>');
-    newTmplsBlock.append(tmplsBlock);
-
-    return newTmplsBlock;
+    return tmplsBlock;
   },
 
+  /**
+   * Добавляет быстрые шаблоны под редактор действия
+   * @param {array|Object} tmpls
+   */
   addActionTemplates(tmpls) {
+    if(Array.isArray(tmpls)){
+      tmpls = pffTmpls.tmplsArrayToObject(tmpls);
+    }
+
     if(Object.keys(tmpls).length === 0) return;
 
     const newTmplsBlock = pffTmpls.getQuickTemplates(tmpls);
@@ -383,14 +388,98 @@ const pffTmpls = {
     }
     else {
       const tmplsWrap = $('<div class="pff-action-tmpls"></div>');
+      const content = $('<div class="pff-tmpls-content"></div>');
+
+      // fast search
+      const search = $('<input type="text" class="search-field"/>');
+      const searchBlock = $('<div class="search-field-block"></div>');
+      searchBlock.append(search);
+
+      // fuse.js init
+      const mru = localStorage.pff_templates_mru ? JSON.parse(
+          localStorage.pff_templates_mru) : {};
+      const items = [];
+      for(let id in mru) {
+        items.push(mru[id]);
+      }
+      // noinspection JSUnresolvedFunction
+      let fuse = new Fuse(items, {
+        includeScore: true,
+        keys: [
+          {name: 'name', weight: 0.8},
+          {name: 'text', weight: 0.4},
+        ],
+      });
+
+      search.on('click', () => false); // чтобы фокус не прыгал на редактор
+      search.on('keydown change paste', function() {
+        const input = $(this);
+        setTimeout(() => {
+          let q = input.val();
+          if(q.match(/[a-z]/i)) q = pffTmpls.punto(q);
+          // console.log('q:', q);
+          if(q === '') {
+            pffTmpls.addActionTemplates(items);
+            return;
+          }
+
+          let filtered = fuse.search(q);
+          const list = filtered.map(item => item.item);
+          pffTmpls.addActionTemplates(list);
+        }, 10);
+      });
 
       const tmplsTitle = $('<span class="pff-tmpls-title">Шаблоны</span>');
-      tmplsTitle.on('click', () => { tmplsWrap.toggleClass('pff-action-tmpls_expanded') });
-      tmplsWrap.append(tmplsTitle);
+      tmplsTitle.on('click', () => {
+        tmplsWrap.toggleClass('pff-action-tmpls_expanded');
+        setTimeout(() => { search.trigger('focus'); }, 50);
+      });
 
-      tmplsWrap.append(newTmplsBlock);
+      content.append(searchBlock);
+      content.append(newTmplsBlock);
+
+      tmplsWrap.append(tmplsTitle);
+      tmplsWrap.append(content);
+
       $('.task-add-block').last().after(tmplsWrap);
     }
+  },
+
+  tmplsArrayToObject(items) {
+    let defaultCat = 'Без категории';
+    const tmpls = {[defaultCat]: []};
+    let itemsObj = {};
+    for (let item of items) {
+      itemsObj[item.name] = item.text;
+      if (!item.cat) item.cat = defaultCat;
+      if (!tmpls[item.cat]) tmpls[item.cat] = [];
+      tmpls[item.cat].push(item);
+    }
+    return tmpls;
+  },
+
+  punto(s, toLang = 'ru') {
+    console.log('s:', s);
+    let i = s.length;
+    let newText = '';
+    while (i--) {newText = pffTmpls.puntoChar(s.charAt(i), toLang) + newText;}
+    console.log('newText:', newText);
+    return newText;
+  },
+
+  puntoChar(char, toLang = 'ru') {
+    const en = '`qwertyuiop[]asdfghjkl;\'zxcvbnm,.~/QWERTYUIOP{}ASDFGHJKL:"ZXCVBNM<>?';
+    const ru = 'ёйцукенгшщзхъфывапролджэячсмитьбю.ЁЙЦУКЕНГШЩЗХЪФЫВАПРОЛДЖЭЯЧСМИТЬБЮ,';
+    let pos = -1;
+    if(toLang !== 'en'){
+      pos = en.indexOf(char);
+      if (pos >= 0) {return ru.substr(pos, 1);}
+    }
+    if(toLang !== 'ru'){
+      pos = ru.indexOf(char);
+      if (pos >= 0) {return en.substr(pos, 1);}
+    }
+    return char;
   },
 
   /**
@@ -426,15 +515,7 @@ const pffTmpls = {
             return 0;
           });
 
-          let defaultCat = 'Часто используемые'; // TODO: var
-          const tmpls = {[defaultCat]: []};
-          let itemsObj = {};
-          for (let item of items) {
-            itemsObj[item.name] = item.text;
-            if (!item.cat) item.cat = defaultCat;
-            if (!tmpls[item.cat]) tmpls[item.cat] = [];
-            tmpls[item.cat].push(item);
-          }
+          const tmpls = pffTmpls.tmplsArrayToObject(items);
 
           return resolve(tmpls);
         }

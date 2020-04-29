@@ -203,6 +203,7 @@ let $; // заглушает ошибки в определении $ в мод�
 .pff-action-tmpls { margin: 5px 0; }
 .pff-action-tmpls .pff-tmpls-content { display: none; }
 .pff-action-tmpls_expanded .pff-tmpls-content { display: block; }
+.pff-action-tmpls .search-field-block { margin: 5px 0; max-width: 300px; }
 /*.pff-tmpls:hover { max-width: none; margin-left: 0; }
 .pff-tmpls:hover .pff-tmpls-content { display: block; }*/
 .pff-cat { margin-bottom: 15px; }
