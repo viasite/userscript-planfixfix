@@ -1,3 +1,17 @@
+## [1.1.3](https://github.com/viasite/userscript-planfixfix/compare/v1.1.2...v1.1.3) (2020-04-29)
+
+
+### Bug Fixes
+
+* при нажатии на "Шаблон" выбиралась запись справочника из комментов ([8f45653](https://github.com/viasite/userscript-planfixfix/commit/8f45653))
+
+
+### Features
+
+* фильтр быстрых шаблонов ([b3dd81e](https://github.com/viasite/userscript-planfixfix/commit/b3dd81e))
+
+
+
 ## [1.1.2](https://github.com/viasite/userscript-planfixfix/compare/v1.1.1...v1.1.2) (2020-04-28)
 
 
