@@ -284,7 +284,7 @@ const pffTmpls = {
      */
     const handbookSelectDialog = new win.HandbookSelectDialogJS();
 
-    const handbookItemSel = `[data-handbookid="${PFF.tmplsRecord.handbook}"]`;
+    const handbookItemSel = `td[data-handbookid="${PFF.tmplsRecord.handbook}"]`;
     const nameColSel = `[data-columnid="${PFF.tmplsRecord.name}"]`;
 
     PFF.waitFor(handbookItemSel).then(handbookItem => {
