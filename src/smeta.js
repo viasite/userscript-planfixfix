@@ -13,7 +13,7 @@ const pffSmeta = {
       PFF.addTaskBlock(
           'Оформить смету',
           pffSmeta.run,
-          {class: 'only-selection'},
+          {class: 'no-only-selection'},
       );
     }
   },
@@ -237,14 +237,38 @@ const pffSmeta = {
 
   // вход в "Оформить смету"
   run() {
-    const html = win.PFF.editorGetSelection();
-    if(html.length === 0){
-      win.show_sys_message('Сначала выделите текст сметы', 'ERROR', undefined, undefined, {})
-      return;
-    }
+    // оформить
+    if($('.pff_editor-selection').length > 0){
+      const html = win.PFF.editorGetSelection();
+      if(html.length === 0){
+        win.show_sys_message('Сначала выделите текст сметы', 'ERROR', undefined, undefined, {})
+        return;
+      }
 
-    const styledHtml = pffSmeta.processHtml(html);
-    win.PFF.editorInsertHtml(styledHtml);
+      const styledHtml = pffSmeta.processHtml(html);
+      win.PFF.editorInsertHtml(styledHtml);
+    }
+    else {
+      // сделать отчёт
+      const link = `https://tagilcity.planfix.ru/?action=report&id=${win.PFF.fields.smeta.reportId}&task=${win.PlanfixPage.task}&run=1`;
+      const html = `<div class="pff-report-frame"><iframe src="${link}" width="100%" height="600"></iframe></div>`;
+
+      // noinspection JSValidateTypes
+      const dialog = new win.CommonDialogScrollableJS('pff-report-frame-wrapper');
+      dialog.customClass = true;
+      dialog.closeByEsc = true;
+      dialog.isMinimizable = true;
+      dialog.draw(html);
+      dialog.setHeader('Отчёт');
+
+      /**
+       * @param iframe.contentWindow.ReportJS.expandLevel
+       */
+      const iframe = $('.pff-report-frame iframe').get(0);
+      win.PFF.waitFor('.tbl-report', 1000, 10, iframe).then(() => {
+        iframe.contentWindow.ReportJS.expandLevel(0);
+      });
+    }
   },
 
   // сортировать смету, https://tagilcity.planfix.ru/task/608083

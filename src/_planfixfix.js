@@ -61,6 +61,7 @@ let $; // заглушает ошибки в определении $ в мод�
       },
       smeta: {
         aid: 314, // смета на разработку
+        reportId: 5469, // id отчёта на смету
         orderByFids: [950, 1093], // тип работ, №
         name: '[data-fid="934"]',
         price: '[data-fid="934:h1016"]',
@@ -213,6 +214,11 @@ let $; // заглушает ошибки в определении $ в мод�
 .pff-cat-content { margin-left: 0; }
 .pff-cat a { display: block; padding: 2px 15px; }
 
+.pff-report-frame-wrapper .g-popup-win-scroll-content { width: calc(100% - 40px); min-width: 665px; }
+.pff-report-frame-wrapper .g-popup-win-scroll-content-main { display: block; max-width: none; padding-bottom: 0; }
+.pff-report-frame-wrapper iframe { border: none; }
+/*.pff-report-frame { min-width: 900px; }*/
+
 .pff-tmpl-form input[type="text"] { width: 200px !important; }
 .pff-tmpls-you-change_active { font-weight:bold; }
 .pff-tmpls-you-change { padding: 5px 10px; }
@@ -323,6 +329,7 @@ let $; // заглушает ошибки в определении $ в мод�
     // get selection html from ckeditor
     editorGetSelection() {
       /**
+       * @param win.CKEDITOR.instances.ActionDescription
        * @param {function} win.CKEDITOR.dom.element
        * @param {function} sel.getRanges
        * @param {function} el.getHtml
@@ -339,6 +346,9 @@ let $; // заглушает ошибки в определении $ в мод�
     },
 
     editorInsertHtml(html) {
+      /**
+       * @param {function} editor.insertHtml
+       */
       const editor = win.CKEDITOR.instances.ActionDescription;
       editor.insertHtml(html);
     },
@@ -358,7 +368,7 @@ let $; // заглушает ошибки в определении $ в мод�
     },
 
     // ждёт появления элемента и возвращает его через promise
-    waitFor(selector, delay = 500, attempts = 10) {
+    waitFor(selector, delay = 500, attempts = 10, iframe) {
       return new Promise((resolve, reject) => {
         let i = 0;
         const interval = setInterval(() => {
@@ -368,8 +378,17 @@ let $; // заглушает ошибки в определении $ в мод�
             return reject(false);
           }
 
-          const elem = $(selector);
-          if (elem.length === 0) return false;
+          console.log(`i: ${i}`);
+          let elem;
+          if(iframe) {
+            elem = iframe.contentWindow.$(selector);
+            console.log('elem:', elem);
+            if (elem.length === 0) return false;
+          }
+          else {
+            elem = $(selector);
+            if (elem.length === 0) return false;
+          }
 
           // found
           clearInterval(interval);
