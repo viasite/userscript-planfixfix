@@ -92,176 +92,230 @@ const pffTmpls = {
     localStorage.pff_templates_mru = JSON.stringify(mru);
   },
 
-  // вставка шаблона, окно заполнения подстановок
   insertTemplate(textRaw, recordId, handbookId) {
     let text = textRaw.replace(/\n/g, '<br>');
     text = text.replace(/---.*/, '').replace(/<p>$/, ''); // отсекаем примечания
 
-    let tokens = text.match(/(%[a-zа-яё_-]+%)/gi);
-    if (tokens) {
-      // inputs
-      tokens = tokens.filter((v, i, s) => s.indexOf(v) === i);
-      const inputs = tokens.map((token) => {
-        const name = token.replace(/%/g, '').replace(/_/g, ' ');
-        let cls = 'text-box';
-        if (name.match(/Дата/)) cls += ' dialog-date';
-        return `<span class="task-create-field task-create-field-custom-99 task-create-field-line-first task-create-field-break-after">
-              <span class="task-create-field-label task-create-field-label-first">${name}</span>
-              <span class="task-create-field-input"><input name="${name}" data-token="${token}" type="text" class="${cls}" /></span>
-              </span>`;
-      });
-
-      // record link
-      /**
-       * @param win.HandbookDataCKEditorJS
-       */
-      let recordLink = '';
-      if(recordId && handbookId) {
-        const link = `/?action=handbookdataview&amp;handbook=${handbookId}&amp;key=${recordId}`
-        recordLink = `<a href="${link}" class="ckeditor-handbook-data-item" data-handbookid="${handbookId}" data-key="${recordId}" target="_blank">Посмотреть запись</a>`;
-      }
-
-      // vyLinks
-      const vyLinks = `<div class="pff-tmpl-form-controls">
-      <a class="pff-tmpls-you-change" href="javascript:" data-type="old">Вы</a>
-      <a class="pff-tmpls-you-change" href="javascript:" data-type="new">вы</a>
-      </div>`;
-
-      // buttons
-      const btns = `
-        <div class="dialog-btn-wrapper">
-        <button class="btn-main btn-create action-edit-save js-action-pff-insert-template">Вставить</button>
-        <button class="btn-main btn-cancel">Отмена</button>
-        </div>`;
-
-      // form template
-      const html = '<div class="pff-tmpl-form">' +
-          recordLink +
-          '<div class="task-create-panel-fields">' +
-          inputs.join('\n') +
-          vyLinks +
-          '</div>' +
-          `<div class="pff-tmpl-preview">${text}</div>` +
-          btns +
-          '</div>';
-
-      // noinspection JSValidateTypes
-      /**
-       * @param {function} win.CommonDialogScrollableJS.draw
-       * @param {function} win.CommonDialogScrollableJS.setHeader
-       * @param {function} win.CommonDialogScrollableJS.setCloseHandler
-       */
-      const dialog = new win.CommonDialogScrollableJS();
-      dialog.closeByEsc = true;
-      dialog.isMinimizable = true;
-      dialog.dateFormat = 'dd.mm.yy';
-      dialog.draw(html);
-      dialog.setHeader('Вставка шаблона');
-
-      const closeHandler = () => {
-        new Promise((resolve) => {
-          let isValid = true;
-          const inputs = $('.pff-tmpl-form input');
-          inputs.each(function() {
-            if ($(this).val() === '') {
-              isValid = false;
-            }
-          });
-          win.PFF.debug('valid:', isValid);
-          if (isValid) {
-            insertTokenizedTemplate();
-            resolve(true);
-          } else {
-            resolve(false);
-          }
-        });
-      };
-      dialog.setCloseHandler(closeHandler);
-
-      const redrawPreview = () => {
-        let pt = text;
-        $('.pff-tmpl-form input').each(function() {
-          const input = $(this);
-          const t = input.data('token');
-          const reg = new RegExp(t, 'g');
-          const v = input.val().toString();
-          if (v === '') {
-            pt = pt.replace(reg, `<span style="background:#ffff00">${t}</span>`);
-          }
-          else pt = pt.replace(reg, v);
-        });
-        $('.pff-tmpl-preview').html(pt);
-      };
-
-      // сохраняет заполненные токены и вставляет текст в редактор
-      const insertTokenizedTemplate = () => {
-        const inputs = $('.pff-tmpl-form input');
-        const tid = win.PlanfixPage.task;
-        const taskTokens = localStorage.pff_task_tokens ?
-            JSON.parse(localStorage.pff_task_tokens) : {};
-
-        if(!taskTokens[tid]) taskTokens[tid] = {}
-        inputs.each(function() {
-          const name = $(this).attr('name');
-          taskTokens[tid][name] = $(this).val();
-        });
-        localStorage.pff_task_tokens = JSON.stringify(taskTokens);
-
-        win.PFF.editorInsertHtml($('.pff-tmpl-preview').html());
-      };
-
-      // tmpl editor init
-      setTimeout(() => {
-        const inputs = $('.pff-tmpl-form input');
-
-        inputs.
-            on('keypress blur change paste',
-                () => { setTimeout(redrawPreview, 50); });
-        inputs.first().trigger('focus');
-
-        // record link click
-        $('.pff-tmpl-form .ckeditor-handbook-data-item').on('click', function(e) {
-          win.HandbookDataCKEditorJS.show($(this), null);
-          e.preventDefault();
-          return false;
-        });
-
-        // stored token values
-        const tid = win.PlanfixPage.task;
-        const taskTokens = localStorage.pff_task_tokens ?
-        JSON.parse(localStorage.pff_task_tokens) : {};
-        inputs.each(function() {
-          const name = $(this).attr('name');
-          if(taskTokens[tid] && taskTokens[tid][name]) {
-            $(this).val(taskTokens[tid][name]);
-          }
-
-          if(name === 'Мои имя фамилия') $(this).val(win.Current.loginedName);
-        });
-
-        // Вы | вы
-        $('.pff-tmpls-you-change').on('click', function() {
-          const type = $(this).data('type');
-          text = pffTmpls.replaceVy(text, type !== 'old');
-          redrawPreview();
-        });
-
-        // кнопки сохранить / отменить
-        $('.pff-tmpl-form .btn-cancel').on('click', () => { dialog.close(); });
-        $('.js-action-pff-insert-template').on('click', () => {
-          insertTokenizedTemplate();
-          dialog.close();
-        });
-
-        redrawPreview();
-
-      }, 100);
-    } else {
-      win.PFF.editorInsertHtml(text);
+    let link;
+    if(recordId && handbookId) {
+      link = `/?action=handbookdataview&handbook=${handbookId}&key=${recordId}`
     }
+
+    let tokens = text.match(/(%[a-zа-яё_-]+%)/gi);
+    if (!tokens) {
+      win.PFF.editorInsertHtml(text);
+      return;
+    }
+    tokens = tokens.filter((v, i, s) => s.indexOf(v) === i);
+
+    Vue.component('token-input', {
+      template: `<span class="task-create-field task-create-field-custom-99 task-create-field-line-first task-create-field-break-after">
+          <span class="task-create-field-label task-create-field-label-first">{{ name }}</span>
+          <span class="task-create-field-input">
+            <input :name="name" :data-token="token" type="text" v-model="val"
+                :class="{'text-box': true, 'dialog-date': token.match('Дата')}"
+                />
+          </span>
+        </span>`,
+      props: ['token'],
+      data() {
+        return {val: ''}
+      },
+      computed: {
+        name() {
+          return this.token.replace(/%/g, '').replace(/_/g, ' ');
+        }
+      },
+      watch: {
+        val(val) {
+          this.$emit('input', val);
+        }
+      },
+      methods: {
+        loadVal() {
+          // console.log('loadVal:', this);
+          const tid = win.PlanfixPage.task;
+          const taskTokens = localStorage.pff_task_tokens ?
+              JSON.parse(localStorage.pff_task_tokens) : {};
+          if(!taskTokens[tid]) taskTokens[tid] = {}
+
+          if(taskTokens[tid] && taskTokens[tid][this.name]) {
+            this.val = taskTokens[tid][this.name];
+          }
+
+          if(this.name === 'Мои имя фамилия') this.val = win.Current.loginedName;
+        }
+      },
+      created() {
+        this.loadVal();
+      },
+      mounted() {
+      }
+    });
+
+    const html = `<div class="pff-tmpl-form">
+
+      <a v-if="link" @click="showRecord" :href="link"
+        class="ckeditor-handbook-data-item"
+        data-handbookid="${handbookId}"
+        data-key="${recordId}"
+        target="_blank"
+        >Посмотреть запись</a>
+
+      <div class="task-create-panel-fields">
+        <token-input v-for="(token, i) in tokens" :key="token" :token="token"
+            v-model="inputs[i].value" @input="redraw"/>
+      </div>
+
+      <div class="pff-tmpl-form-controls">
+        <a :class="{'pff-tmpls-you-change': true, 'pff-tmpls-you-change_active': !vySmall}" @click="changeVy(false)" href="javascript:">Вы</a>
+        <a :class="{'pff-tmpls-you-change': true, 'pff-tmpls-you-change_active': vySmall}" @click="changeVy(true)" href="javascript:">вы</a>
+      </div>
+
+      <div class="pff-tmpl-preview" v-html="renderedText"></div>
+      
+      <div class="dialog-btn-wrapper">
+        <button @click="insert"
+            class="btn-main btn-create action-edit-save">Вставить</button>
+        <button @click="close" class="btn-main btn-cancel">Отмена</button>
+      </div>
+    </div>`;
+
+    // сохраняет заполненные токены и вставляет текст в редактор
+    const insertTokenizedTemplate = () => {
+      const inputs = $('.pff-tmpl-form input');
+      const tid = win.PlanfixPage.task;
+      const taskTokens = localStorage.pff_task_tokens ?
+          JSON.parse(localStorage.pff_task_tokens) : {};
+
+      if(!taskTokens[tid]) taskTokens[tid] = {}
+      inputs.each(function() {
+        const name = $(this).attr('name');
+        taskTokens[tid][name] = $(this).val();
+      });
+      localStorage.pff_task_tokens = JSON.stringify(taskTokens);
+
+      win.PFF.editorInsertHtml($('.pff-tmpl-preview').html());
+    };
+
+    // noinspection JSValidateTypes
+    /**
+     * @param {function} win.CommonFunc.getDatePickerOptions
+     * @param {object} win.CommonDialogScrollableJS.container
+     * @param {function} win.CommonDialogScrollableJS.draw
+     * @param {function} win.CommonDialogScrollableJS.setHeader
+     * @param {function} win.CommonDialogScrollableJS.setCloseHandler
+     */
+    const dialog = new win.CommonDialogScrollableJS();
+    dialog.closeByEsc = true;
+    dialog.isMinimizable = true;
+    dialog.dateFormat = 'dd.mm.yy';
+    dialog.draw(html);
+    dialog.setHeader('Вставка шаблона');
+
+    // date fields init
+    setTimeout(() => {
+      if (dialog.container.find('.dialog-date').datepicker) {
+        const dpoptions = win.CommonFunc.getDatePickerOptions({});
+        dpoptions.dateFormat = dialog.dateFormat;
+        dpoptions.beforeShow = function () {
+          setTimeout(function () {
+            $('#ui-datepicker-div').maxZIndex();
+          }, 100);
+        };
+        dialog.container.find('.dialog-date').datepicker(dpoptions);
+      }
+    }, 200);
+
+    const closeHandler = () => {
+      new Promise((resolve) => {
+        let isValid = true;
+        const inputs = $('.pff-tmpl-form input');
+        inputs.each(function() {
+          if ($(this).val() === '') {
+            isValid = false;
+          }
+        });
+        win.PFF.debug('valid:', isValid);
+        if (isValid) {
+          insertTokenizedTemplate();
+          resolve(true);
+        } else {
+          resolve(false);
+        }
+      });
+    };
+    dialog.setCloseHandler(closeHandler);
+
+    setTimeout(() => {
+      const form = new Vue({
+        el: '.pff-tmpl-form',
+        data: {
+          text,
+          link,
+          tokens,
+          renderedText: 'text',
+          inputs: [],
+          vySmall: localStorage.pff_vy_small !== '0'
+        },
+
+        methods: {
+          redraw() {
+            // console.log('this.inputs:', this.inputs);
+            // console.log('this.tokens:', this.tokens);
+            // console.log('redraw:', this.text);
+            text = this.text;
+            text = pffTmpls.replaceVy(text, this.vySmall);
+
+            for(let input of this.inputs) {
+              const reg = new RegExp(input.token, 'g');
+              if (!input.value) {
+                text = text.replace(reg,
+                    `<span style="background:#ffff00">${input.token}</span>`);
+              }
+              else {
+                text = text.replace(reg, input.value);
+              }
+            }
+            this.renderedText = text;
+            // console.log('text', this.renderedText);
+          },
+
+          showRecord(e) {
+            /**
+             * @param win.HandbookDataCKEditorJS
+             */
+            console.log('e:', e);
+            win.HandbookDataCKEditorJS.show($(e.target), null);
+            e.preventDefault();
+            return false;
+          },
+
+          changeVy(type) {
+            this.vySmall = type;
+            localStorage.pff_vy_small = type ? 1 : 0;
+            this.redraw();
+          },
+
+          close() {
+            dialog.close();
+          },
+
+          insert() {
+            insertTokenizedTemplate();
+            this.close();
+          }
+        },
+        created() {
+          this.inputs = this.tokens.map(token => { return {token, value: ''} });
+        },
+        mounted() {
+          this.redraw();
+        }
+      });
+    }, 100);
   },
 
-  // Вы | вы
   replaceVy(html, isNew) {
     const matched = html.match(/(\s|^)(вы|вас|вам|ваш(и|а|ему|его|ей)?)([\s,.!:)?]|$)/ig);
     //win.PFF.debug(matched);
