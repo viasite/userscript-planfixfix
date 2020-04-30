@@ -325,13 +325,13 @@ const pffTmpls = {
   },
 
   replaceVy(html, isNew) {
-    const matched = html.match(/(\s|^)(вы|вас|вам|ваш(и|а|ему|его|ей)?)([\s,.!:)?]|$)/ig);
-    //win.PFF.debug(matched);
+    const matched = html.match(/([\s;]|^)(вы|вас|вам|ваш(и|а|ему|его|ей)?)([\s,.!&:)?]|$)/ig);
+    // win.PFF.debug(matched);
     for(let m of matched) {
       const newL = isNew ? 'в' : 'В';
-      const rep = m.replace(/в/i, newL)
+      const rep = m.replace(/в/i, newL);
       const reg = new RegExp(rep, 'gi');
-      //win.PFF.debug(`${m} -> ${rep}`);
+      // win.PFF.debug(`${m} -> ${rep}`);
       html = html.replace(reg, rep);
     }
     return html;
