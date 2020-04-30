@@ -220,6 +220,7 @@ const pffTmpls = {
         dpoptions.dateFormat = dialog.dateFormat;
         dpoptions.beforeShow = function () {
           setTimeout(function () {
+            // noinspection JSUnresolvedFunction
             $('#ui-datepicker-div').maxZIndex();
           }, 100);
         };
@@ -248,7 +249,7 @@ const pffTmpls = {
     dialog.setCloseHandler(closeHandler);
 
     setTimeout(() => {
-      const form = new Vue({
+      const vueForm = new Vue({
         el: '.pff-tmpl-form',
         data: {
           text,
@@ -304,10 +305,17 @@ const pffTmpls = {
           insert() {
             insertTokenizedTemplate();
             this.close();
+          },
+
+          // function for suppress JetBrains "unused function"
+          dummy() {
+            this.changeVy();
+            this.showRecord();
           }
         },
         created() {
           this.inputs = this.tokens.map(token => { return {token, value: ''} });
+          setTimeout(() => !vueForm && this.dummy(), 100);
         },
         mounted() {
           this.redraw();
