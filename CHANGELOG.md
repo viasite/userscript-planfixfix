@@ -1,3 +1,12 @@
+## [1.2.1](https://github.com/viasite/userscript-planfixfix/compare/v1.2.0...v1.2.1) (2020-05-07)
+
+
+### Bug Fixes
+
+* добавлена версия в пункт меню ([72d81f9](https://github.com/viasite/userscript-planfixfix/commit/72d81f9))
+
+
+
 # [1.2.0](https://github.com/viasite/userscript-planfixfix/compare/v1.1.3...v1.2.0) (2020-04-30)
 
 

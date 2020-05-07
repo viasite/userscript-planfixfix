@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name           PlanfixFix
 // @author         popstas
-// @version        1.2.0
+// @version        1.2.1
 // @namespace      viasite.ru
 // @description    Some planfix.ru improvements
 // @unwrap
@@ -483,7 +483,8 @@ let $; // заглушает ошибки в определении $ в мод�
      * - url для удаленной загрузки аналитик
      */
     addMenu: function() {
-      $('<a href="javascript:" class="without-dragging main-menu-config-item">PlanfixFix</a>').
+      // noinspection JSUnresolvedVariable
+      $('<a href="javascript:" class="without-dragging main-menu-config-item">PlanfixFix '+GM_info.script.version+'</a>').
           appendTo('.main-config-ddl-wrapper').
           on('click', function() {
             const remoteAnalitics = PFF.analitics.getRemoteAnaliticsUrl();
