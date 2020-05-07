@@ -1,3 +1,12 @@
+## [1.2.2](https://github.com/viasite/userscript-planfixfix/compare/v1.2.1...v1.2.2) (2020-05-07)
+
+
+### Bug Fixes
+
+* исправлена сломанная сортировка сметы ([75996cf](https://github.com/viasite/userscript-planfixfix/commit/75996cf))
+
+
+
 ## [1.2.1](https://github.com/viasite/userscript-planfixfix/compare/v1.2.0...v1.2.1) (2020-05-07)
 
 

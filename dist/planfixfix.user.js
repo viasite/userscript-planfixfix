@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name           PlanfixFix
 // @author         popstas
-// @version        1.2.1
+// @version        1.2.2
 // @namespace      viasite.ru
 // @description    Some planfix.ru improvements
 // @unwrap
@@ -180,7 +180,7 @@ let $; // заглушает ошибки в определении $ в мод�
         setTimeout(() => {
           win.onbeforeunload = undefined; // отменить предупреждение о закрытии окна
           //console.log('debug: new action');
-          $('.actions-quick-add-block-text').trigger('click'); // создание действия
+          // $('.actions-quick-add-block-text').trigger('click'); // создание действия
           //console.log('debug: edit-draft-action');
           //$('.edit-draft-action').trigger('click'); // edit
           //PFF.analitics.addAnalitics({ name: 'Поминутная работа программиста' });
@@ -392,11 +392,11 @@ let $; // заглушает ошибки в определении $ в мод�
             return reject(false);
           }
 
-          console.log(`i: ${i}`);
+          // console.log(`i: ${i}`);
           let elem;
           if(iframe) {
             elem = iframe.contentWindow.$(selector);
-            console.log('elem:', elem);
+            // console.log('elem:', elem);
             if (elem.length === 0) return false;
           }
           else {
@@ -1277,8 +1277,8 @@ const pffSmeta = {
       }
       return 0;
     });
-    //console.log(rowsData);
-    //console.log(rowsDataSorted);
+    // console.log(rowsData);
+    // console.log(rowsDataSorted);
 
     // прогоняем оригинальный массив, но вписываем туда значения из сортированного массива
     rowsData.map(function(row, ind) {
@@ -1286,7 +1286,7 @@ const pffSmeta = {
       const newData = rowsDataSorted[ind];
       for (let fid in newData) {
         if(!newData.hasOwnProperty(fid)) continue;
-        elem.find(`[data-fid="${fid}'] input:hidden`).val(newData[fid]);
+        elem.find(`[data-fid="${fid}"] input:hidden`).val(newData[fid]);
       }
     });
 
