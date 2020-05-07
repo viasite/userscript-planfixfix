@@ -166,7 +166,7 @@ let $; // заглушает ошибки в определении $ в мод�
         setTimeout(() => {
           win.onbeforeunload = undefined; // отменить предупреждение о закрытии окна
           //console.log('debug: new action');
-          $('.actions-quick-add-block-text').trigger('click'); // создание действия
+          // $('.actions-quick-add-block-text').trigger('click'); // создание действия
           //console.log('debug: edit-draft-action');
           //$('.edit-draft-action').trigger('click'); // edit
           //PFF.analitics.addAnalitics({ name: 'Поминутная работа программиста' });
@@ -378,11 +378,11 @@ let $; // заглушает ошибки в определении $ в мод�
             return reject(false);
           }
 
-          console.log(`i: ${i}`);
+          // console.log(`i: ${i}`);
           let elem;
           if(iframe) {
             elem = iframe.contentWindow.$(selector);
-            console.log('elem:', elem);
+            // console.log('elem:', elem);
             if (elem.length === 0) return false;
           }
           else {

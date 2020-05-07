@@ -322,8 +322,8 @@ const pffSmeta = {
       }
       return 0;
     });
-    //console.log(rowsData);
-    //console.log(rowsDataSorted);
+    // console.log(rowsData);
+    // console.log(rowsDataSorted);
 
     // прогоняем оригинальный массив, но вписываем туда значения из сортированного массива
     rowsData.map(function(row, ind) {
@@ -331,7 +331,7 @@ const pffSmeta = {
       const newData = rowsDataSorted[ind];
       for (let fid in newData) {
         if(!newData.hasOwnProperty(fid)) continue;
-        elem.find(`[data-fid="${fid}'] input:hidden`).val(newData[fid]);
+        elem.find(`[data-fid="${fid}"] input:hidden`).val(newData[fid]);
       }
     });
 
