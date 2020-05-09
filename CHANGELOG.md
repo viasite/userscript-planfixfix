@@ -1,3 +1,12 @@
+# [1.3.0](https://github.com/viasite/userscript-planfixfix/compare/v1.2.2...v1.3.0) (2020-05-09)
+
+
+### Features
+
+* убирание спойлеров у комментариев и описаний задач ([b3a1ca7](https://github.com/viasite/userscript-planfixfix/commit/b3a1ca7))
+
+
+
 ## [1.2.2](https://github.com/viasite/userscript-planfixfix/compare/v1.2.1...v1.2.2) (2020-05-07)
 
 

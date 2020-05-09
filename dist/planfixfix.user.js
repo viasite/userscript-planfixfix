@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name           PlanfixFix
 // @author         popstas
-// @version        1.2.2
+// @version        1.3.0
 // @namespace      viasite.ru
 // @description    Some planfix.ru improvements
 // @unwrap
@@ -174,6 +174,10 @@ let $; // заглушает ошибки в определении $ в мод�
 
       PFF.addStyles();
 
+      if(localStorage.pff_no_spoilers === '1') {
+        $('body').addClass('pff-no-spoilers');
+      }
+
       // тестовое открытие нового действия
       if (PFF.isDebug) {
         console.log('debug: init');
@@ -239,6 +243,9 @@ let $; // заглушает ошибки в определении $ в мод�
 .pff-tmpl-form .btn-main { margin-left: 0; }
 .pff-tmpl-form .btn-create { float: right; }
 .pff-tmpl-preview { width: 360px; margin: 30px 0; }
+
+.pff-no-spoilers .action-spoiler, .pff-no-spoilers .task-description-spoiler-text { overflow: visible !important; }
+.pff-no-spoilers .spoiler-actionlist.inited { display: none; }
 </style>`,
       );
     },
@@ -491,7 +498,7 @@ let $; // заглушает ошибки в определении $ в мод�
             const remoteTemplates = PFF.tmpls.getRemoteTemplatesUrl();
             const html =
                 '<div class="pff-settings">' +
-                '<div class="form">' +
+                '<div style="display:none" class="form">' +
                 '<div>URL для обновления аналитик, обязательно https://</div>' +
                 '<input style="width:400px" class="text-box" name="pff_analitics_remote_url" value="' +
                 remoteAnalitics.url +
@@ -503,7 +510,7 @@ let $; // заглушает ошибки в определении $ в мод�
                 '<input style="width:400px" class="text-box" name="pff_templates_remote_url" value="' +
                 remoteTemplates.url +
                 '"/>' +
-                '<input type="button" value="Сохранить"/>' +
+                '<input type="button" value="Сохранить"/><br />' +
                 '</div>';
             /**
              * @param win.drawDialog простая всплывалка, не модальная
@@ -522,6 +529,19 @@ let $; // заглушает ошибки в определении $ в мод�
                 $('.dialogWin .destroy-button').trigger('click');
               }
             });
+
+            const isNoSpoilers = localStorage.pff_no_spoilers === '1';
+            const cb = $('<input type="checkbox" id="pff_no_spoilers"/>');
+            cb.prop('checked', isNoSpoilers);
+            cb.on('change', () => {
+              setTimeout(() => {
+                localStorage.pff_no_spoilers = cb.prop('checked') ? '1' : '0';
+
+                if(cb.prop('checked')) $('body').addClass('pff-no-spoilers');
+                else $('body').removeClass('pff-no-spoilers');
+              }, 50);
+            });
+            $('.pff-settings').append(cb).append('<label for="pff_no_spoilers">Показывать комментарии без спойлеров</label>');
             return false;
           });
     },
