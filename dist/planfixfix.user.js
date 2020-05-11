@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name           PlanfixFix
 // @author         popstas
-// @version        1.3.0
+// @version        1.3.1
 // @namespace      viasite.ru
 // @description    Some planfix.ru improvements
 // @unwrap
@@ -244,8 +244,11 @@ let $; // заглушает ошибки в определении $ в мод�
 .pff-tmpl-form .btn-create { float: right; }
 .pff-tmpl-preview { width: 360px; margin: 30px 0; }
 
-.pff-no-spoilers .action-spoiler, .pff-no-spoilers .task-description-spoiler-text { overflow: visible !important; }
-.pff-no-spoilers .spoiler-actionlist.inited { display: none; }
+.pff-no-spoilers .action-spoiler,
+.pff-no-spoilers .task-description-spoiler-text { overflow: visible !important; }
+.pff-no-spoilers .spoiler-actionlist.inited,
+.pff-no-spoilers .task-description-spoiler,
+.pff-no-spoilers .task-description-hide-block { display: none; }
 </style>`,
       );
     },

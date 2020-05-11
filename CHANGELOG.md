@@ -1,3 +1,12 @@
+## [1.3.1](https://github.com/viasite/userscript-planfixfix/compare/v1.3.0...v1.3.1) (2020-05-11)
+
+
+### Bug Fixes
+
+* спойлер у описания задачи убирался не до конца ([fe78932](https://github.com/viasite/userscript-planfixfix/commit/fe78932))
+
+
+
 # [1.3.0](https://github.com/viasite/userscript-planfixfix/compare/v1.2.2...v1.3.0) (2020-05-09)
 
 
