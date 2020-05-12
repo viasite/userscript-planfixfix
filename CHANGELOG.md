@@ -1,3 +1,12 @@
+## [1.3.2](https://github.com/viasite/userscript-planfixfix/compare/v1.3.1...v1.3.2) (2020-05-12)
+
+
+### Bug Fixes
+
+* замена Vue runtime на Vue полный, не работала всплывалка вставки шаблона ([d45d9c4](https://github.com/viasite/userscript-planfixfix/commit/d45d9c4))
+
+
+
 ## [1.3.1](https://github.com/viasite/userscript-planfixfix/compare/v1.3.0...v1.3.1) (2020-05-11)
 
 
