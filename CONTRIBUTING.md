@@ -41,7 +41,7 @@ var $ = win.$;
 // @require        file:///C:/projects/js/userscript-planfixfix/src/jsyaml.js
 // @require        file:///C:/projects/js/userscript-planfixfix/src/smeta.js
 // @require        file:///C:/projects/js/userscript-planfixfix/src/tmpls.js
-// @require        file:///C:/projects/js/userscript-planfixfix/src/vue.runtime.min.js
+// @require        file:///C:/projects/js/userscript-planfixfix/src/vue.min.js
 // ==/UserScript==
 ```
 
