@@ -505,7 +505,12 @@ let $; // заглушает ошибки в определении $ в мод�
             /**
              * @param win.drawDialog простая всплывалка, не модальная
              */
-            win.drawDialog(300, 'auto', 300, html);
+            const dialog = new win.CommonDialogScrollableJS();
+            dialog.closeByEsc = true;
+            dialog.draw(html);
+            dialog.setHeader(`PlanfixFix ${GM_info.script.version}`);
+
+            // win.drawDialog(300, 'auto', 300, html);
             $('.pff-settings [type="button"]').on('click', function() {
               let isSave = PFF.analitics.setRemoteAnaliticsUrl({
                 url: $('[name="pff_analitics_remote_url"]').val(),
@@ -532,6 +537,7 @@ let $; // заглушает ошибки в определении $ в мод�
               }, 50);
             });
             $('.pff-settings').append(cb).append('<label for="pff_no_spoilers">Показывать комментарии без спойлеров</label>');
+            $('.pff-settings').append('<div style="margin-top:15px"><a class="btn btn-main" href="https://github.com/viasite/userscript-planfixfix/raw/master/dist/planfixfix.user.js">Проверить обновление</a></div>');
             return false;
           });
     },
