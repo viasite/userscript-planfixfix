@@ -249,8 +249,9 @@ const pffSmeta = {
       win.PFF.editorInsertHtml(styledHtml);
     }
     else {
-      // сделать отчёт
+      // сделать отчёт во всплывалке
       const link = `https://tagilcity.planfix.ru/?action=report&id=${win.PFF.fields.smeta.reportId}&task=${win.PlanfixPage.task}&run=1`;
+      const linkTable = `https://tagilcity.planfix.ru/?action=report&id=${win.PFF.fields.smeta.reportTableId}&task=${win.PlanfixPage.task}&run=1`;
       const html = `<div class="pff-report-frame"><iframe src="${link}" width="100%" height="600"></iframe></div>`;
 
       // noinspection JSValidateTypes
@@ -267,6 +268,7 @@ const pffSmeta = {
       const iframe = $('.pff-report-frame iframe').get(0);
       win.PFF.waitFor('.tbl-report', 1000, 10, iframe).then(() => {
         iframe.contentWindow.ReportJS.expandLevel(0);
+        iframe.contentWindow.$('.report-view-ddl').after(`<a href="${linkTable}" target="_blank">В виде таблицы</a>`)
       });
     }
   },
