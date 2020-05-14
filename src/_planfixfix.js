@@ -165,6 +165,23 @@ let $; // заглушает ошибки в определении $ в мод�
         $('body').addClass('pff-no-spoilers');
       }
 
+      // копировать html ссылку
+      if(PFF.isAdmin()){
+        PFF.waitFor('.js-task-title').then(taskTitle => {
+          PFF.waitFor('ul.baron_container').then(() => {
+            const menu = taskTitle.parents('.b-green-block').find('ul.baron_container').first();
+            menu.find('[data-acr="copyWithLink"]').after($('<li class="b-ddl-menu-li-action b-ddl-menu-li-item b-ddl-menu-li-group-0" data-isaction="1" data-group="0"><span></span><span>Копировать html ссылку</span></li>').
+            on('click', () => {
+              const taskName = taskTitle.text();
+              const link = $('[data-id="18"] a').attr('href');
+              const html = `<a href="${link}">${taskName}</a>`;
+              // console.log(html);
+              PFF.copyFormatted(html);
+            }));
+          });
+        });
+      };
+
       // тестовое открытие нового действия
       if (PFF.isDebug) {
         console.log('debug: init');
@@ -310,6 +327,20 @@ let $; // заглушает ошибки в определении $ в мод�
       /*$('body').delegate('.attach-new-analitic td.td-item-add-ex:first span.fakelink-dashed', 'click', function(e){
         PFF.analitics.addAnalitics([{}]);
       });*/
+    },
+
+    copyFormatted (html) {
+      const a = $(html);
+      const wrap = $('<div style="opacity:0;"></div>').appendTo('.taskview-actions');
+      a.appendTo(wrap);
+      const link = a.get(0);
+      const range = document.createRange();
+      range.selectNode(link);
+      const selection = window.getSelection();
+      selection.removeAllRanges();
+      selection.addRange(range);
+      document.execCommand('copy');
+      wrap.remove();
     },
 
     // добавляет класс блоку действия, когда выделен текст
