@@ -1,3 +1,13 @@
+## [1.3.3](https://github.com/viasite/userscript-planfixfix/compare/v1.3.2...v1.3.3) (2020-05-14)
+
+
+### Features
+
+* в настройки добавлена ссылка на обновление скрипта ([713c14b](https://github.com/viasite/userscript-planfixfix/commit/713c14b))
+* добавлена ссылка на отчёт-таблицу во всплывалку отчёта "Оформить смету" ([e771e73](https://github.com/viasite/userscript-planfixfix/commit/e771e73))
+
+
+
 ## [1.3.2](https://github.com/viasite/userscript-planfixfix/compare/v1.3.1...v1.3.2) (2020-05-12)
 
 

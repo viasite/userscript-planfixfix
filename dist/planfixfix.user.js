@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name           PlanfixFix
 // @author         popstas
-// @version        1.3.2
+// @version        1.3.3
 // @namespace      viasite.ru
 // @description    Some planfix.ru improvements
 // @unwrap
@@ -76,6 +76,7 @@ let $; // заглушает ошибки в определении $ в мод�
       smeta: {
         aid: 314, // смета на разработку
         reportId: 5469, // id отчёта на смету
+        reportTableId: 5467, // id отчёта на смету теблицей
         orderByFids: [950, 1093], // тип работ, №
         name: '[data-fid="934"]',
         price: '[data-fid="934:h1016"]',
@@ -518,7 +519,12 @@ let $; // заглушает ошибки в определении $ в мод�
             /**
              * @param win.drawDialog простая всплывалка, не модальная
              */
-            win.drawDialog(300, 'auto', 300, html);
+            const dialog = new win.CommonDialogScrollableJS();
+            dialog.closeByEsc = true;
+            dialog.draw(html);
+            dialog.setHeader(`PlanfixFix ${GM_info.script.version}`);
+
+            // win.drawDialog(300, 'auto', 300, html);
             $('.pff-settings [type="button"]').on('click', function() {
               let isSave = PFF.analitics.setRemoteAnaliticsUrl({
                 url: $('[name="pff_analitics_remote_url"]').val(),
@@ -545,6 +551,7 @@ let $; // заглушает ошибки в определении $ в мод�
               }, 50);
             });
             $('.pff-settings').append(cb).append('<label for="pff_no_spoilers">Показывать комментарии без спойлеров</label>');
+            $('.pff-settings').append('<div style="margin-top:15px"><a class="btn btn-main" href="https://github.com/viasite/userscript-planfixfix/raw/master/dist/planfixfix.user.js">Проверить обновление</a></div>');
             return false;
           });
     },
@@ -1227,8 +1234,9 @@ const pffSmeta = {
       win.PFF.editorInsertHtml(styledHtml);
     }
     else {
-      // сделать отчёт
+      // сделать отчёт во всплывалке
       const link = `https://tagilcity.planfix.ru/?action=report&id=${win.PFF.fields.smeta.reportId}&task=${win.PlanfixPage.task}&run=1`;
+      const linkTable = `https://tagilcity.planfix.ru/?action=report&id=${win.PFF.fields.smeta.reportTableId}&task=${win.PlanfixPage.task}&run=1`;
       const html = `<div class="pff-report-frame"><iframe src="${link}" width="100%" height="600"></iframe></div>`;
 
       // noinspection JSValidateTypes
@@ -1245,6 +1253,7 @@ const pffSmeta = {
       const iframe = $('.pff-report-frame iframe').get(0);
       win.PFF.waitFor('.tbl-report', 1000, 10, iframe).then(() => {
         iframe.contentWindow.ReportJS.expandLevel(0);
+        iframe.contentWindow.$('.report-view-ddl').after(`<a href="${linkTable}" target="_blank">В виде таблицы</a>`)
       });
     }
   },
