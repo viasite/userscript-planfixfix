@@ -1,3 +1,17 @@
+## [1.3.4](https://github.com/viasite/userscript-planfixfix/compare/v1.3.3...v1.3.4) (2020-05-15)
+
+
+### Bug Fixes
+
+* при выборе даты в шаблоне подстановка не срабатывала ([c4a0a35](https://github.com/viasite/userscript-planfixfix/commit/c4a0a35))
+
+
+### Features
+
+* копировать html ссылку (для админа) ([6655fb2](https://github.com/viasite/userscript-planfixfix/commit/6655fb2))
+
+
+
 ## [1.3.3](https://github.com/viasite/userscript-planfixfix/compare/v1.3.2...v1.3.3) (2020-05-14)
 
 
