@@ -112,7 +112,7 @@ const pffTmpls = {
       template: `<span class="task-create-field task-create-field-custom-99 task-create-field-line-first task-create-field-break-after">
           <span class="task-create-field-label task-create-field-label-first">{{ name }}</span>
           <span class="task-create-field-input">
-            <input :name="name" :data-token="token" type="text" v-model="val"
+            <input ref="input" :name="name" :data-token="token" type="text" v-model="val"
                 :class="{'text-box': true, 'dialog-date': token.match('Дата')}"
                 />
           </span>
@@ -150,6 +150,12 @@ const pffTmpls = {
         this.loadVal();
       },
       mounted() {
+        // костыль для отслеживания изменения поля даты
+        if(this.token.match('Дата')) {
+          const interval = setInterval(() => {
+            if(this.$refs.input.value != this.val) this.val = this.$refs.input.value;
+          }, 1000);
+        }
       }
     });
 
