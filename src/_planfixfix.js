@@ -162,7 +162,7 @@ let $; // заглушает ошибки в определении $ в мод�
       PFF.addStyles();
 
       if(localStorage.pff_no_spoilers === '1') {
-        $('body').addClass('pff-no-spoilers');
+        body.addClass('pff-no-spoilers');
       }
 
       // копировать html ссылку
@@ -180,7 +180,7 @@ let $; // заглушает ошибки в определении $ в мод�
             }));
           });
         });
-      };
+      }
 
       // тестовое открытие нового действия
       if (PFF.isDebug) {
@@ -533,16 +533,20 @@ let $; // заглушает ошибки в определении $ в мод�
                 '"/>' +
                 '<input type="button" value="Сохранить"/><br />' +
                 '</div>';
+
+            // noinspection JSValidateTypes
             /**
              * @param win.drawDialog простая всплывалка, не модальная
              */
             const dialog = new win.CommonDialogScrollableJS();
             dialog.closeByEsc = true;
             dialog.draw(html);
+            // noinspection JSUnresolvedVariable
             dialog.setHeader(`PlanfixFix ${GM_info.script.version}`);
 
+            const settingsDiv = $('.pff-settings');
             // win.drawDialog(300, 'auto', 300, html);
-            $('.pff-settings [type="button"]').on('click', function() {
+            settingsDiv.find('[type="button"]').on('click', function() {
               let isSave = PFF.analitics.setRemoteAnaliticsUrl({
                 url: $('[name="pff_analitics_remote_url"]').val(),
                 format: 'text',
@@ -558,17 +562,18 @@ let $; // заглушает ошибки в определении $ в мод�
 
             const isNoSpoilers = localStorage.pff_no_spoilers === '1';
             const cb = $('<input type="checkbox" id="pff_no_spoilers"/>');
+            const body = $('body');
             cb.prop('checked', isNoSpoilers);
             cb.on('change', () => {
               setTimeout(() => {
                 localStorage.pff_no_spoilers = cb.prop('checked') ? '1' : '0';
 
-                if(cb.prop('checked')) $('body').addClass('pff-no-spoilers');
-                else $('body').removeClass('pff-no-spoilers');
+                if(cb.prop('checked')) body.addClass('pff-no-spoilers');
+                else body.removeClass('pff-no-spoilers');
               }, 50);
             });
-            $('.pff-settings').append(cb).append('<label for="pff_no_spoilers">Показывать комментарии без спойлеров</label>');
-            $('.pff-settings').append('<div style="margin-top:15px"><a class="btn btn-main" href="https://github.com/viasite/userscript-planfixfix/raw/master/dist/planfixfix.user.js">Проверить обновление</a></div>');
+            settingsDiv.append(cb).append('<label for="pff_no_spoilers">Показывать комментарии без спойлеров</label>');
+            settingsDiv.append('<div style="margin-top:15px"><a class="btn btn-main" href="https://github.com/viasite/userscript-planfixfix/raw/master/dist/planfixfix.user.js">Проверить обновление</a></div>');
             return false;
           });
     },

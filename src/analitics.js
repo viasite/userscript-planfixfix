@@ -72,6 +72,7 @@ const pffAnalitics = {
    * Может парсить строки типа:
    * [Группа аналитик] Название аналитики - кол-во
    * Группа по умолчанию - Выработка
+   * @return []
    */
   normalizeAnalitics: function(analitics_arr) {
     const analitics = [];

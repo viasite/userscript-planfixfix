@@ -108,6 +108,7 @@ const pffTmpls = {
     }
     tokens = tokens.filter((v, i, s) => s.indexOf(v) === i);
 
+    // noinspection HtmlUnknownAttribute
     Vue.component('token-input', {
       template: `<span class="task-create-field task-create-field-custom-99 task-create-field-line-first task-create-field-break-after">
           <span class="task-create-field-label task-create-field-label-first">{{ name }}</span>
@@ -152,13 +153,14 @@ const pffTmpls = {
       mounted() {
         // костыль для отслеживания изменения поля даты
         if(this.token.match('Дата')) {
-          const interval = setInterval(() => {
-            if(this.$refs.input.value != this.val) this.val = this.$refs.input.value;
+          setInterval(() => {
+            if(this.$refs.input.value !== this.val) this.val = this.$refs.input.value;
           }, 1000);
         }
       }
     });
 
+    // noinspection HtmlUnknownTag
     const html = `<div class="pff-tmpl-form">
 
       <a v-if="link" @click="showRecord" :href="link"
