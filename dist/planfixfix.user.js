@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name           PlanfixFix
 // @author         popstas
-// @version        1.3.4
+// @version        1.3.5
 // @namespace      viasite.ru
 // @description    Some planfix.ru improvements
 // @unwrap
@@ -176,7 +176,7 @@ let $; // заглушает ошибки в определении $ в мод�
       PFF.addStyles();
 
       if(localStorage.pff_no_spoilers === '1') {
-        $('body').addClass('pff-no-spoilers');
+        body.addClass('pff-no-spoilers');
       }
 
       // копировать html ссылку
@@ -194,7 +194,7 @@ let $; // заглушает ошибки в определении $ в мод�
             }));
           });
         });
-      };
+      }
 
       // тестовое открытие нового действия
       if (PFF.isDebug) {
@@ -547,16 +547,20 @@ let $; // заглушает ошибки в определении $ в мод�
                 '"/>' +
                 '<input type="button" value="Сохранить"/><br />' +
                 '</div>';
+
+            // noinspection JSValidateTypes
             /**
              * @param win.drawDialog простая всплывалка, не модальная
              */
             const dialog = new win.CommonDialogScrollableJS();
             dialog.closeByEsc = true;
             dialog.draw(html);
+            // noinspection JSUnresolvedVariable
             dialog.setHeader(`PlanfixFix ${GM_info.script.version}`);
 
+            const settingsDiv = $('.pff-settings');
             // win.drawDialog(300, 'auto', 300, html);
-            $('.pff-settings [type="button"]').on('click', function() {
+            settingsDiv.find('[type="button"]').on('click', function() {
               let isSave = PFF.analitics.setRemoteAnaliticsUrl({
                 url: $('[name="pff_analitics_remote_url"]').val(),
                 format: 'text',
@@ -572,17 +576,18 @@ let $; // заглушает ошибки в определении $ в мод�
 
             const isNoSpoilers = localStorage.pff_no_spoilers === '1';
             const cb = $('<input type="checkbox" id="pff_no_spoilers"/>');
+            const body = $('body');
             cb.prop('checked', isNoSpoilers);
             cb.on('change', () => {
               setTimeout(() => {
                 localStorage.pff_no_spoilers = cb.prop('checked') ? '1' : '0';
 
-                if(cb.prop('checked')) $('body').addClass('pff-no-spoilers');
-                else $('body').removeClass('pff-no-spoilers');
+                if(cb.prop('checked')) body.addClass('pff-no-spoilers');
+                else body.removeClass('pff-no-spoilers');
               }, 50);
             });
-            $('.pff-settings').append(cb).append('<label for="pff_no_spoilers">Показывать комментарии без спойлеров</label>');
-            $('.pff-settings').append('<div style="margin-top:15px"><a class="btn btn-main" href="https://github.com/viasite/userscript-planfixfix/raw/master/dist/planfixfix.user.js">Проверить обновление</a></div>');
+            settingsDiv.append(cb).append('<label for="pff_no_spoilers">Показывать комментарии без спойлеров</label>');
+            settingsDiv.append('<div style="margin-top:15px"><a class="btn btn-main" href="https://github.com/viasite/userscript-planfixfix/raw/master/dist/planfixfix.user.js">Проверить обновление</a></div>');
             return false;
           });
     },
@@ -671,6 +676,7 @@ const pffAnalitics = {
    * Может парсить строки типа:
    * [Группа аналитик] Название аналитики - кол-во
    * Группа по умолчанию - Выработка
+   * @return []
    */
   normalizeAnalitics: function(analitics_arr) {
     const analitics = [];
@@ -1054,6 +1060,24 @@ const pffSmeta = {
         sortLink.remove();
         realizeLink.remove();
       });
+
+      // удаление переноса контента
+      const contentServices = smetaTable.find(PFF.fields.smeta.name).filter(function() {
+        const text = $(this).text();
+        return text.match(/Перенос контента/) || text.match(/Редиректы URL/);
+      });
+      if(contentServices.length > 0) {
+        const link = PFF.addAnaliticAction(
+            `Удалить перенос контента`,
+            () => {
+              contentServices.each(function(){
+                const row = $(this).parents('tr');
+                row.find('[data-acr="delete"]').trigger('click');
+              });
+              link.remove();
+            }, smetaAid,
+        );
+      }
 
       // удаление аналитик по блокам (этапам)
       const sections = {};
@@ -1607,6 +1631,7 @@ const pffTmpls = {
     }
     tokens = tokens.filter((v, i, s) => s.indexOf(v) === i);
 
+    // noinspection HtmlUnknownAttribute
     Vue.component('token-input', {
       template: `<span class="task-create-field task-create-field-custom-99 task-create-field-line-first task-create-field-break-after">
           <span class="task-create-field-label task-create-field-label-first">{{ name }}</span>
@@ -1651,13 +1676,14 @@ const pffTmpls = {
       mounted() {
         // костыль для отслеживания изменения поля даты
         if(this.token.match('Дата')) {
-          const interval = setInterval(() => {
-            if(this.$refs.input.value != this.val) this.val = this.$refs.input.value;
+          setInterval(() => {
+            if(this.$refs.input.value !== this.val) this.val = this.$refs.input.value;
           }, 1000);
         }
       }
     });
 
+    // noinspection HtmlUnknownTag
     const html = `<div class="pff-tmpl-form">
 
       <a v-if="link" @click="showRecord" :href="link"

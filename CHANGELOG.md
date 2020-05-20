@@ -1,3 +1,12 @@
+## [1.3.5](https://github.com/viasite/userscript-planfixfix/compare/v1.3.4...v1.3.5) (2020-05-20)
+
+
+### Features
+
+* удалить перенос контента из сметы ([eda712d](https://github.com/viasite/userscript-planfixfix/commit/eda712d))
+
+
+
 ## [1.3.4](https://github.com/viasite/userscript-planfixfix/compare/v1.3.3...v1.3.4) (2020-05-15)
 
 
