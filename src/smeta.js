@@ -39,6 +39,24 @@ const pffSmeta = {
         realizeLink.remove();
       });
 
+      // удаление переноса контента
+      const contentServices = smetaTable.find(PFF.fields.smeta.name).filter(function() {
+        const text = $(this).text();
+        return text.match(/Перенос контента/) || text.match(/Редиректы URL/);
+      });
+      if(contentServices.length > 0) {
+        const link = PFF.addAnaliticAction(
+            `Удалить перенос контента`,
+            () => {
+              contentServices.each(function(){
+                const row = $(this).parents('tr');
+                row.find('[data-acr="delete"]').trigger('click');
+              });
+              link.remove();
+            }, smetaAid,
+        );
+      }
+
       // удаление аналитик по блокам (этапам)
       const sections = {};
       smetaTable.find(PFF.fields.smeta.block).each(function() {
