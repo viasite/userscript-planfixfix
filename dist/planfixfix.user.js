@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name           PlanfixFix
 // @author         popstas
-// @version        1.3.5
+// @version        1.3.6
 // @namespace      viasite.ru
 // @description    Some planfix.ru improvements
 // @unwrap
@@ -250,11 +250,13 @@ let $; // заглушает ошибки в определении $ в мод�
 .pff-cat-content { margin-left: 0; }
 .pff-cat a { display: block; padding: 2px 15px; }
 
+/* отчёт со сметой во вспл. окне */
 .pff-report-frame-wrapper .g-popup-win-scroll-content { width: calc(100% - 40px); min-width: 665px; }
 .pff-report-frame-wrapper .g-popup-win-scroll-content-main { display: block; max-width: none; padding-bottom: 0; }
 .pff-report-frame-wrapper iframe { border: none; }
 /*.pff-report-frame { min-width: 900px; }*/
 
+/* вспл. окно вставки шаблона */
 .pff-tmpl-form input[type="text"] { width: 200px !important; }
 .pff-tmpls-you-change_active { font-weight:bold; }
 .pff-tmpls-you-change { padding: 5px 10px; }
@@ -262,11 +264,15 @@ let $; // заглушает ошибки в определении $ в мод�
 .pff-tmpl-form .btn-create { float: right; }
 .pff-tmpl-preview { width: 360px; margin: 30px 0; }
 
+/* убирание спойлеров у комментов и описаний задач */
 .pff-no-spoilers .action-spoiler,
 .pff-no-spoilers .task-description-spoiler-text { overflow: visible !important; }
 .pff-no-spoilers .spoiler-actionlist.inited,
 .pff-no-spoilers .task-description-spoiler,
 .pff-no-spoilers .task-description-hide-block { display: none; }
+
+/* связанные задачи */
+.task-card-data-custom-78 .js-custom-filed-value-task-link { display: block !important; }
 </style>`,
       );
     },
