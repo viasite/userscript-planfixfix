@@ -259,6 +259,9 @@ let $; // заглушает ошибки в определении $ в мод�
 
 /* связанные задачи */
 .task-card-data-custom-78 .js-custom-filed-value-task-link { display: block !important; }
+
+/* иконка Toggl */
+.toggl-button.planfix { right: 34px; top: 8px; position: absolute; }
 </style>`,
       );
     },
