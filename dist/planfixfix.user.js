@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name           PlanfixFix
 // @author         popstas
-// @version        1.3.6
+// @version        1.3.7
 // @namespace      viasite.ru
 // @description    Some planfix.ru improvements
 // @unwrap
@@ -267,12 +267,17 @@ let $; // заглушает ошибки в определении $ в мод�
 /* убирание спойлеров у комментов и описаний задач */
 .pff-no-spoilers .action-spoiler,
 .pff-no-spoilers .task-description-spoiler-text { overflow: visible !important; }
+.pff-no-spoilers .task-description-spoiler-text .vanisher { display: none; }
 .pff-no-spoilers .spoiler-actionlist.inited,
 .pff-no-spoilers .task-description-spoiler,
 .pff-no-spoilers .task-description-hide-block { display: none; }
+.pff-no-spoilers .b-description-text-shown { max-height: none !important; }
 
 /* связанные задачи */
 .task-card-data-custom-78 .js-custom-filed-value-task-link { display: block !important; }
+
+/* иконка Toggl */
+.toggl-button.planfix { right: 34px; top: 8px; position: absolute; }
 </style>`,
       );
     },

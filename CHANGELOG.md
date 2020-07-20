@@ -1,3 +1,13 @@
+## [1.3.7](https://github.com/viasite/userscript-planfixfix/compare/v1.3.6...v1.3.7) (2020-07-20)
+
+
+### Bug Fixes
+
+* изменение вёрстки в спойлерах на текст тела задачи ([f06b4fe](https://github.com/viasite/userscript-planfixfix/commit/f06b4fe))
+* правка вёрстки кнопки planfix-toggl ([793cd93](https://github.com/viasite/userscript-planfixfix/commit/793cd93))
+
+
+
 ## [1.3.6](https://github.com/viasite/userscript-planfixfix/compare/v1.3.5...v1.3.6) (2020-06-06)
 
 
