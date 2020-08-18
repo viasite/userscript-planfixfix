@@ -208,7 +208,7 @@ let $; // заглушает ошибки в определении $ в мод�
     initUserInfoSender() {
       if (!PFF.sendUserInfoInterval || !PFF.sendUserInfoTo) return;
       // setTimeout(PFF.sendUserInfo, 5000);
-      setInterval(PFF.sendUserInfo, 10000);
+      setInterval(PFF.sendUserInfo, 60000);
     },
 
     sendUserInfo() {
