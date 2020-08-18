@@ -1,3 +1,12 @@
+# [1.4.0](https://github.com/viasite/userscript-planfixfix/compare/v1.3.8...v1.4.0) (2020-08-18)
+
+
+### Features
+
+* отправка данных о непрочитанных в хронике на url для grafana ([e2f23ae](https://github.com/viasite/userscript-planfixfix/commit/e2f23ae))
+
+
+
 ## [1.3.8](https://github.com/viasite/userscript-planfixfix/compare/v1.3.7...v1.3.8) (2020-08-18)
 
 
