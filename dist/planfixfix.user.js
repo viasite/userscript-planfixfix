@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name           PlanfixFix
 // @author         popstas
-// @version        1.4.0
+// @version        1.4.1
 // @namespace      viasite.ru
 // @description    Some planfix.ru improvements
 // @unwrap
@@ -222,7 +222,7 @@ let $; // заглушает ошибки в определении $ в мод�
     initUserInfoSender() {
       if (!PFF.sendUserInfoInterval || !PFF.sendUserInfoTo) return;
       // setTimeout(PFF.sendUserInfo, 5000);
-      setInterval(PFF.sendUserInfo, 10000);
+      setInterval(PFF.sendUserInfo, 60000);
     },
 
     sendUserInfo() {

@@ -1,3 +1,12 @@
+## [1.4.1](https://github.com/viasite/userscript-planfixfix/compare/v1.4.0...v1.4.1) (2020-08-18)
+
+
+### Bug Fixes
+
+* интервал отправки хроники 10 -> 60 сек ([7dd5dfb](https://github.com/viasite/userscript-planfixfix/commit/7dd5dfb))
+
+
+
 # [1.4.0](https://github.com/viasite/userscript-planfixfix/compare/v1.3.8...v1.4.0) (2020-08-18)
 
 
