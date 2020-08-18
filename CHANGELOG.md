@@ -1,3 +1,12 @@
+## [1.3.8](https://github.com/viasite/userscript-planfixfix/compare/v1.3.7...v1.3.8) (2020-08-18)
+
+
+### Bug Fixes
+
+* в список менеджеров добавлен Коммерческий директор ([6989dcd](https://github.com/viasite/userscript-planfixfix/commit/6989dcd))
+
+
+
 ## [1.3.7](https://github.com/viasite/userscript-planfixfix/compare/v1.3.6...v1.3.7) (2020-07-20)
 
 

@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name           PlanfixFix
 // @author         popstas
-// @version        1.3.7
+// @version        1.3.8
 // @namespace      viasite.ru
 // @description    Some planfix.ru improvements
 // @unwrap
@@ -45,7 +45,8 @@ let $; // заглушает ошибки в определении $ в мод�
     adminIds: [ 9230 ], // тестовые пользователи
     managerPosts: [
       'Менеджер по сопровождению заказов',
-      'Руководитель отдела продаж'
+      'Руководитель отдела продаж',
+      'Коммерческий директор'
     ],
 
     debug() {
@@ -275,9 +276,6 @@ let $; // заглушает ошибки в определении $ в мод�
 
 /* связанные задачи */
 .task-card-data-custom-78 .js-custom-filed-value-task-link { display: block !important; }
-
-/* иконка Toggl */
-.toggl-button.planfix { right: 34px; top: 8px; position: absolute; }
 </style>`,
       );
     },
@@ -298,6 +296,17 @@ let $; // заглушает ошибки в определении $ в мод�
       win.ActionJS.prototype.edit_orig = win.ActionJS.prototype.edit;
       //win.ActionJS.restoreAnaliticsForEdit_orig = win.ActionJS.restoreAnaliticsForEdit;
       win.AnaliticsWinJS.prototype.show_orig = win.AnaliticsWinJS.prototype.show;
+
+      win.PlanfixPage.drawTask_orig = PlanfixPage.drawTask;
+
+      // TODO:
+      PlanfixPage.drawTask = function(task) {
+        win.PlanfixPage.drawTask_orig(task);
+
+        setTimeout(() => {
+          PFF.fixTaskSummary();
+        }, 500);
+      }
 
       // decorate original functions
       win.ActionListJS.prototype.createAction = function() {
@@ -602,6 +611,20 @@ let $; // заглушает ошибки в определении $ в мод�
             return false;
           });
     },
+
+    fixTaskSummary: function() {
+      console.log('fixTaskSummary');
+      function getTaskGeneral(taskId) {
+        const found = Object.entries(TaskCardPoolJS.poolGeneral.task).
+          find(e => e[1].taskid == taskId);
+        return found ? found[0] : false;
+      }
+      
+      var general = getTaskGeneral(PlanfixPage.task);
+      console.log('general: ', general);
+      $('.table-actions').append(`<span style="display:none" class="task-summary"><span data-id="18"><a>#${general}</a></span></span>`);
+      
+    }
   };
   win.PFF = PFF;
 
