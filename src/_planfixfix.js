@@ -34,6 +34,8 @@ let $; // заглушает ошибки в определении $ в мод�
       'Руководитель отдела продаж',
       'Коммерческий директор'
     ],
+    sendUserInfoTo: false,
+    sendUserInfoInterval: 10, // sec
 
     debug() {
       if (PFF.isDebug) console.log(...arguments);
@@ -162,12 +164,18 @@ let $; // заглушает ошибки в определении $ в мод�
 
       PFF.addStyles();
 
-      if(localStorage.pff_no_spoilers === '1') {
+      // отправка инфы о юзере, для Стаса и Оли
+      if (PFF.isAdmin() || win.Current.logined == 24242){
+        PFF.sendUserInfoTo = 'https://planfix.viasite.ru/planfix-user-info.php';
+      }
+      PFF.initUserInfoSender();
+
+      if (localStorage.pff_no_spoilers === '1') {
         body.addClass('pff-no-spoilers');
       }
 
       // копировать html ссылку
-      if(PFF.isAdmin()){
+      if (PFF.isAdmin()){
         PFF.waitFor('.js-task-title').then(taskTitle => {
           PFF.waitFor('ul.baron_container').then(() => {
             const menu = taskTitle.parents('.b-green-block').find('ul.baron_container').first();
@@ -195,6 +203,35 @@ let $; // заглушает ошибки в определении $ в мод�
           //PFF.analitics.addAnalitics({ name: 'Поминутная работа программиста' });
         }, 2000);
       }
+    },
+
+    initUserInfoSender() {
+      if (!PFF.sendUserInfoInterval || !PFF.sendUserInfoTo) return;
+      // setTimeout(PFF.sendUserInfo, 5000);
+      setInterval(PFF.sendUserInfo, 10000);
+    },
+
+    sendUserInfo() {
+      const randomDelay = Math.floor(Math.random() * 1000);
+      setTimeout(() => {
+        const user = win.Current.logined;
+        const count = win.PlanfixPage.newCount;
+        // const time = new Date().toTimeString().split(' ')[0];
+        const lastSent = localStorage.pff_tasksCountLastSent || 0;
+
+        if(Date.now() - lastSent < PFF.sendUserInfoInterval * 1000) return;
+        localStorage.pff_tasksCountLastSent = Date.now();
+
+        // console.log(`${time}: ${count}`);
+
+        const url = `${PFF.sendUserInfoTo}?user=${user}&unreaded=${count}`;
+        // console.log('url: ', url);
+
+        GM_xmlhttpRequest({
+          method: "GET",
+          url: url,
+        });
+      }, randomDelay);
     },
 
     // добавляет быстрые действия в блок действия
