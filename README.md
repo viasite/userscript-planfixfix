@@ -15,7 +15,7 @@
    [Chrome](https://chrome.google.com/webstore/detail/tampermonkey/dhdgffkkebhmkfjojejmpbldmpobfkfo?hl=ru)
    или
    [Firefox](https://addons.mozilla.org/en-US/firefox/addon/tampermonkey/)
-2. Перейдите на [страницу расширения](https://raw.githubusercontent.com/viasite/userscript-planfixfix/master/planfixfix.user.js)
+2. Перейдите на [страницу расширения](https://github.com/viasite/userscript-planfixfix/raw/master/dist/planfixfix.user.js)
 3. На открывшейся странице нажмите Установить
 
 ## Обновление
