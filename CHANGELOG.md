@@ -1,3 +1,13 @@
+## [1.4.2](https://github.com/viasite/userscript-planfixfix/compare/v1.4.1...v1.4.2) (2020-08-28)
+
+
+### Bug Fixes
+
+* быстрая отправка непрочитанных при изменении, медленная (раз в час), когда изменений нет ([8152ce0](https://github.com/viasite/userscript-planfixfix/commit/8152ce0))
+* сложный разговор, починена выработка ([39b9c7c](https://github.com/viasite/userscript-planfixfix/commit/39b9c7c))
+
+
+
 ## [1.4.1](https://github.com/viasite/userscript-planfixfix/compare/v1.4.0...v1.4.1) (2020-08-18)
 
 

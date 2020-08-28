@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name           PlanfixFix
 // @author         popstas
-// @version        1.4.1
+// @version        1.4.2
 // @namespace      viasite.ru
 // @description    Some planfix.ru improvements
 // @unwrap
@@ -222,7 +222,7 @@ let $; // заглушает ошибки в определении $ в мод�
     initUserInfoSender() {
       if (!PFF.sendUserInfoInterval || !PFF.sendUserInfoTo) return;
       // setTimeout(PFF.sendUserInfo, 5000);
-      setInterval(PFF.sendUserInfo, 60000);
+      setInterval(PFF.sendUserInfo, 5000);
     },
 
     sendUserInfo() {
@@ -230,13 +230,25 @@ let $; // заглушает ошибки в определении $ в мод�
       setTimeout(() => {
         const user = win.Current.logined;
         const count = win.PlanfixPage.newCount;
-        // const time = new Date().toTimeString().split(' ')[0];
         const lastSent = localStorage.pff_tasksCountLastSent || 0;
+        const lastCount = localStorage.pff_tasksCountLastCount || 0;
 
-        if(Date.now() - lastSent < PFF.sendUserInfoInterval * 1000) return;
+        const sentAgo = Date.now() - lastSent;
+        if (sentAgo < PFF.sendUserInfoInterval * 1000) {
+          // console.log('sentAgo: ', sentAgo);
+          return;
+        }
         localStorage.pff_tasksCountLastSent = Date.now();
 
+        if (lastCount == count && sentAgo < 3600 * 1000) { // минимум раз в час отправляем, даже если не поменялось
+          // console.log('unreaded no change: ', count);
+          return;
+        }
+
+        // const time = new Date().toTimeString().split(' ')[0];
         // console.log(`${time}: ${count}`);
+
+        localStorage.pff_tasksCountLastCount = count;
 
         const url = `${PFF.sendUserInfoTo}?user=${user}&unreaded=${count}`;
         // console.log('url: ', url);
@@ -688,14 +700,14 @@ const pffAnalitics = {
 
     const userPost = Current.loginedPost;
     switch (userPost) {
-      case 'Программист':
+    case 'Программист':
         PFF.addTaskBlock('Программирование',
             {name: 'Поминутная работа программиста'});
         break;
       case 'Менеджер по сопровождению заказов':
         PFF.addTaskBlock('тел. лёгкий', {name: 'Лёгкий разговор по телефону'});
         PFF.addTaskBlock('тел. обычный', {name: 'Обычный разговор по телефону'});
-        PFF.addTaskBlock('тел. сложный', {name: 'Сложный разговор по телефону'});
+        PFF.addTaskBlock('тел. сложный', {name: 'Очень сложный разговор по телефону'});
         PFF.addTaskBlock('письмо лёгкое', {name: 'Лёгкое письмо'});
         PFF.addTaskBlock('письмо обычное', {
           name: 'Письмо средней сложности / обычное письмо',
