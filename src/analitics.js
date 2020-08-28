@@ -13,14 +13,14 @@ const pffAnalitics = {
 
     const userPost = Current.loginedPost;
     switch (userPost) {
-      case 'Программист':
+    case 'Программист':
         PFF.addTaskBlock('Программирование',
             {name: 'Поминутная работа программиста'});
         break;
       case 'Менеджер по сопровождению заказов':
         PFF.addTaskBlock('тел. лёгкий', {name: 'Лёгкий разговор по телефону'});
         PFF.addTaskBlock('тел. обычный', {name: 'Обычный разговор по телефону'});
-        PFF.addTaskBlock('тел. сложный', {name: 'Сложный разговор по телефону'});
+        PFF.addTaskBlock('тел. сложный', {name: 'Очень сложный разговор по телефону'});
         PFF.addTaskBlock('письмо лёгкое', {name: 'Лёгкое письмо'});
         PFF.addTaskBlock('письмо обычное', {
           name: 'Письмо средней сложности / обычное письмо',
