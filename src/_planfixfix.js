@@ -218,26 +218,29 @@ let $; // заглушает ошибки в определении $ в мод�
         const count = win.PlanfixPage.newCount;
         const lastSent = localStorage.pff_tasksCountLastSent || 0;
         const lastCount = localStorage.pff_tasksCountLastCount || 0;
-
         const sentAgo = Date.now() - lastSent;
+
+        // отправляем не чаще, чем раз в 10 сек, если изменилось
         if (sentAgo < PFF.sendUserInfoInterval * 1000) {
           // console.log('sentAgo: ', sentAgo);
           return;
         }
-        localStorage.pff_tasksCountLastSent = Date.now();
 
-        if (lastCount == count && sentAgo < 3600 * 1000) { // минимум раз в час отправляем, даже если не поменялось
+        // отправляем минимум раз в 10 минут отправляем, даже если не поменялось
+        if (lastCount == count && sentAgo < 600 * 1000) {
           // console.log('unreaded no change: ', count);
+          // console.log('sentAgo: ', sentAgo);
           return;
         }
 
         // const time = new Date().toTimeString().split(' ')[0];
         // console.log(`${time}: ${count}`);
 
+        localStorage.pff_tasksCountLastSent = Date.now();
         localStorage.pff_tasksCountLastCount = count;
 
         const url = `${PFF.sendUserInfoTo}?user=${user}&unreaded=${count}`;
-        // console.log('url: ', url);
+        console.log('url: ', url);
 
         GM_xmlhttpRequest({
           method: "GET",
@@ -335,13 +338,15 @@ let $; // заглушает ошибки в определении $ в мод�
       win.PlanfixPage.drawTask_orig = PlanfixPage.drawTask;
 
       // TODO:
-      PlanfixPage.drawTask = function(task) {
-        win.PlanfixPage.drawTask_orig(task);
+     /*  win.PlanfixPage.drawTask = function(task) {
+        console.log('drawTask');
 
         setTimeout(() => {
           PFF.fixTaskSummary();
         }, 500);
-      }
+
+        return win.PlanfixPage.drawTask_orig(task);;
+      } */
 
       // decorate original functions
       win.ActionListJS.prototype.createAction = function() {
