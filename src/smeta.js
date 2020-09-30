@@ -238,6 +238,7 @@ const pffSmeta = {
     outSectionSummary();
 
     // summary:
+    // тут на сафари выходит ошибка в reduce, когда headerPrices нулевой длины
     let sumPrice = headerPrices.reduce((a, c) => a + c);
     let oldsumPrice = new Intl.NumberFormat().format(sumPrice + discontTotal);
     sumPrice = new Intl.NumberFormat().format(sumPrice);
