@@ -1,3 +1,17 @@
+## [1.4.3](https://github.com/viasite/userscript-planfixfix/compare/v1.4.2...v1.4.3) (2020-09-30)
+
+
+### Bug Fixes
+
+* отправка непрочитанных не реже раз в 10 минут ([c6aad45](https://github.com/viasite/userscript-planfixfix/commit/c6aad45))
+
+
+### Features
+
+* всегда показывать аватарки ([2db2b1c](https://github.com/viasite/userscript-planfixfix/commit/2db2b1c))
+
+
+
 ## [1.4.2](https://github.com/viasite/userscript-planfixfix/compare/v1.4.1...v1.4.2) (2020-08-28)
 
 

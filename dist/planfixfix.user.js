@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name           PlanfixFix
 // @author         popstas
-// @version        1.4.2
+// @version        1.4.3
 // @namespace      viasite.ru
 // @description    Some planfix.ru improvements
 // @unwrap
@@ -188,6 +188,10 @@ let $; // заглушает ошибки в определении $ в мод�
         body.addClass('pff-no-spoilers');
       }
 
+      if (localStorage.pff_avatars_always === '1') {
+        body.addClass('pff-avatars-always');
+      }
+
       // копировать html ссылку
       if (PFF.isAdmin()){
         PFF.waitFor('.js-task-title').then(taskTitle => {
@@ -232,26 +236,29 @@ let $; // заглушает ошибки в определении $ в мод�
         const count = win.PlanfixPage.newCount;
         const lastSent = localStorage.pff_tasksCountLastSent || 0;
         const lastCount = localStorage.pff_tasksCountLastCount || 0;
-
         const sentAgo = Date.now() - lastSent;
+
+        // отправляем не чаще, чем раз в 10 сек, если изменилось
         if (sentAgo < PFF.sendUserInfoInterval * 1000) {
           // console.log('sentAgo: ', sentAgo);
           return;
         }
-        localStorage.pff_tasksCountLastSent = Date.now();
 
-        if (lastCount == count && sentAgo < 3600 * 1000) { // минимум раз в час отправляем, даже если не поменялось
+        // отправляем минимум раз в 10 минут отправляем, даже если не поменялось
+        if (lastCount == count && sentAgo < 600 * 1000) {
           // console.log('unreaded no change: ', count);
+          // console.log('sentAgo: ', sentAgo);
           return;
         }
 
         // const time = new Date().toTimeString().split(' ')[0];
         // console.log(`${time}: ${count}`);
 
+        localStorage.pff_tasksCountLastSent = Date.now();
         localStorage.pff_tasksCountLastCount = count;
 
         const url = `${PFF.sendUserInfoTo}?user=${user}&unreaded=${count}`;
-        // console.log('url: ', url);
+        console.log('url: ', url);
 
         GM_xmlhttpRequest({
           method: "GET",
@@ -325,6 +332,9 @@ let $; // заглушает ошибки в определении $ в мод�
 
 /* связанные задачи */
 .task-card-data-custom-78 .js-custom-filed-value-task-link { display: block !important; }
+
+/* современный интерфейс: показать аватарки */
+.pff-avatars-always .table-actions-v2 .actions-item-v2-normal .actions-item-v2-normal-meta .actions-item-v2-normal-meta-notified { visibility: visible; }
 </style>`,
       );
     },
@@ -349,13 +359,15 @@ let $; // заглушает ошибки в определении $ в мод�
       win.PlanfixPage.drawTask_orig = PlanfixPage.drawTask;
 
       // TODO:
-      PlanfixPage.drawTask = function(task) {
-        win.PlanfixPage.drawTask_orig(task);
+     /*  win.PlanfixPage.drawTask = function(task) {
+        console.log('drawTask');
 
         setTimeout(() => {
           PFF.fixTaskSummary();
         }, 500);
-      }
+
+        return win.PlanfixPage.drawTask_orig(task);;
+      } */
 
       // decorate original functions
       win.ActionListJS.prototype.createAction = function() {
@@ -656,6 +668,20 @@ let $; // заглушает ошибки в определении $ в мод�
               }, 50);
             });
             settingsDiv.append(cb).append('<label for="pff_no_spoilers">Показывать комментарии без спойлеров</label>');
+
+            let val = localStorage.pff_avatars_always === '1';
+            let checkbox = $('<input type="checkbox" id="pff_avatars_always"/>');
+            checkbox.prop('checked', val);
+            checkbox.on('change', () => {
+              setTimeout(() => {
+                localStorage.pff_avatars_always = checkbox.prop('checked') ? '1' : '0';
+
+                if(checkbox.prop('checked')) body.addClass('pff-avatars-always');
+                else body.removeClass('pff-avatars-always');
+              }, 50);
+            });
+            settingsDiv.append(checkbox).append('<label for="pff_avatars_always">Всегда показывать аватарки</label>');
+
             settingsDiv.append('<div style="margin-top:15px"><a class="btn btn-main" href="https://github.com/viasite/userscript-planfixfix/raw/master/dist/planfixfix.user.js">Проверить обновление</a></div>');
             return false;
           });
@@ -1343,6 +1369,7 @@ const pffSmeta = {
     outSectionSummary();
 
     // summary:
+    // тут на сафари выходит ошибка в reduce, когда headerPrices нулевой длины
     let sumPrice = headerPrices.reduce((a, c) => a + c);
     let oldsumPrice = new Intl.NumberFormat().format(sumPrice + discontTotal);
     sumPrice = new Intl.NumberFormat().format(sumPrice);
