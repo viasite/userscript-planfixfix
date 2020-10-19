@@ -271,9 +271,10 @@ let $; // заглушает ошибки в определении $ в мод�
 .task-add-block.only-selection { visibility: hidden; }
 .pff_editor-selection .only-selection { visibility: visible; }
 
+/* select fix */
 /*.task-custom-field-val { display: inline !important; }*/
 .chzn-container .chzn-results{ max-height:400px !important; }
-.chzn-drop{ width:850px !important; border-style:solid !important; border-width:1px !important; }
+/* .chzn-drop{ width:850px !important; border-style:solid !important; border-width:1px !important; } */
 .silentChosen .chzn-container .chzn-results{ max-height:1px !important; }
 .silentChosen .chzn-drop{ width:1px !important; }
 
