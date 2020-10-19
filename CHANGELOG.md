@@ -1,3 +1,12 @@
+## [1.4.4](https://github.com/viasite/userscript-planfixfix/compare/v1.4.3...v1.4.4) (2020-10-19)
+
+
+### Bug Fixes
+
+* убрано расширение select chosen, дёргалось во многих местах ([de8868a](https://github.com/viasite/userscript-planfixfix/commit/de8868a))
+
+
+
 ## [1.4.3](https://github.com/viasite/userscript-planfixfix/compare/v1.4.2...v1.4.3) (2020-09-30)
 
 
