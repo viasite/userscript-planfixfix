@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name           PlanfixFix
 // @author         popstas
-// @version        1.4.4
+// @version        1.4.5
 // @namespace      viasite.ru
 // @description    Some planfix.ru improvements
 // @unwrap
@@ -727,9 +727,13 @@ const pffAnalitics = {
 
     const userPost = Current.loginedPost;
     switch (userPost) {
-    case 'Программист':
+      case 'Программист':
         PFF.addTaskBlock('Программирование',
             {name: 'Поминутная работа программиста'});
+        break;
+      case 'Руководитель отдела разработки':
+        PFF.addTaskBlock('Проектирование',
+            {name: 'Поминутная работа по проектированию'});
         break;
       case 'Менеджер по сопровождению заказов':
         PFF.addTaskBlock('тел. лёгкий', {name: 'Лёгкий разговор по телефону'});

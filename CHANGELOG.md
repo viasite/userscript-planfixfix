@@ -1,3 +1,12 @@
+## [1.4.5](https://github.com/viasite/userscript-planfixfix/compare/v1.4.4...v1.4.5) (2020-11-16)
+
+
+### Bug Fixes
+
+* добавено Проектирование для руководителя отдела ([946bf83](https://github.com/viasite/userscript-planfixfix/commit/946bf83))
+
+
+
 ## [1.4.4](https://github.com/viasite/userscript-planfixfix/compare/v1.4.3...v1.4.4) (2020-10-19)
 
 
