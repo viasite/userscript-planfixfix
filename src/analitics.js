@@ -13,9 +13,13 @@ const pffAnalitics = {
 
     const userPost = Current.loginedPost;
     switch (userPost) {
-    case 'Программист':
+      case 'Программист':
         PFF.addTaskBlock('Программирование',
             {name: 'Поминутная работа программиста'});
+        break;
+      case 'Руководитель отдела разработки':
+        PFF.addTaskBlock('Проектирование',
+            {name: 'Поминутная работа по проектированию'});
         break;
       case 'Менеджер по сопровождению заказов':
         PFF.addTaskBlock('тел. лёгкий', {name: 'Лёгкий разговор по телефону'});
