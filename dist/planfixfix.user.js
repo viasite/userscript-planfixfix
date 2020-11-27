@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name           PlanfixFix
 // @author         popstas
-// @version        1.4.5
+// @version        1.4.6
 // @namespace      viasite.ru
 // @description    Some planfix.ru improvements
 // @unwrap
@@ -1972,7 +1972,7 @@ const pffTmpls = {
 
   replaceVy(html, isNew) {
     const matched = html.match(/([\s;]|^)(вы|вас|вам|ваш(и|а|ему|его|ей)?)([\s,.!&:)?]|$)/ig);
-    // win.PFF.debug(matched);
+    if (!matched) return html;
     for(let m of matched) {
       const newL = isNew ? 'в' : 'В';
       const rep = m.replace(/в/i, newL);

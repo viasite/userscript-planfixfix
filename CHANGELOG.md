@@ -1,3 +1,12 @@
+## [1.4.6](https://github.com/viasite/userscript-planfixfix/compare/v1.4.5...v1.4.6) (2020-11-27)
+
+
+### Bug Fixes
+
+* шаблоны не вставлялись, если в тексте нет "ты/вы" ([9354fc6](https://github.com/viasite/userscript-planfixfix/commit/9354fc6))
+
+
+
 ## [1.4.5](https://github.com/viasite/userscript-planfixfix/compare/v1.4.4...v1.4.5) (2020-11-16)
 
 
