@@ -1,3 +1,12 @@
+## [1.4.9](https://github.com/viasite/userscript-planfixfix/compare/v1.4.8...v1.4.9) (2020-12-07)
+
+
+### Bug Fixes
+
+* добавен Серёга ([10f4ec5](https://github.com/viasite/userscript-planfixfix/commit/10f4ec5))
+
+
+
 ## [1.4.8](https://github.com/viasite/userscript-planfixfix/compare/v1.4.7...v1.4.8) (2020-12-07)
 
 
