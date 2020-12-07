@@ -165,7 +165,7 @@ let $; // заглушает ошибки в определении $ в мод�
       PFF.addStyles();
 
       // отправка инфы о юзере, для Стаса и Оли
-      if (PFF.isAdmin() || win.Current.logined == 24242){
+      if (PFF.isAdmin() || [7419, 24242].includes(win.Current.logined)){
         PFF.sendUserInfoTo = 'https://planfix.viasite.ru/planfix-user-info.php';
       }
       PFF.initUserInfoSender();
