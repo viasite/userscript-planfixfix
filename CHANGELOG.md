@@ -1,3 +1,12 @@
+## [1.4.10](https://github.com/viasite/userscript-planfixfix/compare/v1.4.9...v1.4.10) (2020-12-18)
+
+
+### Bug Fixes
+
+* Инструкция ->Проблема ([c21e609](https://github.com/viasite/userscript-planfixfix/commit/c21e609))
+
+
+
 ## [1.4.9](https://github.com/viasite/userscript-planfixfix/compare/v1.4.8...v1.4.9) (2020-12-07)
 
 

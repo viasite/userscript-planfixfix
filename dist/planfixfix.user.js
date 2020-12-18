@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name           PlanfixFix
 // @author         popstas
-// @version        1.4.9
+// @version        1.4.10
 // @namespace      viasite.ru
 // @description    Some planfix.ru improvements
 // @unwrap
@@ -748,8 +748,8 @@ const pffAnalitics = {
     }
 
     PFF.addTaskBlock('|');
-    PFF.addTaskBlock('Инструкция',
-        {group: 'Особые пометки', name: 'Инструкции'});
+    PFF.addTaskBlock('Проблема',
+        {group: 'Особые пометки', name: 'Проблема'});
 
     // парсим массив подготовленных аналитик
     pffAnalitics.getAnalitics().then(function(tasks) {
