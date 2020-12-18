@@ -34,8 +34,8 @@ const pffAnalitics = {
     }
 
     PFF.addTaskBlock('|');
-    PFF.addTaskBlock('Инструкция',
-        {group: 'Особые пометки', name: 'Инструкции'});
+    PFF.addTaskBlock('Проблема',
+        {group: 'Особые пометки', name: 'Проблема'});
 
     // парсим массив подготовленных аналитик
     pffAnalitics.getAnalitics().then(function(tasks) {
