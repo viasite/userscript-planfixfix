@@ -1,3 +1,12 @@
+## [1.4.11](https://github.com/viasite/userscript-planfixfix/compare/v1.4.10...v1.4.11) (2021-02-16)
+
+
+### Bug Fixes
+
+* в менеджеров добавлена должность директор ([49216fd](https://github.com/viasite/userscript-planfixfix/commit/49216fd))
+
+
+
 ## [1.4.10](https://github.com/viasite/userscript-planfixfix/compare/v1.4.9...v1.4.10) (2020-12-18)
 
 
