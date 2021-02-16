@@ -32,7 +32,8 @@ let $; // заглушает ошибки в определении $ в мод�
     managerPosts: [
       'Менеджер по сопровождению заказов',
       'Руководитель отдела продаж',
-      'Коммерческий директор'
+      'Коммерческий директор',
+      'Директор'
     ],
     sendUserInfoTo: false,
     sendUserInfoInterval: 10, // sec
@@ -179,8 +180,9 @@ let $; // заглушает ошибки в определении $ в мод�
       }
 
       // копировать html ссылку
-      if (PFF.isAdmin()){
+      /* if (PFF.isAdmin()){
         PFF.waitFor('.js-task-title').then(taskTitle => {
+          // ul.baron_container больше нет
           PFF.waitFor('ul.baron_container').then(() => {
             const menu = taskTitle.parents('.b-green-block').find('ul.baron_container').first();
             menu.find('[data-acr="copyWithLink"]').after($('<li class="b-ddl-menu-li-action b-ddl-menu-li-item b-ddl-menu-li-group-0" data-isaction="1" data-group="0"><span></span><span>Копировать html ссылку</span></li>').
@@ -193,7 +195,7 @@ let $; // заглушает ошибки в определении $ в мод�
             }));
           });
         });
-      }
+      } */
 
       // тестовое открытие нового действия
       if (PFF.isDebug) {
@@ -346,7 +348,7 @@ let $; // заглушает ошибки в определении $ в мод�
       win.PlanfixPage.drawTask_orig = PlanfixPage.drawTask;
 
       // TODO:
-     /*  win.PlanfixPage.drawTask = function(task) {
+     /* win.PlanfixPage.drawTask = function(task) {
         console.log('drawTask');
 
         setTimeout(() => {
@@ -398,6 +400,21 @@ let $; // заглушает ошибки в определении $ в мод�
       win.MainMenuJS.showConfig = function(show) {
         win.MainMenuJS.showConfig_orig(show);
         PFF.addMenu();
+      };
+
+      // спасение кнопки toggl при обновлении шапки
+      win.PanelLayoutJS.prototype.setBlockPath_orig = PanelLayoutJS.prototype.setBlockPath;
+      win.PanelLayoutJS.prototype.setBlockPath = function(container, html) {
+        const togglButton = $('.b-toggl-btn');
+        if (togglButton.length > 0) togglButton.appendTo('body');
+
+        const $block = this.setBlockPath_orig(container, html);
+
+        if (togglButton.length > 0) console.log('save toggl!');
+
+        if (togglButton.length > 0) togglButton.appendTo('.toggl');
+
+        return $block;
       };
 
       /*$('body').delegate(PFF.fields.vyrabotka.count, 'change keypress', PFF.analitics.countTotalAnalitics);
@@ -684,6 +701,7 @@ let $; // заглушает ошибки в определении $ в мод�
       
       var general = getTaskGeneral(PlanfixPage.task);
       console.log('general: ', general);
+      win.show_sys_message(`Номер задачи: ${general}'`, 'OK', undefined, undefined, {})
       $('.table-actions').append(`<span style="display:none" class="task-summary"><span data-id="18"><a>#${general}</a></span></span>`);
       
     }
