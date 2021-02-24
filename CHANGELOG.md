@@ -1,3 +1,12 @@
+## [1.4.12](https://github.com/viasite/userscript-planfixfix/compare/v1.4.11...v1.4.12) (2021-02-24)
+
+
+### Bug Fixes
+
+* попытки спасти кнопку Toggl от перерисовки шапки ПФ ([f681307](https://github.com/viasite/userscript-planfixfix/commit/f681307))
+
+
+
 ## [1.4.11](https://github.com/viasite/userscript-planfixfix/compare/v1.4.10...v1.4.11) (2021-02-16)
 
 
