@@ -402,7 +402,17 @@ let $; // заглушает ошибки в определении $ в мод�
         PFF.addMenu();
       };
 
-      // спасение кнопки toggl при обновлении шапки
+      /*$('body').delegate(PFF.fields.vyrabotka.count, 'change keypress', PFF.analitics.countTotalAnalitics);
+      $('body').delegate(PFF.fields.vyrabotka.name, 'change', function(){
+      var hours_field = $(this).parents('.add-analitic-block').find(PFF.fields.vyrabotka.hours_per_count);
+      hours_field.attr('title', (hours_field.val().replace(',', '.')*60).toFixed(1));
+      });*/
+
+      /*$('body').delegate('.attach-new-analitic td.td-item-add-ex:first span.fakelink-dashed', 'click', function(e){
+        PFF.analitics.addAnalitics([{}]);
+      });*/
+
+      // спасение кнопки toggl при обновлении шапки, спасает не всегда
       win.PanelLayoutJS.prototype.setBlockPath_orig = PanelLayoutJS.prototype.setBlockPath;
       win.PanelLayoutJS.prototype.setBlockPath = function(container, html) {
         const togglButton = $('.b-toggl-btn');
@@ -417,15 +427,6 @@ let $; // заглушает ошибки в определении $ в мод�
         return $block;
       };
 
-      /*$('body').delegate(PFF.fields.vyrabotka.count, 'change keypress', PFF.analitics.countTotalAnalitics);
-      $('body').delegate(PFF.fields.vyrabotka.name, 'change', function(){
-      var hours_field = $(this).parents('.add-analitic-block').find(PFF.fields.vyrabotka.hours_per_count);
-      hours_field.attr('title', (hours_field.val().replace(',', '.')*60).toFixed(1));
-      });*/
-
-      /*$('body').delegate('.attach-new-analitic td.td-item-add-ex:first span.fakelink-dashed', 'click', function(e){
-        PFF.analitics.addAnalitics([{}]);
-      });*/
     },
 
     copyFormatted (html) {
