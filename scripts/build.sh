@@ -1,6 +1,9 @@
 #!/bin/bash
 set -eu
 
+# нужно, чтобы cat src/* выдал файлы в нужном порядке
+export LC_ALL=C
+
 # build from src/
 rm -rf dist && mkdir dist
 cat src/* > dist/planfixfix.user.js
