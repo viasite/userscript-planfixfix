@@ -413,7 +413,8 @@ let $; // заглушает ошибки в определении $ в мод�
       });*/
 
       // спасение кнопки toggl при обновлении шапки, спасает не всегда
-      win.PanelLayoutJS.prototype.setBlockPath_orig = PanelLayoutJS.prototype.setBlockPath;
+      // TODO: это иногда вызывает зависание при попытке вставки записи справочника в коммент
+      /* win.PanelLayoutJS.prototype.setBlockPath_orig = PanelLayoutJS.prototype.setBlockPath;
       win.PanelLayoutJS.prototype.setBlockPath = function(container, html) {
         const togglButton = $('.b-toggl-btn');
         if (togglButton.length > 0) togglButton.appendTo('body');
@@ -425,7 +426,7 @@ let $; // заглушает ошибки в определении $ в мод�
         if (togglButton.length > 0) togglButton.appendTo('.toggl');
 
         return $block;
-      };
+      }; */
 
     },
 
