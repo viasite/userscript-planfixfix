@@ -1,3 +1,12 @@
+## [1.4.13](https://github.com/viasite/userscript-planfixfix/compare/v1.4.12...v1.4.13) (2021-03-01)
+
+
+### Bug Fixes
+
+* отмена спасения кнопки Toggl ([0535a63](https://github.com/viasite/userscript-planfixfix/commit/0535a63))
+
+
+
 ## [1.4.12](https://github.com/viasite/userscript-planfixfix/compare/v1.4.11...v1.4.12) (2021-02-24)
 
 
