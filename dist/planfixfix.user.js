@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name           PlanfixFix
 // @author         popstas
-// @version        1.4.13
+// @version        1.4.14
 // @namespace      viasite.ru
 // @description    Some planfix.ru improvements
 // @unwrap
@@ -358,6 +358,7 @@ let $; // заглушает ошибки в определении $ в мод�
       win.ActionJS.prototype.edit_orig = win.ActionJS.prototype.edit;
       //win.ActionJS.restoreAnaliticsForEdit_orig = win.ActionJS.restoreAnaliticsForEdit;
       win.AnaliticsWinJS.prototype.show_orig = win.AnaliticsWinJS.prototype.show;
+      // win.ActionV3TS.processActionCancelOrSave_orig = win.ActionV3TS.processActionCancelOrSave;
 
       win.PlanfixPage.drawTask_orig = PlanfixPage.drawTask;
 
@@ -398,6 +399,12 @@ let $; // заглушает ошибки в определении $ в мод�
         win.ActionJS.restoreAnaliticsForEdit_orig(data);
         setTimeout(PFF.analitics.countTotalAnalitics, 2000);
       };*/
+
+      // чат, новые события не переопределяются
+      /* win.ActionV3TS.processActionCancelOrSave = function(hide, deleteDraft) {
+        console.log('alter chat action');
+        win.ActionV3TS.processActionCancelOrSave_orig(hide, deleteDraft);
+      } */
 
       // редактор аналитик
       win.AnaliticsWinJS.prototype.show = function(options) {
@@ -593,6 +600,14 @@ let $; // заглушает ошибки в определении $ в мод�
         );
         block.attr('title', analitics.join('\n'));
       }
+
+      // add first elem, for chat feed
+      const elem = $('.task-add-block').last();
+      console.log('elem: ', elem);
+      if (elem.length === 0) {
+        $('.b-add-action').prepend('<div class="task-add-block">...</div>');
+      }
+
       $('.task-add-block').last().after(block);
       return block;
     },
@@ -1306,7 +1321,7 @@ const pffSmeta = {
 
       // is header?
       if (h && line.indexOf(':') === -1) {
-        const name = h[1];
+        const name = h[1].replace(/&nbsp;/g, '').trim();
         const price = h[3];
 
         // section end
@@ -1333,7 +1348,7 @@ const pffSmeta = {
           continue;
         }
 
-        const name = item[1];
+        const name = item[1].replace(/&nbsp;/g, '').trim();
         let price = item[2];
 
         // double conversion fix
@@ -1348,6 +1363,8 @@ const pffSmeta = {
 
           // style desc
           desc = ` <span style="color:#7f8c8d"><em>${desc}</em></span>`;
+
+          if (item[6] == '()') desc = ''; // убирает пустые скобки
         }
 
         // old price

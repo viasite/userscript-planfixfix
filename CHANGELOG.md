@@ -1,3 +1,12 @@
+## [1.4.14](https://github.com/viasite/userscript-planfixfix/compare/v1.4.13...v1.4.14) (2021-04-05)
+
+
+### Bug Fixes
+
+* **смета:** убраны пустые скобки и пробелы в начале ([1ce202b](https://github.com/viasite/userscript-planfixfix/commit/1ce202b))
+
+
+
 ## [1.4.13](https://github.com/viasite/userscript-planfixfix/compare/v1.4.12...v1.4.13) (2021-03-01)
 
 
