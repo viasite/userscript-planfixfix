@@ -150,7 +150,7 @@ const pffSmeta = {
 
       // is header?
       if (h && line.indexOf(':') === -1) {
-        const name = h[1];
+        const name = h[1].replace(/&nbsp;/g, '').trim();
         const price = h[3];
 
         // section end
@@ -177,7 +177,7 @@ const pffSmeta = {
           continue;
         }
 
-        const name = item[1];
+        const name = item[1].replace(/&nbsp;/g, '').trim();
         let price = item[2];
 
         // double conversion fix
@@ -192,6 +192,8 @@ const pffSmeta = {
 
           // style desc
           desc = ` <span style="color:#7f8c8d"><em>${desc}</em></span>`;
+
+          if (item[6] == '()') desc = ''; // убирает пустые скобки
         }
 
         // old price
