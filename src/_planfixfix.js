@@ -324,6 +324,7 @@ let $; // заглушает ошибки в определении $ в мод�
 
 /* современный интерфейс: показать аватарки */
 .pff-avatars-always .table-actions-v2 .actions-item-v2-normal .actions-item-v2-normal-meta .actions-item-v2-normal-meta-notified { visibility: visible; }
+.pff-avatars-always .task-as-a-chat .table-actions-v2 .actions-item-v2-normal .actions-item-v2-normal-meta { display: block; }
 </style>`,
       );
     },
@@ -344,6 +345,7 @@ let $; // заглушает ошибки в определении $ в мод�
       win.ActionJS.prototype.edit_orig = win.ActionJS.prototype.edit;
       //win.ActionJS.restoreAnaliticsForEdit_orig = win.ActionJS.restoreAnaliticsForEdit;
       win.AnaliticsWinJS.prototype.show_orig = win.AnaliticsWinJS.prototype.show;
+      // win.ActionV3TS.processActionCancelOrSave_orig = win.ActionV3TS.processActionCancelOrSave;
 
       win.PlanfixPage.drawTask_orig = PlanfixPage.drawTask;
 
@@ -384,6 +386,12 @@ let $; // заглушает ошибки в определении $ в мод�
         win.ActionJS.restoreAnaliticsForEdit_orig(data);
         setTimeout(PFF.analitics.countTotalAnalitics, 2000);
       };*/
+
+      // чат, новые события не переопределяются
+      /* win.ActionV3TS.processActionCancelOrSave = function(hide, deleteDraft) {
+        console.log('alter chat action');
+        win.ActionV3TS.processActionCancelOrSave_orig(hide, deleteDraft);
+      } */
 
       // редактор аналитик
       win.AnaliticsWinJS.prototype.show = function(options) {
@@ -579,6 +587,14 @@ let $; // заглушает ошибки в определении $ в мод�
         );
         block.attr('title', analitics.join('\n'));
       }
+
+      // add first elem, for chat feed
+      const elem = $('.task-add-block').last();
+      // console.log('elem: ', elem);
+      if (elem.length === 0) {
+        $('.b-add-action').prepend('<div class="task-add-block">...</div>');
+      }
+
       $('.task-add-block').last().after(block);
       return block;
     },
