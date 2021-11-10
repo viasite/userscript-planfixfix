@@ -1,3 +1,12 @@
+# [1.5.0](https://github.com/viasite/userscript-planfixfix/compare/v1.4.14...v1.5.0) (2021-11-10)
+
+
+### Features
+
+* добавлена Поминутная работа менеджера, аватарки всегда ([3742654](https://github.com/viasite/userscript-planfixfix/commit/3742654))
+
+
+
 ## [1.4.14](https://github.com/viasite/userscript-planfixfix/compare/v1.4.13...v1.4.14) (2021-04-05)
 
 

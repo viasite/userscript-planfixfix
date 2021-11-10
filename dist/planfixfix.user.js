@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name           PlanfixFix
 // @author         popstas
-// @version        1.4.14
+// @version        1.5.0
 // @namespace      viasite.ru
 // @description    Some planfix.ru improvements
 // @unwrap
@@ -338,6 +338,7 @@ let $; // заглушает ошибки в определении $ в мод�
 
 /* современный интерфейс: показать аватарки */
 .pff-avatars-always .table-actions-v2 .actions-item-v2-normal .actions-item-v2-normal-meta .actions-item-v2-normal-meta-notified { visibility: visible; }
+.pff-avatars-always .task-as-a-chat .table-actions-v2 .actions-item-v2-normal .actions-item-v2-normal-meta { display: block; }
 </style>`,
       );
     },
@@ -603,7 +604,7 @@ let $; // заглушает ошибки в определении $ в мод�
 
       // add first elem, for chat feed
       const elem = $('.task-add-block').last();
-      console.log('elem: ', elem);
+      // console.log('elem: ', elem);
       if (elem.length === 0) {
         $('.b-add-action').prepend('<div class="task-add-block">...</div>');
       }
@@ -771,6 +772,7 @@ const pffAnalitics = {
             {name: 'Поминутная работа по проектированию'});
         break;
       case 'Менеджер по сопровождению заказов':
+        PFF.addTaskBlock('Выработка', {name: 'Поминутная работа менеджера'});
         PFF.addTaskBlock('тел. лёгкий', {name: 'Лёгкий разговор по телефону'});
         PFF.addTaskBlock('тел. обычный', {name: 'Обычный разговор по телефону'});
         PFF.addTaskBlock('тел. сложный', {name: 'Очень сложный разговор по телефону'});
