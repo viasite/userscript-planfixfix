@@ -1,3 +1,12 @@
+## [1.5.1](https://github.com/viasite/userscript-planfixfix/compare/v1.5.0...v1.5.1) (2021-12-01)
+
+
+### Bug Fixes
+
+* сметы для менеджера по продажам ([6fb2d84](https://github.com/viasite/userscript-planfixfix/commit/6fb2d84))
+
+
+
 # [1.5.0](https://github.com/viasite/userscript-planfixfix/compare/v1.4.14...v1.5.0) (2021-11-10)
 
 
