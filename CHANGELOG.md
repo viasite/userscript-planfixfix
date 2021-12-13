@@ -1,3 +1,12 @@
+## [1.5.3](https://github.com/viasite/userscript-planfixfix/compare/v1.5.2...v1.5.3) (2021-12-13)
+
+
+### Bug Fixes
+
+* typo ([3253ead](https://github.com/viasite/userscript-planfixfix/commit/3253ead))
+
+
+
 ## [1.5.2](https://github.com/viasite/userscript-planfixfix/compare/v1.5.1...v1.5.2) (2021-12-13)
 
 

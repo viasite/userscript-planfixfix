@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name           PlanfixFix
 // @author         popstas
-// @version        1.5.2
+// @version        1.5.3
 // @namespace      viasite.ru
 // @description    Some planfix.ru improvements
 // @unwrap
@@ -1440,7 +1440,7 @@ const pffSmeta = {
         return;
       }
       if(html.match(/Итого:/)){
-        win.show_sys_message('Не выделяйте стоку Итого!', 'ERROR');
+        win.show_sys_message('Не выделяйте строку Итого!', 'ERROR');
         return;
       }
 
