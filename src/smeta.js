@@ -266,7 +266,7 @@ const pffSmeta = {
         return;
       }
       if(html.match(/Итого:/)){
-        win.show_sys_message('Не выделяйте стоку Итого!', 'ERROR');
+        win.show_sys_message('Не выделяйте строку Итого!', 'ERROR');
         return;
       }
 
