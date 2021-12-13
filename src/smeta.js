@@ -262,7 +262,11 @@ const pffSmeta = {
     if($('.pff_editor-selection').length > 0){
       const html = win.PFF.editorGetSelection();
       if(html.length === 0){
-        win.show_sys_message('Сначала выделите текст сметы', 'ERROR', undefined, undefined, {})
+        win.show_sys_message('Сначала выделите текст сметы', 'ERROR')
+        return;
+      }
+      if(html.match(/Итого:/)){
+        win.show_sys_message('Не выделяйте стоку Итого!', 'ERROR');
         return;
       }
 
